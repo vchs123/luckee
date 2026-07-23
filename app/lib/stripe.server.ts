@@ -1,11 +1,8 @@
 import Stripe from "stripe";
+import { env } from "cloudflare:workers";
 
-interface Context {
-  cloudflare: { env: { STRIPE_SECRET_KEY: string } };
-}
-
-export function getStripe(context: Context) {
-  const key = context.cloudflare.env.STRIPE_SECRET_KEY;
-  if (!key) throw new Error("Missing STRIPE_SECRET_KEY");
-  return new Stripe(key, { apiVersion: "2025-06-30.basil" });
+export function getStripe() {
+  const { STRIPE_SECRET_KEY } = env;
+  if (!STRIPE_SECRET_KEY) throw new Error("Missing STRIPE_SECRET_KEY");
+  return new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2026-06-24.dahlia" });
 }

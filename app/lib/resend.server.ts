@@ -1,11 +1,8 @@
 import { Resend } from "resend";
+import { env } from "cloudflare:workers";
 
-interface Context {
-  cloudflare: { env: { RESEND_API_KEY: string } };
-}
-
-export function getResend(context: Context) {
-  const apiKey = context.cloudflare.env.RESEND_API_KEY;
-  if (!apiKey) throw new Error("Missing RESEND_API_KEY");
-  return new Resend(apiKey);
+export function getResend() {
+  const { RESEND_API_KEY } = env;
+  if (!RESEND_API_KEY) throw new Error("Missing RESEND_API_KEY");
+  return new Resend(RESEND_API_KEY);
 }

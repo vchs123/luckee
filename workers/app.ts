@@ -6,7 +6,7 @@ const requestHandler = createRequestHandler(
 );
 
 export default {
-  async fetch(request) {
+  async fetch(request: Request) {
     return requestHandler(request);
   },
 } satisfies ExportedHandler<Env>;

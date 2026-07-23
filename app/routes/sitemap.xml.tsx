@@ -16,12 +16,12 @@ const STATIC_ROUTES = [
 
 const BASE = "https://luckee.com.au";
 
-export async function loader({ context }: LoaderFunctionArgs) {
+export async function loader(_: LoaderFunctionArgs) {
   let blogRoutes: { url: string; priority: string; changefreq: string }[] = [];
 
   try {
     const { getSupabase } = await import("~/lib/supabase.server");
-    const supabase = getSupabase(context as { cloudflare: { env: Record<string, string> } });
+    const supabase = getSupabase();
     const { data } = await supabase
       .from("posts")
       .select("slug, published_at")

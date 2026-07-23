@@ -1,12 +1,13 @@
-import type { MetaFunction, LoaderFunctionArgs } from "react-router";
+import type { LoaderFunctionArgs } from "react-router";
 import { useLoaderData, Link } from "react-router";
+import type { Route } from "./+types/blog.$slug";
 import { marked } from "marked";
 import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
 
-export async function loader({ params, context }: LoaderFunctionArgs) {
+export async function loader({ params }: LoaderFunctionArgs) {
   const { getSupabase } = await import("~/lib/supabase.server");
-  const supabase = getSupabase(context as { cloudflare: { env: Record<string, string> } });
+  const supabase = getSupabase();
   const { data, error } = await supabase
     .from("posts")
     .select("title, description, body, published_at")
@@ -22,14 +23,14 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
   return { ...data, html };
 }
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  if (!data) return [{ title: "Not found | Luckee" }];
+export const meta: Route.MetaFunction = ({ loaderData }) => {
+  if (!loaderData) return [{ title: "Not found | Luckee" }];
   return [
-    { title: `${data.title} | Luckee` },
-    { name: "description", content: data.description ?? "" },
-    { property: "og:title", content: data.title },
-    { property: "og:description", content: data.description ?? "" },
-    { tagName: "link", rel: "canonical", href: `https://luckee.com.au/blog/${data.title}` },
+    { title: `${loaderData.title} | Luckee` },
+    { name: "description", content: loaderData.description ?? "" },
+    { property: "og:title", content: loaderData.title },
+    { property: "og:description", content: loaderData.description ?? "" },
+    { tagName: "link", rel: "canonical", href: `https://luckee.com.au/blog/${loaderData.title}` },
   ];
 };
 

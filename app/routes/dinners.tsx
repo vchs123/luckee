@@ -10,7 +10,7 @@ export const meta: MetaFunction = () => [
   { tagName: "link", rel: "canonical", href: "https://luckee.com.au/dinners" },
 ];
 
-export async function action({ request, context }: ActionFunctionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
   const { getSupabase } = await import("~/lib/supabase.server");
   const { getResend } = await import("~/lib/resend.server");
 
@@ -26,7 +26,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return { error: "Please fill in all required fields." };
   }
 
-  const supabase = getSupabase(context as { cloudflare: { env: Record<string, string> } });
+  const supabase = getSupabase();
   const { error: dbError } = await supabase.from("dinner_waitlist").insert({
     first_name: firstName,
     last_name: lastName,
@@ -44,7 +44,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return { error: "Something went wrong. Please try again." };
   }
 
-  const resend = getResend(context as { cloudflare: { env: Record<string, string> } });
+  const resend = getResend();
   await resend.emails.send({
     from: "Vanessa at Luckee <hello@luckee.com.au>",
     to: email,

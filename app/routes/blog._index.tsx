@@ -8,10 +8,10 @@ export const meta: MetaFunction = () => [
   { name: "description", content: "In-depth guides on Melbourne freebies, birthday perks, free things to do and money-saving tips — written by a local." },
 ];
 
-export async function loader({ context }: LoaderFunctionArgs) {
+export async function loader(_: LoaderFunctionArgs) {
   try {
     const { getSupabase } = await import("~/lib/supabase.server");
-    const supabase = getSupabase(context as { cloudflare: { env: Record<string, string> } });
+    const supabase = getSupabase();
     const { data } = await supabase
       .from("posts")
       .select("slug, title, description, published_at")
