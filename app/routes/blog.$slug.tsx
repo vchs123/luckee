@@ -5,9 +5,11 @@ import { marked } from "marked";
 import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
 
-export async function loader({ params }: LoaderFunctionArgs) {
+export async function loader({ params, context }: LoaderFunctionArgs) {
   const { getSupabase } = await import("~/lib/supabase.server");
-  const supabase = getSupabase();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const env = (context as any)?.cloudflare?.env as Env;
+  const supabase = getSupabase(env);
   const { data, error } = await supabase
     .from("posts")
     .select("title, description, body, published_at")

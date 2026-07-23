@@ -6,7 +6,8 @@ const requestHandler = createRequestHandler(
 );
 
 export default {
-  async fetch(request: Request) {
-    return requestHandler(request);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async fetch(request: Request, env: Env, ctx: ExecutionContext) {
+    return requestHandler(request, { cloudflare: { env, ctx } } as any);
   },
 } satisfies ExportedHandler<Env>;

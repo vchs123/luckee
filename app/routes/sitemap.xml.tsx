@@ -16,12 +16,14 @@ const STATIC_ROUTES = [
 
 const BASE = "https://luckee.com.au";
 
-export async function loader(_: LoaderFunctionArgs) {
+export async function loader({ context }: LoaderFunctionArgs) {
   let blogRoutes: { url: string; priority: string; changefreq: string }[] = [];
 
   try {
     const { getSupabase } = await import("~/lib/supabase.server");
-    const supabase = getSupabase();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const env = (context as any)?.cloudflare?.env as Env;
+    const supabase = getSupabase(env);
     const { data } = await supabase
       .from("posts")
       .select("slug, published_at")

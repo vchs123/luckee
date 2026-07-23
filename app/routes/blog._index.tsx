@@ -8,10 +8,12 @@ export const meta: MetaFunction = () => [
   { name: "description", content: "In-depth guides on Melbourne freebies, birthday perks, free things to do and money-saving tips — written by a local." },
 ];
 
-export async function loader(_: LoaderFunctionArgs) {
+export async function loader({ context }: LoaderFunctionArgs) {
   try {
     const { getSupabase } = await import("~/lib/supabase.server");
-    const supabase = getSupabase();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const env = (context as any)?.cloudflare?.env as Env;
+    const supabase = getSupabase(env);
     const { data } = await supabase
       .from("posts")
       .select("slug, title, description, published_at")

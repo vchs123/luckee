@@ -1,7 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
-import { env } from "cloudflare:workers";
 
-export function getSupabase() {
+export function getSupabase(env: Env) {
   const { SUPABASE_URL, SUPABASE_SERVICE_KEY } = env;
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
     throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_KEY");
