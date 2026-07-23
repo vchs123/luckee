@@ -35,7 +35,7 @@ export function Footer() {
           </div>
         </div>
         <div className="ft-bot">
-          <p className="ft-legal">© 2026 Vanessa Chua trading as Luckee. All rights reserved.</p>
+          <p className="ft-legal">© 2026 Luckee. All rights reserved.</p>
           <p className="ft-disco">Some links are affiliate referral links. Luckee earns a commission if you sign up — at no extra cost to you. All freebie listings are editorially independent.</p>
         </div>
       </div>

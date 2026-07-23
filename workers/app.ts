@@ -1,4 +1,12 @@
-import { createRequestHandler } from "react-router";
+import { createRequestHandler, RouterContextProvider } from "react-router";
+
+class CloudflareContext extends RouterContextProvider {
+  readonly cloudflare: { env: Env; ctx: ExecutionContext };
+  constructor(env: Env, ctx: ExecutionContext) {
+    super();
+    this.cloudflare = { env, ctx };
+  }
+}
 
 const requestHandler = createRequestHandler(
   () => import("virtual:react-router/server-build"),
@@ -6,8 +14,7 @@ const requestHandler = createRequestHandler(
 );
 
 export default {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
-    return requestHandler(request, { cloudflare: { env, ctx } } as any);
+    return requestHandler(request, new CloudflareContext(env, ctx));
   },
 } satisfies ExportedHandler<Env>;
