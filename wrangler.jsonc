@@ -7,7 +7,13 @@
 	"name": "luckee",
 	"compatibility_date": "2026-07-23",
 	"main": "./workers/app.ts",
-	"vars": {},
+	"vars": {
+		"SUPABASE_URL": "",
+		"SUPABASE_SERVICE_KEY": "",
+		"RESEND_API_KEY": "",
+		"STRIPE_SECRET_KEY": "",
+		"GA4_MEASUREMENT_ID": ""
+	},
 	"observability": {
 		"enabled": true
 	},
