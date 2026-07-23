@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luckee — Melbourne Freebies, Deals & Dinners</title>
+<meta name="description" content="Melbourne's best birthday freebies, affiliate deals, free experiences and community dinners — all in one place.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,500;1,9..144,700&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:linear-gradient(160deg,#fff0f8 0%,#fdf4ff 48%,#f0f4ff 100%);
+  --card:#fff;
+  --cb:rgba(236,72,153,.12);
+  --cs:0 2px 20px rgba(220,50,140,.08),0 1px 4px rgba(220,50,140,.04);
+  --cs2:0 8px 36px rgba(220,50,140,.15),0 2px 8px rgba(220,50,140,.09);
+  --pink:#e91e8c;--pl:#ffe4f2;--pm:rgba(233,30,140,.1);
+  --t1:#1e0a2e;--t2:#6b4d82;--t3:#a08bb8;
+  --food:#f97316;--fb:#fff7ed;
+  --bty:#a855f7;--bb:#faf5ff;
+  --melb:#0d9488;--mb:#f0fdfa;
+  --evnt:#3b82f6;--eb:#eff6ff;
+  --sgn:#16a34a;--sb:#f0fdf4;
+  --cld:#7c3aed;--clb:#f5f2ff;
+  --bls:#059669;--blb:#f0fdf7;
+  --krs:#ea580c;--krb:#fff8f3;
+  --mac:#0891b2;--mcb:#f0fbff;
+  --warn:#d97706;--wb:#fffbeb;
+  --r:20px;--rs:12px;--rp:100px;--mx:1080px
+}
+html{scroll-behavior:smooth}
+body{font-family:'Nunito',sans-serif;background:var(--bg);background-attachment:fixed;color:var(--t1);min-height:100vh;line-height:1.65;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,rgba(233,30,140,.06) 1.2px,transparent 1.2px);background-size:28px 28px;pointer-events:none;z-index:0}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;font-family:inherit}
+img{max-width:100%}
+.wrap{position:relative;z-index:1;max-width:var(--mx);margin:0 auto;padding:0 24px}
+
+/* ── pages ── */
+.pg{display:none;min-height:80vh}
+.pg.active{display:block}
+
+/* ── disclosure ── */
+.disco{position:relative;z-index:10;background:rgba(255,228,242,.92);border-bottom:1px solid rgba(233,30,140,.2);text-align:center;padding:9px 20px;font-size:11.5px;color:var(--pink);font-weight:700;letter-spacing:.04em}
+
+/* ── nav ── */
+.nav{position:sticky;top:0;z-index:100;background:rgba(255,240,248,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(236,72,153,.18)}
+.nav-i{max-width:var(--mx);margin:0 auto;padding:0 24px;height:62px;display:flex;align-items:center;gap:8px}
+.nav-logo{font-family:'Fraunces',serif;font-style:italic;font-size:23px;font-weight:700;color:var(--pink);letter-spacing:-.03em;margin-right:16px}
+.nav-links{display:flex;align-items:center;gap:2px;flex:1}
+.nl{background:none;border:none;padding:7px 13px;font-size:13.5px;font-weight:700;color:var(--t2);border-radius:var(--rs);transition:all .18s;cursor:pointer}
+.nl:hover,.nl.on{color:var(--pink);background:var(--pm)}
+.nd{position:relative}
+.nd-m{display:none;position:absolute;top:calc(100% + 6px);left:0;background:white;border:1px solid var(--cb);border-radius:var(--rs);box-shadow:var(--cs);padding:8px;min-width:210px;z-index:200}
+.nd:hover .nd-m{display:block}
+.nd-m a{display:flex;align-items:center;gap:8px;padding:9px 12px;font-size:13px;font-weight:700;color:var(--t2);border-radius:9px;transition:all .15s}
+.nd-m a:hover{background:var(--pm);color:var(--pink)}
+.nd-m a span{font-size:16px}
+.nav-r{margin-left:auto;display:flex;align-items:center;gap:10px}
+.btn-ghost{background:none;border:1.5px solid var(--cb);padding:7px 18px;border-radius:var(--rp);font-size:13px;font-weight:700;color:var(--t2);transition:all .18s}
+.btn-ghost:hover{border-color:var(--pink);color:var(--pink)}
+.btn-pink{background:var(--pink);border:none;padding:8px 20px;border-radius:var(--rp);font-size:13px;font-weight:700;color:white;transition:all .18s}
+.btn-pink:hover{background:#d01870;transform:translateY(-1px)}
+.hamburger{display:none;background:none;border:none;font-size:22px;color:var(--t2);margin-left:auto}
+.mobile-nav{display:none;position:fixed;top:62px;inset-x:0;background:rgba(255,240,248,.98);backdrop-filter:blur(18px);z-index:99;padding:20px 24px;border-bottom:1px solid var(--cb)}
+.mobile-nav a,.mobile-nav button{display:block;padding:11px 0;font-size:16px;font-weight:700;color:var(--t2);border:none;background:none;width:100%;text-align:left;border-bottom:1px solid var(--cb)}
+.mobile-nav a:last-child,.mobile-nav button:last-child{border-bottom:none}
+.mobile-nav a.ind{padding-left:20px;font-size:14px;color:var(--t3)}
+
+/* ── section headers ── */
+.eyebrow{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--pink);margin-bottom:10px}
+.sec-h{font-family:'Fraunces',serif;font-style:italic;font-size:clamp(26px,4.5vw,44px);font-weight:700;line-height:1.1;letter-spacing:-.025em;color:var(--t1);margin-bottom:10px}
+.sec-p{font-size:15px;color:var(--t2);line-height:1.7;max-width:520px;margin-bottom:32px}
+.sec-p.wide{max-width:700px}
+.sec-hd{padding:52px 0 0}
+
+/* ── home hero ── */
+.hero{padding:76px 0 60px;text-align:center}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:var(--pl);border:1.5px solid rgba(233,30,140,.25);border-radius:var(--rp);padding:5px 14px;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--pink);margin-bottom:28px}
+.hero-h{font-family:'Fraunces',serif;font-style:italic;font-size:clamp(38px,6.5vw,68px);font-weight:700;line-height:1.06;letter-spacing:-.03em;color:var(--t1);margin-bottom:16px}
+.hero-h .ac{color:var(--pink)}
+.hero-p{max-width:500px;margin:0 auto 32px;color:var(--t2);font-size:16.5px;font-weight:500;line-height:1.7}
+.search{display:flex;align-items:center;gap:10px;max-width:500px;margin:0 auto 28px;background:white;border:1.5px solid rgba(236,72,153,.2);border-radius:var(--rp);padding:10px 20px;box-shadow:var(--cs)}
+.search:focus-within{border-color:var(--pink);box-shadow:0 0 0 3px rgba(233,30,140,.12)}
+.search input{flex:1;border:none;outline:none;font-family:'Nunito',sans-serif;font-size:15px;font-weight:500;color:var(--t1);background:transparent}
+.search input::placeholder{color:var(--t3)}
+.hcats{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.hcat{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;background:white;border:1.5px solid var(--cb);border-radius:var(--rp);font-size:13px;font-weight:700;color:var(--t2);cursor:pointer;box-shadow:var(--cs);transition:all .2s;border:none}
+.hcat:hover{transform:translateY(-2px);box-shadow:var(--cs2)}
+
+/* ── grids ── */
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.ga{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px}
+
+/* ── freebie cards ── */
+.fc{background:var(--card);border:1px solid var(--cb);border-radius:var(--r);overflow:hidden;box-shadow:var(--cs);transition:all .22s;display:flex;flex-direction:column}
+.fc:hover{transform:translateY(-3px);box-shadow:var(--cs2)}
+.fc-stripe{height:4px}
+.fc.food .fc-stripe{background:var(--food)}
+.fc.bty  .fc-stripe{background:var(--bty)}
+.fc.melb .fc-stripe{background:var(--melb)}
+.fc.evnt .fc-stripe{background:var(--evnt)}
+.fc.sgn  .fc-stripe{background:var(--sgn)}
+.fc-b{padding:18px;display:flex;flex-direction:column;gap:11px;flex:1}
+.fc-top{display:flex;align-items:flex-start;gap:10px}
+.fc-em{font-size:24px;flex-shrink:0;line-height:1}
+.fc-inf{flex:1}
+.fc-cat{font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:1px}
+.fc.food .fc-cat{color:var(--food)}
+.fc.bty  .fc-cat{color:var(--bty)}
+.fc.melb .fc-cat{color:var(--melb)}
+.fc.evnt .fc-cat{color:var(--evnt)}
+.fc.sgn  .fc-cat{color:var(--sgn)}
+.fc-brand{font-size:14.5px;font-weight:800;color:var(--t1)}
+.fc-prog{font-size:11px;color:var(--t3);margin-top:1px}
+.bn{flex-shrink:0;padding:3px 9px;border-radius:var(--rp);font-size:9.5px;font-weight:800}
+.bn-ok{background:#d1fae5;color:#065f46}
+.bn-warn{background:#fef3c7;color:#92400e}
+.fc-rw{border-radius:var(--rs);padding:9px 12px}
+.fc.food .fc-rw{background:var(--fb)}
+.fc.bty  .fc-rw{background:var(--bb)}
+.fc.melb .fc-rw{background:var(--mb)}
+.fc.evnt .fc-rw{background:var(--eb)}
+.fc.sgn  .fc-rw{background:var(--sb)}
+.fc-rl{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:2px}
+.fc-rv{font-size:13.5px;font-weight:800;color:var(--t1);line-height:1.35}
+.fc-dt{display:flex;flex-direction:column;gap:4px;flex:1}
+.fc-d{display:flex;align-items:flex-start;gap:6px;font-size:12px;color:var(--t2);line-height:1.45}
+.fc-dc{display:flex;align-items:flex-start;gap:6px;font-size:12px;color:var(--warn);line-height:1.45}
+.fc-ft{display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid var(--cb);margin-top:auto}
+.fc-ver{font-size:10px;color:var(--t3);font-weight:600}
+.fc-cta{padding:6px 14px;border-radius:var(--rp);font-size:12px;font-weight:700;color:white;border:none;cursor:pointer;transition:all .18s}
+.fc.food .fc-cta{background:var(--food)}
+.fc.bty  .fc-cta{background:var(--bty)}
+.fc.melb .fc-cta{background:var(--melb)}
+.fc.evnt .fc-cta{background:var(--evnt)}
+.fc.sgn  .fc-cta{background:var(--sgn)}
+.fc-cta:hover{filter:brightness(.88);transform:translateY(-1px)}
+
+/* ── filter bar ── */
+.fb-wrap{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;align-items:center}
+.fb-lbl{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);margin-right:4px}
+.fb{padding:7px 16px;background:white;border:1.5px solid var(--cb);border-radius:var(--rp);font-size:13px;font-weight:700;color:var(--t2);transition:all .18s;cursor:pointer;font-family:inherit}
+.fb:hover{border-color:var(--pink);color:var(--pink)}
+.fb.on{background:var(--pink);color:white;border-color:var(--pink)}
+
+/* ── tip box ── */
+.tip{display:flex;align-items:flex-start;gap:12px;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:var(--r);padding:16px 20px;margin-bottom:28px;font-size:13.5px;color:#1e40af;line-height:1.65}
+.tip-ico{font-size:20px;flex-shrink:0;margin-top:1px}
+
+/* ── experience cards (Free Melb) ── */
+.xc{background:var(--card);border:1px solid var(--cb);border-radius:var(--r);padding:20px;box-shadow:var(--cs);display:flex;gap:14px;align-items:flex-start;transition:all .2s}
+.xc:hover{transform:translateY(-2px);box-shadow:var(--cs2)}
+.xc-ico{font-size:28px;flex-shrink:0}
+.xc-cat{font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:3px}
+.xc-title{font-size:14.5px;font-weight:800;color:var(--t1);margin-bottom:4px}
+.xc-desc{font-size:12.5px;color:var(--t2);line-height:1.55}
+.xc-tag{display:inline-flex;margin-top:8px;padding:2px 10px;background:#d1fae5;color:#065f46;border-radius:var(--rp);font-size:9.5px;font-weight:800}
+.xc-tag.blue{background:#dbeafe;color:#1e40af}
+.xc-tag.amber{background:#fef3c7;color:#78350f}
+
+/* ── deal cards ── */
+.dc{background:var(--card);border:1px solid var(--cb);border-radius:var(--r);overflow:hidden;box-shadow:var(--cs);transition:all .22s;display:flex;flex-direction:column}
+.dc:hover{transform:translateY(-3px);box-shadow:var(--cs2)}
+.dc-s{height:4px}
+.dc.cld .dc-s{background:var(--cld)}
+.dc.bls .dc-s{background:var(--bls)}
+.dc.krs .dc-s{background:var(--krs)}
+.dc.mac .dc-s{background:var(--mac)}
+.dc-b{padding:20px;flex:1;display:flex;flex-direction:column;gap:12px}
+.dc-hd{display:flex;align-items:center;gap:10px}
+.dc-em{font-size:26px}
+.dc-name{font-size:16px;font-weight:800;color:var(--t1)}
+.dc-sub{font-size:11px;color:var(--t3);margin-top:1px}
+.dc-rw{border-radius:var(--rs);padding:10px 13px}
+.dc.cld .dc-rw{background:var(--clb)}
+.dc.bls .dc-rw{background:var(--blb)}
+.dc.krs .dc-rw{background:var(--krb)}
+.dc.mac .dc-rw{background:var(--mcb)}
+.dc-rl{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:2px}
+.dc-rv{font-size:14.5px;font-weight:800;color:var(--t1)}
+.dc-desc{font-size:13px;color:var(--t2);line-height:1.6;flex:1}
+.dc-code{display:flex;align-items:center;justify-content:space-between;background:#f8f7f9;border:1px dashed rgba(30,10,46,.12);border-radius:var(--rs);padding:8px 12px}
+.dc-cl{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)}
+.dc-cv{font-size:13.5px;font-weight:800;letter-spacing:.07em;font-family:monospace;color:var(--t1)}
+.dc-tags{display:flex;gap:6px;flex-wrap:wrap}
+.dc-tag{padding:3px 9px;border-radius:var(--rp);font-size:10px;font-weight:700;border:1.5px solid transparent}
+.dc.cld .dc-tag{background:var(--clb);color:var(--cld);border-color:rgba(124,58,237,.2)}
+.dc.bls .dc-tag{background:var(--blb);color:var(--bls);border-color:rgba(5,150,105,.2)}
+.dc.krs .dc-tag{background:var(--krb);color:var(--krs);border-color:rgba(234,88,12,.2)}
+.dc.mac .dc-tag{background:var(--mcb);color:var(--mac);border-color:rgba(8,145,178,.2)}
+.dc-ft{padding:0 20px 20px}
+.dc-cta{display:block;text-align:center;padding:12px;border-radius:var(--rs);font-size:14px;font-weight:800;color:white;transition:all .18s;border:none;cursor:pointer;width:100%;font-family:inherit}
+.dc.cld .dc-cta{background:var(--cld)}
+.dc.bls .dc-cta{background:var(--bls)}
+.dc.krs .dc-cta{background:var(--krs)}
+.dc.mac .dc-cta{background:var(--mac)}
+.dc-cta:hover{filter:brightness(.88);transform:translateY(-1px)}
+
+/* ── teasers ── */
+.tsr{background:var(--card);border:1px solid var(--cb);border-radius:var(--r);padding:28px 32px;box-shadow:var(--cs);display:flex;align-items:center;justify-content:space-between;gap:24px;transition:all .2s}
+.tsr:hover{box-shadow:var(--cs2)}
+.tsr h3{font-family:'Fraunces',serif;font-style:italic;font-size:20px;font-weight:700;color:var(--t1);margin-bottom:5px}
+.tsr p{font-size:13.5px;color:var(--t2);max-width:360px;line-height:1.6}
+.tsr-cta{flex-shrink:0;padding:11px 24px;background:var(--pink);color:white;border-radius:var(--rp);font-size:13.5px;font-weight:800;cursor:pointer;border:none;transition:all .18s;font-family:inherit;white-space:nowrap}
+.tsr-cta:hover{background:#d01870;transform:translateY(-1px)}
+
+/* ── earn cards ── */
+.ecs{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.ec{background:var(--card);border:1px solid var(--cb);border-radius:var(--r);padding:24px 18px;text-align:center;box-shadow:var(--cs)}
+.ec-ico{font-size:34px;margin-bottom:10px}
+.ec h4{font-size:15px;font-weight:800;color:var(--t1);margin-bottom:4px}
+.ec p{font-size:12px;color:var(--t2);line-height:1.55}
+.ec-pts{display:inline-block;margin-top:10px;padding:3px 11px;background:var(--pm);color:var(--pink);border-radius:var(--rp);font-size:11px;font-weight:800}
+
+/* ── freebies hub ── */
+.hub{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px}
+.hc{background:var(--card);border:1px solid var(--cb);border-radius:var(--r);padding:26px 18px;text-align:center;box-shadow:var(--cs);cursor:pointer;transition:all .22s;display:block}
+.hc:hover{transform:translateY(-4px);box-shadow:var(--cs2)}
+.hc.food:hover{border-color:var(--food)}
+.hc.bty:hover{border-color:var(--bty)}
+.hc.melb:hover{border-color:var(--melb)}
+.hc.evnt:hover{border-color:var(--evnt)}
+.hc.sgn:hover{border-color:var(--sgn)}
+.hc-em{font-size:38px;margin-bottom:12px}
+.hc-name{font-size:14.5px;font-weight:800;color:var(--t1);margin-bottom:3px}
+.hc-count{font-size:12px;color:var(--t3)}
+
+/* ── subsection heads ── */
+.ssh{font-size:11.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding-bottom:11px;border-bottom:2px solid;margin-top:40px;margin-bottom:18px}
+.ssh.food{color:var(--food);border-color:var(--food)}
+.ssh.bty{color:var(--bty);border-color:var(--bty)}
+.ssh.melb{color:var(--melb);border-color:var(--melb)}
+.ssh.evnt{color:var(--evnt);border-color:var(--evnt)}
+.ssh.sgn{color:var(--sgn);border-color:var(--sgn)}
+
+/* ── event cards ── */
+.evc{background:var(--card);border:1px solid var(--cb);border-radius:var(--r);padding:20px;box-shadow:var(--cs);transition:all .2s}
+.evc:hover{transform:translateY(-2px);box-shadow:var(--cs2)}
+.evc-m{display:inline-block;padding:3px 10px;background:var(--eb);color:var(--evnt);border-radius:var(--rp);font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px}
+.evc-h{font-size:14.5px;font-weight:800;color:var(--t1);margin-bottom:5px}
+.evc-p{font-size:12.5px;color:var(--t2);line-height:1.6;margin-bottom:9px}
+.free-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;background:#d1fae5;color:#065f46;border-radius:var(--rp);font-size:9.5px;font-weight:800}
+
+/* ── dinner steps ── */
+.dsteps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:48px}
+.ds{background:var(--card);border:1px solid var(--cb);border-radius:var(--r);padding:24px;box-shadow:var(--cs)}
+.ds-n{width:36px;height:36px;background:var(--pl);color:var(--pink);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;margin-bottom:14px}
+.ds h4{font-size:15.5px;font-weight:800;color:var(--t1);margin-bottom:7px}
+.ds p{font-size:13px;color:var(--t2);line-height:1.6}
+
+/* ── waitlist form ── */
+.wf{background:var(--card);border:1px solid var(--cb);border-radius:var(--r);padding:36px;box-shadow:var(--cs);max-width:560px}
+.wf h3{font-family:'Fraunces',serif;font-style:italic;font-size:22px;font-weight:700;color:var(--t1);margin-bottom:6px}
+.wf-sub{font-size:13.5px;color:var(--t2);margin-bottom:28px;line-height:1.6}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.fg{display:flex;flex-direction:column;gap:6px}
+.fg.full{grid-column:1/-1}
+.fl{font-size:11px;font-weight:800;color:var(--t2);letter-spacing:.05em;text-transform:uppercase}
+.fi,.fs{padding:11px 14px;border:1.5px solid var(--cb);border-radius:var(--rs);font-family:'Nunito',sans-serif;font-size:14px;font-weight:500;color:var(--t1);background:white;transition:all .18s;outline:none;width:100%}
+.fi:focus,.fs:focus{border-color:var(--pink);box-shadow:0 0 0 3px rgba(233,30,140,.1)}
+.wf-note{font-size:11.5px;color:var(--t3);margin-top:10px;line-height:1.6}
+.wf-btn{width:100%;padding:14px;background:var(--pink);color:white;border:none;border-radius:var(--rs);font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;transition:all .18s;margin-top:20px}
+.wf-btn:hover{background:#d01870}
+.success-msg{display:none;background:var(--sb);border:1.5px solid #86efac;border-radius:var(--r);padding:20px 24px;color:#14532d;font-weight:700;font-size:14px}
+
+/* ── rewards ── */
+.ptable{width:100%;border-collapse:collapse;background:var(--card);border-radius:var(--r);overflow:hidden;box-shadow:var(--cs);border:1px solid var(--cb);margin-bottom:36px}
+.ptable th{background:var(--pl);padding:12px 18px;text-align:left;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--pink)}
+.ptable td{padding:12px 18px;font-size:13.5px;color:var(--t2);border-top:1px solid var(--cb)}
+.ptable td:last-child{font-weight:800;color:var(--pink);text-align:right}
+.ptable tr:hover td{background:#fffafd}
+.reward-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:36px}
+.rc{background:var(--card);border:1px solid var(--cb);border-radius:var(--r);padding:22px 18px;text-align:center;box-shadow:var(--cs)}
+.rc-ico{font-size:36px;margin-bottom:10px}
+.rc h4{font-size:15px;font-weight:800;color:var(--t1);margin-bottom:5px}
+.rc p{font-size:13px;color:var(--t2);line-height:1.55}
+.rc-badge{display:inline-block;margin-top:10px;padding:4px 12px;background:var(--pm);color:var(--pink);border-radius:var(--rp);font-size:11px;font-weight:800}
+.soon-badge{background:#f3f4f6;color:#6b7280;font-size:11px;font-weight:700;padding:3px 10px;border-radius:var(--rp);margin-left:8px}
+
+/* ── about ── */
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;margin-bottom:48px}
+.about-card{background:var(--card);border:1px solid var(--cb);border-radius:var(--r);padding:28px;box-shadow:var(--cs)}
+.about-card h4{font-family:'Fraunces',serif;font-style:italic;font-size:18px;font-weight:700;color:var(--t1);margin-bottom:10px}
+.about-card p{font-size:13.5px;color:var(--t2);line-height:1.7;margin-bottom:10px}
+.about-card p:last-child{margin-bottom:0}
+
+/* ── divider ── */
+.dv{height:1px;background:var(--cb);margin:48px 0}
+
+/* ── footer ── */
+.ft{background:rgba(255,255,255,.55);border-top:1px solid var(--cb);padding:44px 0 28px;position:relative;z-index:1;margin-top:60px}
+.ft-i{max-width:var(--mx);margin:0 auto;padding:0 24px}
+.ft-top{display:flex;gap:48px;margin-bottom:36px;flex-wrap:wrap}
+.ft-brand{max-width:220px;flex-shrink:0}
+.ft-logo{font-family:'Fraunces',serif;font-style:italic;font-size:24px;font-weight:700;color:var(--pink);margin-bottom:8px}
+.ft-tag{font-size:13px;color:var(--t2);line-height:1.65}
+.ft-cols{display:flex;gap:48px;flex-wrap:wrap;flex:1}
+.ft-col h4{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--t3);margin-bottom:12px}
+.ft-col a{display:block;font-size:13px;color:var(--t2);margin-bottom:7px;transition:color .15s}
+.ft-col a:hover{color:var(--pink)}
+.ft-bot{border-top:1px solid var(--cb);padding-top:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.ft-legal{font-size:12px;color:var(--t3)}
+.ft-disco{font-size:11px;color:var(--t3);font-style:italic;max-width:440px;text-align:right}
+
+/* ── blank state ── */
+.blank{text-align:center;padding:48px 24px;color:var(--t3)}
+.blank-ico{font-size:40px;margin-bottom:12px}
+.blank h3{font-size:17px;font-weight:700;color:var(--t2);margin-bottom:6px}
+.blank p{font-size:14px}
+
+/* ── util ── */
+.mt{margin-top:36px}
+.mb{margin-bottom:36px}
+
+/* ── responsive ── */
+@media(max-width:860px){
+  .g3,.g4{grid-template-columns:repeat(2,1fr)}
+  .dsteps,.ecs,.reward-cards{grid-template-columns:1fr}
+  .ft-top{flex-direction:column}
+  .about-grid{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .g3,.g4,.g2,.ga{grid-template-columns:1fr}
+  .nav-links,.btn-ghost{display:none}
+  .hamburger{display:block}
+  .hero{padding:52px 0 40px}
+  .fr{grid-template-columns:1fr}
+  .wf{padding:24px 18px}
+  .tsr{flex-direction:column;align-items:flex-start}
+  .hub{grid-template-columns:repeat(2,1fr)}
+  .ft-cols{gap:28px}
+}
+</style>
+</head>
+<body>
+
+<!-- Disclosure -->
+<div class="disco">🔗 Some links on this site are affiliate links — I earn a small commission if you sign up, at no cost to you. All recommendations are genuine.</div>
+
+<!-- Nav -->
+<nav class="nav">
+  <div class="nav-i">
+    <a href="#home" class="nav-logo" onclick="go('home')">Luckee</a>
+    <div class="nav-links">
+      <div class="nd">
+        <button class="nl" id="nl-freebies" onclick="go('freebies')">Freebies ▾</button>
+        <div class="nd-m">
+          <a href="#birthday" onclick="go('birthday')"><span>🎂</span> Birthday Freebies</a>
+          <a href="#signup" onclick="go('signup')"><span>🎁</span> Sign-up Freebies</a>
+          <a href="#melbourne" onclick="go('melbourne')"><span>🌿</span> Free Melbourne</a>
+          <a href="#events" onclick="go('events')"><span>🎉</span> Events Calendar</a>
+        </div>
+      </div>
+      <button class="nl" id="nl-deals" onclick="go('deals')">Deals</button>
+      <button class="nl" id="nl-dinners" onclick="go('dinners')">Dinners</button>
+      <button class="nl" id="nl-rewards" onclick="go('rewards')">Rewards</button>
+      <button class="nl" id="nl-about" onclick="go('about')">About</button>
+    </div>
+    <div class="nav-r">
+      <button class="btn-ghost">Sign in</button>
+      <button class="btn-pink" onclick="go('dinners')">Join free</button>
+    </div>
+    <button class="hamburger" onclick="toggleMobile()" aria-label="Menu">☰</button>
+  </div>
+</nav>
+<div class="mobile-nav" id="mob-nav">
+  <button onclick="go('home');toggleMobile()">Home</button>
+  <a class="ind" href="#birthday" onclick="go('birthday');toggleMobile()">🎂 Birthday Freebies</a>
+  <a class="ind" href="#signup" onclick="go('signup');toggleMobile()">🎁 Sign-up Freebies</a>
+  <a class="ind" href="#melbourne" onclick="go('melbourne');toggleMobile()">🌿 Free Melbourne</a>
+  <a class="ind" href="#events" onclick="go('events');toggleMobile()">🎉 Events Calendar</a>
+  <button onclick="go('deals');toggleMobile()">Deals</button>
+  <button onclick="go('dinners');toggleMobile()">Dinners</button>
+  <button onclick="go('rewards');toggleMobile()">Rewards</button>
+  <button onclick="go('about');toggleMobile()">About</button>
+</div>
+
+<!-- ════════════════════════════════
+     HOME
+════════════════════════════════ -->
+<div id="pg-home" class="pg active">
+<div class="hero">
+  <div class="wrap">
+    <div class="hero-badge">✦ Melbourne's freebie hub</div>
+    <h1 class="hero-h">Score Melbourne's best <span class="ac">freebies</span> every day</h1>
+    <p class="hero-p">Birthday perks, loyalty sign-ups, free galleries and community dinners — curated for Melbourne locals.</p>
+    <div class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search freebies, deals, events..." id="hero-search" oninput="liveSearch(this.value)">
+    </div>
+    <div class="hcats">
+      <button class="hcat" onclick="go('birthday')">🎂 Birthday</button>
+      <button class="hcat" onclick="go('melbourne')">🎨 Experiences</button>
+      <button class="hcat" onclick="go('birthday');setFilter('beauty')">💄 Beauty</button>
+      <button class="hcat" onclick="go('birthday');setFilter('food')">🍔 Food</button>
+      <button class="hcat" onclick="go('events')">🎉 Events</button>
+      <button class="hcat" onclick="go('signup')">💸 Sign-up bonuses</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <!-- Top picks -->
+  <div class="sec-hd">
+    <p class="eyebrow">⭐ Top picks</p>
+    <h2 class="sec-h">Today's best freebies</h2>
+  </div>
+  <div class="g3" id="home-top"></div>
+
+  <div class="dv"></div>
+
+  <!-- Free Melbourne -->
+  <p class="eyebrow">🌿 No cost, ever</p>
+  <h2 class="sec-h">Free in Melbourne right now</h2>
+  <p class="sec-p">World-class galleries, free trams, walking tours and workshops — your zero-dollar day out starts here.</p>
+  <div class="g4" id="home-melb"></div>
+  <button class="btn-pink mt" onclick="go('melbourne')" style="margin-top:20px">Explore all free experiences →</button>
+
+  <div class="dv"></div>
+
+  <!-- Deals teaser -->
+  <p class="eyebrow">💸 Referral deals</p>
+  <h2 class="sec-h">Deals I genuinely use</h2>
+  <p class="sec-p">Products I recommend. Sign up through my links and you'll usually get a bonus — so do I.</p>
+  <div class="g4" id="home-deals"></div>
+  <button class="btn-ghost mt" onclick="go('deals')" style="margin-top:20px">See all deals →</button>
+
+  <div class="dv"></div>
+
+  <!-- Dinner teaser -->
+  <div class="tsr">
+    <div class="tsr-txt">
+      <h3>Next Teochew table — Melbourne</h3>
+      <p>Language-matched community dinners with 2–6 new people. Non-profit, cost-neutral. Fill out a profile and I'll match you.</p>
+    </div>
+    <button class="tsr-cta" onclick="go('dinners')">Join the waitlist →</button>
+  </div>
+
+  <div class="dv"></div>
+
+  <!-- Earn & win -->
+  <p class="eyebrow">🎰 Rewards</p>
+  <h2 class="sec-h">Earn points, win prizes</h2>
+  <p class="sec-p">Every deal click, dinner and daily login earns points toward the monthly lucky draw.</p>
+  <div class="ecs">
+    <div class="ec"><div class="ec-ico">⭐</div><h4>Earn points</h4><p>Click deals, attend dinners, play trivia, log in daily</p><span class="ec-pts">Up to 200 pts per action</span></div>
+    <div class="ec"><div class="ec-ico">🎡</div><h4>Spin to win</h4><p>One free spin per day. Bonus spins for deal sign-ups</p><span class="ec-pts">Coming with launch</span></div>
+    <div class="ec"><div class="ec-ico">🎁</div><h4>Monthly draw</h4><p>100 points = 1 entry. Winner announced each month</p><span class="ec-pts">Sponsored prizes</span></div>
+  </div>
+  <button class="btn-ghost mt" onclick="go('rewards')" style="margin-top:20px">How Rewards work →</button>
+</div>
+</div>
+
+<!-- ════════════════════════════════
+     FREEBIES HUB
+════════════════════════════════ -->
+<div id="pg-freebies" class="pg">
+<div class="wrap">
+  <div class="sec-hd">
+    <p class="eyebrow">🎀 Browse by type</p>
+    <h1 class="sec-h">Freebies</h1>
+    <p class="sec-p">Birthday perks, one-time sign-up bonuses, free Melbourne experiences and upcoming events — all verified and regularly updated.</p>
+  </div>
+  <div class="hub">
+    <a class="hc food" onclick="go('birthday');setFilter('food')" href="#">
+      <div class="hc-em">🍔</div>
+      <div class="hc-name">Birthday Food & Drink</div>
+      <div class="hc-count">9 verified offers</div>
+    </a>
+    <a class="hc bty" onclick="go('birthday');setFilter('beauty')" href="#">
+      <div class="hc-em">💄</div>
+      <div class="hc-name">Birthday Beauty & Retail</div>
+      <div class="hc-count">6 verified offers</div>
+    </a>
+    <a class="hc sgn" onclick="go('signup')" href="#">
+      <div class="hc-em">🎁</div>
+      <div class="hc-name">Sign-up Freebies</div>
+      <div class="hc-count">One-time bonuses</div>
+    </a>
+    <a class="hc melb" onclick="go('melbourne')" href="#">
+      <div class="hc-em">🌿</div>
+      <div class="hc-name">Free Melbourne</div>
+      <div class="hc-count">20+ ongoing perks</div>
+    </a>
+    <a class="hc evnt" onclick="go('events')" href="#">
+      <div class="hc-em">🎉</div>
+      <div class="hc-name">Events Calendar</div>
+      <div class="hc-count">Annual free events</div>
+    </a>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════
+     BIRTHDAY FREEBIES
+════════════════════════════════ -->
+<div id="pg-birthday" class="pg">
+<div class="wrap">
+  <div class="sec-hd">
+    <p style="font-size:12px;color:var(--t3);margin-bottom:8px">
+      <span style="cursor:pointer;text-decoration:underline" onclick="go('freebies')">Freebies</span> → Birthday Freebies
+    </p>
+    <p class="eyebrow">🎂 Birthday guide</p>
+    <h1 class="sec-h">Birthday Freebies Melbourne</h1>
+    <p class="sec-p wide">The complete guide, verified July 2026. 15+ offers across food, beauty and retail — with honest notes on which ones actually require a minimum spend.</p>
+  </div>
+  <div class="fb-wrap">
+    <span class="fb-lbl">Filter:</span>
+    <button class="fb on" id="fb-all" onclick="setFilter('all')">All (15+)</button>
+    <button class="fb" id="fb-food" onclick="setFilter('food')">🍔 Food & Drink</button>
+    <button class="fb" id="fb-beauty" onclick="setFilter('beauty')">💄 Beauty & Retail</button>
+    <button class="fb" id="fb-nospend" onclick="setFilter('nospend')">✓ No min spend only</button>
+  </div>
+  <div class="tip"><span class="tip-ico">💡</span><span>Sign up 3–4 weeks before your birthday. Most programs email your voucher on the <strong>1st of your birthday month</strong>. Programs marked <strong style="color:var(--warn)">Min spend</strong> require a purchase to unlock the freebie — Kate Newhill, who compiled Australia's most-shared birthday freebie list, deliberately skips these: "it defeats the purpose of a freebie."</span></div>
+  <div class="ssh food" id="ssh-food">🍔 Food & Drink</div>
+  <div class="ga" id="bday-food"></div>
+  <div class="ssh bty" id="ssh-beauty" style="margin-top:40px">💄 Beauty & Retail</div>
+  <div class="ga" id="bday-beauty"></div>
+  <div class="tip" style="margin-top:36px"><span class="tip-ico">⚠️</span><span><strong>Programs change:</strong> As of the 2025–26 relaunches, David Jones removed its $10 welcome voucher (Sept 2025), Mecca switched to product gifts instead of vouchers (Oct 2025), and Myer One was overhauled. Always verify on the brand's official app before relying on a specific value.</span></div>
+</div>
+</div>
+
+<!-- ════════════════════════════════
+     SIGN-UP FREEBIES
+════════════════════════════════ -->
+<div id="pg-signup" class="pg">
+<div class="wrap">
+  <div class="sec-hd">
+    <p style="font-size:12px;color:var(--t3);margin-bottom:8px"><span style="cursor:pointer;text-decoration:underline" onclick="go('freebies')">Freebies</span> → Sign-up Freebies</p>
+    <p class="eyebrow">🎁 One-time bonuses</p>
+    <h1 class="sec-h">Sign-up Freebies</h1>
+    <p class="sec-p">Join once and get the bonus — no birthday required. These are one-time welcome perks from loyalty programs worth signing up for regardless.</p>
+  </div>
+  <div class="ga" id="signup-cards"></div>
+</div>
+</div>
+
+<!-- ════════════════════════════════
+     FREE MELBOURNE
+════════════════════════════════ -->
+<div id="pg-melbourne" class="pg">
+<div class="wrap">
+  <div class="sec-hd">
+    <p style="font-size:12px;color:var(--t3);margin-bottom:8px"><span style="cursor:pointer;text-decoration:underline" onclick="go('freebies')">Freebies</span> → Free Melbourne</p>
+    <p class="eyebrow">🌿 Zero cost, ongoing</p>
+    <h1 class="sec-h">Free in Melbourne</h1>
+    <p class="sec-p wide">A full day out in the Melbourne CBD can cost absolutely nothing. Free trams, world-class galleries, walking tours, outdoor fitness and community workshops — year-round.</p>
+  </div>
+
+  <div class="tip"><span class="tip-ico">🚃</span><span><strong>Half-price public transport</strong> is running state-wide from Monday 1 June 2026 until 1 January 2027. The maximum Full Fare daily cap drops from $11.40 to $5.70. Under-18s travel free across Victoria with a Youth myki; seniors/carers/DSP recipients travel free on weekends.</span></div>
+
+  <div class="ssh melb">🚃 Getting around</div>
+  <div class="ga" id="melb-transport"></div>
+
+  <div class="ssh melb" style="margin-top:36px">🎨 Culture & arts</div>
+  <div class="ga" id="melb-culture"></div>
+
+  <div class="ssh melb" style="margin-top:36px">🏃 Classes & workshops</div>
+  <div class="ga" id="melb-classes"></div>
+
+  <div class="ssh melb" style="margin-top:36px">🌳 Markets & outdoors</div>
+  <div class="ga" id="melb-outdoors"></div>
+</div>
+</div>
+
+<!-- ════════════════════════════════
+     EVENTS CALENDAR
+════════════════════════════════ -->
+<div id="pg-events" class="pg">
+<div class="wrap">
+  <div class="sec-hd">
+    <p style="font-size:12px;color:var(--t3);margin-bottom:8px"><span style="cursor:pointer;text-decoration:underline" onclick="go('freebies')">Freebies</span> → Events Calendar</p>
+    <p class="eyebrow">🎉 Annual calendar</p>
+    <h1 class="sec-h">Free Events in Melbourne</h1>
+    <p class="sec-p wide">Melbourne's free events calendar is arguably the best in Australia. Dates shift slightly year to year — always confirm on the City of Melbourne "What's On" calendar before going.</p>
+  </div>
+  <div class="ga" id="event-cards"></div>
+</div>
+</div>
+
+<!-- ════════════════════════════════
+     DEALS
+════════════════════════════════ -->
+<div id="pg-deals" class="pg">
+<div class="wrap">
+  <div class="sec-hd">
+    <p class="eyebrow">💸 Referral deals</p>
+    <h1 class="sec-h">Deals I recommend</h1>
+    <p class="sec-p wide">Products I actually use. Sign up through my referral link and you'll usually get a welcome bonus — and so will I. Marked clearly where a referral code is involved.</p>
+  </div>
+  <div class="g4" id="deal-cards"></div>
+</div>
+</div>
+
+<!-- ════════════════════════════════
+     DINNERS
+════════════════════════════════ -->
+<div id="pg-dinners" class="pg">
+<div class="wrap">
+  <div class="sec-hd">
+    <p class="eyebrow">🍜 Community dining</p>
+    <h1 class="sec-h">Community Dinners</h1>
+    <p class="sec-p wide">Language-matched shared dinners with 2–6 people you haven't met yet. Starting with Teochew community dinners in Melbourne, once a month. Non-profit — you pay exactly what the venue charges, nothing more.</p>
+  </div>
+  <div class="dsteps">
+    <div class="ds"><div class="ds-n">1</div><h4>Build your profile</h4><p>Tell me your preferred dinner language, dietary needs, interests and suburb. Takes two minutes.</p></div>
+    <div class="ds"><div class="ds-n">2</div><h4>Get matched</h4><p>I review all profiles and form compatible tables by hand. Language is the hard filter — everything else is a preference.</p></div>
+    <div class="ds"><div class="ds-n">3</div><h4>Show up and eat</h4><p>You receive a PayID payment request for your exact share of the venue cost. Pay, confirm, and arrive. I'll be there too.</p></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start">
+    <div>
+      <h3 style="font-family:'Fraunces',serif;font-style:italic;font-size:20px;font-weight:700;color:var(--t1);margin-bottom:16px">Join the waitlist</h3>
+      <div class="wf">
+        <h3>Register your interest</h3>
+        <p class="wf-sub">Once you're matched, I'll reach out by email with date, venue and payment details. No commitment until you confirm.</p>
+        <div id="wf-success" class="success-msg">✅ You're on the list! I'll be in touch when a table opens up for your language group.</div>
+        <form id="wf-form" onsubmit="submitWF(event)">
+          <div class="fr">
+            <div class="fg"><label class="fl">First name</label><input class="fi" type="text" placeholder="Your first name" required></div>
+            <div class="fg"><label class="fl">Last name</label><input class="fi" type="text" placeholder="Your last name" required></div>
+          </div>
+          <div class="fr">
+            <div class="fg"><label class="fl">Email</label><input class="fi" type="email" placeholder="you@example.com" required></div>
+            <div class="fg"><label class="fl">Melbourne suburb</label><input class="fi" type="text" placeholder="e.g. Fitzroy, Docklands" required></div>
+          </div>
+          <div class="fr" style="margin-bottom:0">
+            <div class="fg"><label class="fl">Preferred dinner language</label>
+              <select class="fs" required>
+                <option value="">Select a language</option>
+                <option>Teochew (潮州話)</option>
+                <option>Cantonese (廣東話)</option>
+                <option>Mandarin (普通話)</option>
+                <option>Bahasa Melayu</option>
+                <option>English (open table)</option>
+                <option>Other (please specify)</option>
+              </select>
+            </div>
+            <div class="fg"><label class="fl">Dietary needs</label>
+              <select class="fs">
+                <option value="">None / happy with anything</option>
+                <option>Vegetarian</option>
+                <option>Vegan</option>
+                <option>Halal</option>
+                <option>No pork</option>
+                <option>No shellfish</option>
+                <option>Gluten-free</option>
+              </select>
+            </div>
+          </div>
+          <p class="wf-note">Payment (exact venue cost per head, no markup) is via PayID once you're matched and confirm. Cancellation: 48+ hrs = full refund, 24–48 hrs = 50%, &lt;24 hrs = no refund.</p>
+          <button class="wf-btn" type="submit">Join the waitlist →</button>
+        </form>
+      </div>
+    </div>
+    <div>
+      <h3 style="font-family:'Fraunces',serif;font-style:italic;font-size:20px;font-weight:700;color:var(--t1);margin-bottom:16px">How it works</h3>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="xc"><div class="xc-ico">🌏</div><div><p class="xc-title">Language is the hard filter</p><p class="xc-desc">Dinners are matched by preferred dinner language first — no exceptions. Dietary requirements are a close second.</p></div></div>
+        <div class="xc"><div class="xc-ico">👥</div><div><p class="xc-title">2 to 6 people per table</p><p class="xc-desc">Small enough to be genuinely social. I attend every dinner as part of the group — within the 6-person maximum.</p></div></div>
+        <div class="xc"><div class="xc-ico">💰</div><div><p class="xc-title">Truly non-profit</p><p class="xc-desc">You pay the venue's per-head price. I collect via PayID and pay the venue in full. I don't take a coordination fee.</p></div></div>
+        <div class="xc"><div class="xc-ico">📅</div><div><p class="xc-title">Once a month, for now</p><p class="xc-desc">Starting with Teochew community dinners. More language groups added as the waitlist grows.</p></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════
+     REWARDS
+════════════════════════════════ -->
+<div id="pg-rewards" class="pg">
+<div class="wrap">
+  <div class="sec-hd">
+    <p class="eyebrow">⭐ Points & prizes</p>
+    <h1 class="sec-h">Rewards</h1>
+    <p class="sec-p">Earn points by using Luckee. Every 100 points = 1 monthly lucky draw entry. Prizes funded by sponsors and affiliate commissions.</p>
+  </div>
+  <h3 style="font-size:15px;font-weight:800;color:var(--t2);margin-bottom:14px;text-transform:uppercase;letter-spacing:.07em">How to earn</h3>
+  <table class="ptable">
+    <thead><tr><th>Action</th><th>Points</th></tr></thead>
+    <tbody>
+      <tr><td>Complete your profile</td><td>100 pts</td></tr>
+      <tr><td>Click an affiliate deal link</td><td>10 pts</td></tr>
+      <tr><td>Self-report a successful deal sign-up</td><td>50 pts</td></tr>
+      <tr><td>Daily login</td><td>5 pts</td></tr>
+      <tr><td>Win daily trivia (5 correct)</td><td>25 pts</td></tr>
+      <tr><td>Attend a community dinner</td><td>150 pts</td></tr>
+      <tr><td>Refer a friend (who creates an account)</td><td>200 pts</td></tr>
+      <tr><td>Daily spin (free, once per day)</td><td>10–500 pts</td></tr>
+    </tbody>
+  </table>
+  <div class="tip"><span class="tip-ico">🎁</span><span><strong>Monthly lucky draw:</strong> Every 100 points = 1 draw entry. Random winner selected each month end. Prize announced via email and Luckee's social channels. Prizes are real cash-value gifts from sponsors — typically AUD $30–$150.</span></div>
+  <div class="reward-cards">
+    <div class="rc"><div class="rc-ico">⭐</div><h4>Points ledger</h4><p>A running log of every point you've earned, with the action and date</p><span class="rc-badge">Launching with site</span></div>
+    <div class="rc"><div class="rc-ico">🎡</div><h4>Spin wheel</h4><p>1 free spin daily. Extra spins earned for each completed deal sign-up</p><span class="rc-badge">Launching with site</span></div>
+    <div class="rc"><div class="rc-ico">🧠</div><h4>Daily trivia</h4><p>5 questions per day themed around money, travel and the products on Deals</p><span class="rc-badge">Launching with site</span></div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════
+     ABOUT
+════════════════════════════════ -->
+<div id="pg-about" class="pg">
+<div class="wrap">
+  <div class="sec-hd">
+    <p class="eyebrow">👋 The story</p>
+    <h1 class="sec-h">About Luckee</h1>
+  </div>
+  <div class="about-grid">
+    <div>
+      <div class="about-card">
+        <h4>Why I built this</h4>
+        <p>Melbourne is one of the best cities in the world for freebies — free trams, free world-class galleries, birthday perks from dozens of brands. But finding them requires trawling Reddit, outdated blogs, and loyalty apps that don't talk to each other.</p>
+        <p>Luckee is a single place where Melbourne locals can find what's free, discover deals worth signing up for, and meet other people over a shared meal — matched by language and interests, not an algorithm.</p>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="xc"><div class="xc-ico">📍</div><div><p class="xc-title">Based in Melbourne</p><p class="xc-desc">All freebies research is focused on Melbourne, with national deals flagged separately.</p></div></div>
+      <div class="xc"><div class="xc-ico">🌏</div><div><p class="xc-title">Built for Melbourne's Chinese-speaking community</p><p class="xc-desc">Starting with Teochew and Mandarin-speaking locals. Language support expanding with the community.</p></div></div>
+      <div class="xc"><div class="xc-ico">🔗</div><div><p class="xc-title">Transparent about affiliate links</p><p class="xc-desc">Deals earn a referral commission. Freebies content is independent — no brand pays to appear in the guide.</p></div></div>
+    </div>
+  </div>
+  <div class="dv"></div>
+  <div style="display:flex;gap:16px;flex-wrap:wrap">
+    <a href="#" class="btn-ghost">Privacy Policy</a>
+    <a href="#" class="btn-ghost">Terms & Conditions</a>
+    <a href="#" class="btn-ghost">Copyright Policy</a>
+    <a href="#" class="btn-ghost">Partner With Us</a>
+  </div>
+</div>
+</div>
+
+<!-- Footer -->
+<footer class="ft">
+  <div class="ft-i">
+    <div class="ft-top">
+      <div class="ft-brand">
+        <div class="ft-logo">Luckee</div>
+        <p class="ft-tag">Melbourne's best freebies, deals and community dinners. Updated regularly. Verified by a local.</p>
+      </div>
+      <div class="ft-cols">
+        <div class="ft-col">
+          <h4>Freebies</h4>
+          <a href="#birthday" onclick="go('birthday')">Birthday Freebies</a>
+          <a href="#signup" onclick="go('signup')">Sign-up Freebies</a>
+          <a href="#melbourne" onclick="go('melbourne')">Free Melbourne</a>
+          <a href="#events" onclick="go('events')">Events Calendar</a>
+        </div>
+        <div class="ft-col">
+          <h4>Platform</h4>
+          <a href="#deals" onclick="go('deals')">Deals</a>
+          <a href="#dinners" onclick="go('dinners')">Community Dinners</a>
+          <a href="#rewards" onclick="go('rewards')">Rewards</a>
+          <a href="#about" onclick="go('about')">About Luckee</a>
+        </div>
+        <div class="ft-col">
+          <h4>Legal</h4>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms & Conditions</a>
+          <a href="#">Copyright Policy</a>
+          <a href="#">Partner With Us</a>
+        </div>
+      </div>
+    </div>
+    <div class="ft-bot">
+      <p class="ft-legal">© 2026 Vanessa Chua trading as Luckee. All rights reserved.</p>
+      <p class="ft-disco">Some links are affiliate referral links. Luckee earns a commission if you sign up — at no extra cost to you. All freebie listings are editorially independent.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ─────────────────────────────────
+//  DATA
+// ─────────────────────────────────
+const BDAY_FOOD = [
+  {e:'🍗',n:"Nando's",pg:'PERi-Perks',r:"$15 birthday voucher",m:"App",t:"Emailed 1st of birthday month",c:"Verified email + 1 transaction within 6 months",ns:true,link:'https://www.nandos.com.au/perination'},
+  {e:'🍩',n:'Krispy Kreme',pg:'Inner Circle',r:'Free 4-pack Original Glazed (or $15 online dozen)',m:'Newsletter code',t:'Code emailed ~15 days before birthday, valid 30 days',c:'Show code on phone + photo ID in-store',ns:true,link:'https://www.krispykreme.com.au/inner-circle'},
+  {e:'🌯',n:'Mad Mex',pg:'Mad Members',r:'Free burrito or naked burrito',m:'App',t:'Birthday',c:'App-only · No phone number required',ns:true,link:'https://www.madmex.com.au/mad-members'},
+  {e:'🥤',n:'Boost Juice',pg:'Vibe Club',r:'Free smoothie or juice',m:'App / Vibe card',t:'Valid a few days either side of birthday',c:'Scan in-store',ns:true,link:'https://www.boostjuice.com.au/vibe'},
+  {e:'🍟',n:"McDonald's",pg:"MyMacca's",r:'Free cheeseburger, small fries or small sundae',m:'App',t:'Birthday',c:'App-only · Choose one item',ns:true,link:'https://www.mcdonalds.com.au/mymaccas'},
+  {e:'🍔',n:"Hungry Jack's",pg:'App rewards',r:'Free Whopper',m:'App',t:'Birthday',c:'App-only',ns:true,link:'https://www.hungryjacks.com.au/app'},
+  {e:'☕',n:'Starbucks',pg:'Starbucks Rewards',r:'Birthday reward drink (any size, any handcrafted drink)',m:'App',t:'Birthday',c:'App-only · Must be registered Rewards member',ns:true,link:'https://www.starbucks.com.au/rewards'},
+  {e:'🍦',n:'Cold Rock',pg:'Rockstar Rewards',r:'Free ice cream with a mix-in',m:'App',t:'Birthday',c:'Join Rockstar Rewards (free)',ns:true,link:'https://www.coldrock.com.au/rockstar-rewards'},
+  {e:'🍟',n:"Grill'd",pg:'Relish',r:'Free Famous Snack Chips every day for the full 31 days of your birthday month',m:'App',t:'Daily during birthday month',c:'Requires a burger, salad or Super Slider purchase each day',ns:false,link:'https://www.grilld.com.au/relish'},
+];
+
+const BDAY_BEAUTY = [
+  {e:'💄',n:'Mecca',pg:'Beauty Loop',r:'Birthday Edit gift product (your choice from the curated selection)',m:'App or in-store · Beauty Loop',t:'During birthday month',c:'Join Beauty Loop for free. From Oct 2025: physical product gift, not a gift card',ns:true,link:'https://www.mecca.com.au/mecca-beauty-loop'},
+  {e:'✨',n:'Sephora',pg:'Beauty Pass (White tier)',r:'Birthday gift + double points during birthday month',m:'In-store · No purchase needed',t:'During birthday month',c:'Free White tier membership',ns:true,link:'https://www.sephora.com.au/beauty-pass'},
+  {e:'💊',n:'Priceline',pg:'Sister Club',r:'$5 birthday reward voucher + bonus points',m:'App',t:'Birthday month (valid 28 days)',c:'Free Sister Club membership',ns:true,link:'https://www.priceline.com.au/sister-club'},
+  {e:'👗',n:'Country Road',pg:'Rewards',r:'15% off your first full-priced online order on sign-up',m:'Email on sign-up',t:'On sign-up',c:'Full-priced items only · Birthday rewards unlock with spend tiers',ns:true,link:'https://www.countryroad.com.au'},
+  {e:'🌿',n:'The Body Shop',pg:'Love Your Body Club',r:'$10 birthday reward',m:'In-store or online',t:'Birthday month (expires 1 month from issue)',c:'Requires at least 1 purchase in the prior 12 months',ns:false,link:'https://www.thebodyshop.com/en-au/love-your-body'},
+  {e:'🛍️',n:'Myer',pg:'Myer One',r:'$10 (Member) · $15 (Silver) · $20 (Gold) · $30 (Platinum) birthday reward',m:'App',t:'Birthday month',c:'Requires ≥1 month membership + ≥$30 annual spend',ns:false,link:'https://www.myer.com.au/help/myer-one'},
+];
+
+const SIGNUP_FREEBIES = [
+  {e:'🌯',n:'Guzman y Gomez',cat:'sgn',pg:'GOMEX Rewards',r:'Free burrito on sign-up (value ~$11)',m:'App',t:'On sign-up',c:'New users only · Australian accounts only (the $20 birthday voucher is Singapore-only)',ns:true,link:'https://www.guzmanygomez.com.au/gomex'},
+  {e:'🍺',n:'The Pass',cat:'sgn',pg:'Australian Venue Co · 200+ pubs & bars',r:'$10 food & drink credit instantly on app download',m:'App download',t:'On sign-up',c:'Valid at 200+ pubs and bars Australia-wide, many in Melbourne',ns:true,link:'https://thepass.com.au'},
+  {e:'☕',n:'Ferguson Plarre',cat:'sgn',pg:'Bakehouses Loyalty',r:'Free hot drink when you sign up',m:'Loyalty card',t:'On sign-up',c:'Melbourne institution · Every 6th coffee free · $5 coupon at 5,000 pts + on your birthday',ns:true,link:'https://www.fergusonplarre.com.au'},
+  {e:'🍟',n:"Grill'd",cat:'sgn',pg:'Relish rewards track',r:'Free chips after your 2nd visit · Free drink after 5th · Free burger after 8th',m:'App · Relish card',t:'Ongoing milestones',c:'Also get birthday chips daily for your entire birth month (requires purchase)',ns:true,link:'https://www.grilld.com.au/relish'},
+  {e:'🎒',n:'Kathmandu',cat:'sgn',pg:'Out There Rewards',r:'$20 welcome voucher after your first purchase',m:'Email',t:'After first purchase',c:'Plus birthday vouchers ($10–$50 by spend tier). Formerly Summit Club',ns:true,link:'https://www.kathmandu.com.au/rewards'},
+];
+
+const MELB_TRANSPORT = [
+  {e:'🚃',cat:'Getting around',n:'Free Tram Zone',d:'All trams within the CBD and Docklands are free — no myki needed. Includes the City Circle heritage tram. If you tap on accidentally, you\'ll be charged Zone 1.',t:'Always free',col:'melb'},
+  {e:'🎟️',cat:'Getting around',n:'Half-price public transport',d:'From 1 June 2026 to 1 January 2027, all public transport across Victoria is half price. Full Fare daily cap drops from $11.40 to $5.70. Under-18s travel free with a Youth myki.',t:'Until 1 Jan 2027',col:'amber'},
+  {e:'👶',cat:'Getting around',n:'Free travel for under-18s & seniors',d:'Under-18s travel free across all of Victoria with a Youth myki. Seniors, carers and DSP recipients travel free on weekends from February 2026.',t:'Ongoing',col:'melb'},
+];
+
+const MELB_CULTURE = [
+  {e:'🎨',cat:'Culture & arts',n:'NGV International & Ian Potter Centre',d:'Two world-class galleries, permanent collections always free. Ian Potter Centre (Federation Square) covers Australian art; NGV International (St Kilda Rd) covers international and temporary exhibitions. Ticketed exhibitions charged separately.',t:'Always free (permanent)',col:'melb'},
+  {e:'📽️',cat:'Culture & arts',n:'ACMI — Australian Centre for the Moving Image',d:'The Story of the Moving Image permanent gallery is free. Federation Square. Films, games, TV and digital culture from the last 100+ years.',t:'Always free (permanent)',col:'melb'},
+  {e:'📚',cat:'Culture & arts',n:'State Library Victoria',d:'Free entry, free WiFi (fastest indoor WiFi in Melbourne), free exhibitions. Dome to Catacombs history walking tours almost daily — book online. Near Melbourne Central station.',t:'Always free',col:'melb'},
+  {e:'🏛️',cat:'Culture & arts',n:'Shrine of Remembrance',d:'Free entry, including the balcony with panoramic Melbourne views. The Undercroft and galleries are free. Tours available.',t:'Always free',col:'melb'},
+  {e:'🎵',cat:'Culture & arts',n:'Australian Music Vault',d:'At Arts Centre Melbourne. Free interactive exhibition covering 60+ years of Australian music — from Melbourne bands to contemporary pop.',t:'Always free',col:'melb'},
+  {e:'🖼️',cat:'Culture & arts',n:'City Gallery at Melbourne Town Hall',d:'Free rotating exhibitions celebrating Melbourne stories, history and culture. Open during business hours.',t:'Always free',col:'melb'},
+];
+
+const MELB_CLASSES = [
+  {e:'🏃',cat:'Classes & workshops',n:'City of Melbourne Free Fitness in the Park',d:'Monthly outdoor fitness sessions — zumba, tai chi, yoga, boxing, pilates, family fitness — led by rec-centre staff. Free refreshments afterward. Book online; all fitness levels welcome.',t:'Monthly sessions',col:'melb'},
+  {e:'🧘',cat:'Classes & workshops',n:'lululemon community classes',d:'Free ambassador-led yoga, run club, pilates, boxing and strength sessions near Melbourne stores. Previously ran 20-week programs in the NGV garden. Check Eventbrite.',t:'Seasonal',col:'melb'},
+  {e:'🔨',cat:'Classes & workshops',n:'Bunnings DIY workshops',d:'Free hands-on adult Make & Take workshops, garden hub sessions, and free weekend kids\' DIY activities for ages 5+. Book online.',t:'Ongoing',col:'melb'},
+  {e:'📱',cat:'Classes & workshops',n:'Today at Apple',d:'Free daily sessions in photography, music creation, coding and more, led by Creative Pros at Chadstone and other Melbourne Apple stores.',t:'Daily',col:'melb'},
+  {e:'📖',cat:'Classes & workshops',n:'State Library walking tours',d:'Free Dome to Catacombs history tours almost daily. Book via the State Library website.',t:'Most days',col:'melb'},
+];
+
+const MELB_OUTDOORS = [
+  {e:'🌺',cat:'Markets & outdoors',n:'Royal Botanic Gardens',d:'36 hectares of free gardens along the Yarra. Free guided walks available. Picnic-friendly. Near Domain Rd tram stop.',t:'Always free',col:'melb'},
+  {e:'🎨',cat:'Markets & outdoors',n:'Hosier Lane & street art laneways',d:'Melbourne\'s famous laneway art — Hosier Lane, Rutledge Lane, AC/DC Lane and more. Self-guided, always free, ever-changing.',t:'Always free',col:'melb'},
+  {e:'🛒',cat:'Markets & outdoors',n:'Queen Victoria Market',d:'Free to wander. Sample-friendly stallholders in the Dairy Hall and deli sheds. Night Markets (Summer and Winter) have free entry and live music.',t:'Open Tue–Sun',col:'melb'},
+  {e:'📶',cat:'Markets & outdoors',n:'VicFreeWiFi — 500+ hotspots',d:'Free public WiFi at 500+ hotspots across Melbourne, Bendigo and Ballarat CBDs. Up to 1GB per device per day, no login, no pop-up ads. Fastest spots: State Library, Federation Square.',t:'Always free',col:'melb'},
+  {e:'🏫',cat:'Markets & outdoors',n:'Melbourne Greeter Service',d:'City of Melbourne volunteers lead free orientation walks for visitors and locals. Pairs you with a local volunteer. Book via the City of Melbourne website.',t:'By booking',col:'melb'},
+];
+
+const EVENTS = [
+  {month:'March (long weekend)',n:'Moomba Festival',d:"Australia's largest free community festival — carnival rides, the famous Birdman Rally on the Yarra, Moomba parade, live music and fireworks. South bank, Alexandra and Kings Domain gardens.",f:true},
+  {month:'February',n:'St Kilda Festival',d:"Australia's largest free music festival, held beachside at St Kilda foreshore. Multiple stages, 50+ acts, family area. Usually the first or second weekend of February.",f:true},
+  {month:'February',n:'Lunar New Year',d:"Chinatown (Lonsdale Street) hosts lion dances, parades, night markets and performances. NGV programs Chinese art and culture events. The broader Moomba corridor also celebrates.",f:true},
+  {month:'July–August',n:'Melbourne International Film Festival',d:"MIFF runs free outdoor screenings at Federation Square each year as part of the program. Specific free events vary — check miff.com.au.",f:false},
+  {month:'August (approx)',n:'White Night',d:"All-night arts and projection festival across the Melbourne CBD — light installations, live performance, food. Exact dates shift year to year.",f:true},
+  {month:'Year-round',n:'QVM Night Markets',d:"Queen Victoria Market Summer Night Market (Oct–Feb, Wednesday evenings) and Winter Night Market (Jun–Aug, Wednesday evenings). Free entry. Live music, street food, market stalls.",f:true},
+  {month:'April 25',n:'ANZAC Day Dawn Service',d:"Free commemorative service at the Shrine of Remembrance beginning before dawn. One of the largest ANZAC Day services in Australia.",f:true},
+  {month:'September–October',n:'AFL Grand Final',d:"The big screen at Federation Square shows the Grand Final live with a free public viewing. Expect a big crowd — arrive early for a spot.",f:true},
+  {month:'December–January',n:'Sidney Myer Music Bowl — MSO Carols & Concerts',d:"The Melbourne Symphony Orchestra performs free outdoor summer concerts and Christmas Carols by Candlelight at the Sidney Myer Music Bowl. Bring a picnic.",f:true},
+  {month:'Various (Greek Easter)',n:'Antipodes Festival',d:"Melbourne's Greek cultural festival on Lonsdale Street. Free entry. Food, dance, music, craft and cultural activities celebrating Greek-Australian community.",f:true},
+];
+
+const DEALS = [
+  {cls:'cld',e:'🤖',n:'Claude Pro',sub:'Anthropic · AI assistant',reward:'7-day free trial',rl:'Try Claude Pro',desc:'The AI I use every day for work, writing, research and building Luckee. Claude Pro gives access to the most capable models with more usage than the free tier. Try it free for 7 days.',code:null,tags:['🌍 Global','💻 Web & mobile','🧠 AI'],cta:'Start 7-day free trial →',link:'https://claude.ai'},
+  {cls:'bls',e:'🌸',n:'Blossom',sub:'Savings & rewards app · Australia',reward:'$10 bonus on first deposit',rl:'Referral bonus',desc:'A savings and rewards app that helps you build good financial habits. Deposit $50, earn $10 instantly. I use it to ringfence specific savings goals.',code:null,tags:['🇦🇺 Australia only','📱 iOS & Android','💰 Finance'],cta:'Get $10 bonus →',link:'#'},
+  {cls:'krs',e:'✈️',n:'Kris+',sub:'Singapore Airlines lifestyle app',reward:'500 KrisPay miles on first $5 spend',rl:'Code: C506127',desc:'The lifestyle rewards app from Singapore Airlines. Earn KrisPay miles on everyday spending at 100+ partners — restaurants, retail, entertainment. Worth having if you fly SQ.',code:'C506127',tags:['🇦🇺 Australia','🌍 Global','🎁 Miles & rewards'],cta:'Join Kris+ →',link:'#'},
+  {cls:'mac',e:'🛣️',n:'Macadam',sub:'Road trip app · Australia',reward:'1,000 coins on sign-up',rl:'Code: RE65K8',desc:'A beautifully designed app for planning Australian road trips. Earn coins for every drive, redeem for fuel discounts and roadside perks. Great if you road trip regularly.',code:'RE65K8',tags:['🇦🇺 Australia','🚗 Road trips','⛽ Fuel rewards'],cta:'Join Macadam →',link:'#'},
+];
+
+// ─────────────────────────────────
+//  CARD RENDERERS
+// ─────────────────────────────────
+function makeFCard(f, cat) {
+  const badge = f.ns
+    ? '<span class="bn bn-ok">✓ No min spend</span>'
+    : '<span class="bn bn-warn">⚠ Min spend</span>';
+  const cond = f.c ? `<p class="fc-dc"><span>⚠</span><span>${f.c}</span></p>` : '';
+  return `<div class="fc ${cat}">
+    <div class="fc-stripe"></div>
+    <div class="fc-b">
+      <div class="fc-top">
+        <span class="fc-em">${f.e}</span>
+        <div class="fc-inf">
+          <p class="fc-cat">${cat==='food'?'Food & Drink':cat==='bty'?'Beauty & Retail':'Sign-up bonus'}</p>
+          <p class="fc-brand">${f.n}</p>
+          <p class="fc-prog">${f.pg}</p>
+        </div>
+        <div class="fc-badge">${badge}</div>
+      </div>
+      <div class="fc-rw"><p class="fc-rl">What you get</p><p class="fc-rv">${f.r}</p></div>
+      <div class="fc-dt">
+        <p class="fc-d"><span>📱</span><span>${f.m}</span></p>
+        <p class="fc-d"><span>📅</span><span>${f.t}</span></p>
+        ${cond}
+      </div>
+      <div class="fc-ft">
+        <span class="fc-ver">✓ Verified Jul 2026</span>
+        <a href="${f.link}" target="_blank" rel="noopener" class="fc-cta">Get freebie →</a>
+      </div>
+    </div>
+  </div>`;
+}
+
+function makeXCard(x) {
+  const tagCls = x.col==='amber'?'xc-tag amber':'xc-tag';
+  const label = x.col==='amber'?'⚡ Limited time':'✓ Always free';
+  return `<div class="xc">
+    <span class="xc-ico">${x.e}</span>
+    <div>
+      <p class="xc-cat">${x.cat}</p>
+      <p class="xc-title">${x.n}</p>
+      <p class="xc-desc">${x.d}</p>
+      <span class="${tagCls}">${label}</span>
+    </div>
+  </div>`;
+}
+
+function makeEventCard(ev) {
+  const ftag = ev.f ? '<span class="free-tag">✓ Free entry</span>' : '<span class="free-tag" style="background:#dbeafe;color:#1e40af">Check pricing</span>';
+  return `<div class="evc">
+    <span class="evc-m">${ev.month}</span>
+    <h3 class="evc-h">${ev.n}</h3>
+    <p class="evc-p">${ev.d}</p>
+    ${ftag}
+  </div>`;
+}
+
+function makeDealCard(d) {
+  const codeBox = d.code ? `<div class="dc-code"><span class="dc-cl">Referral code</span><span class="dc-cv">${d.code}</span></div>` : '';
+  const tags = d.tags.map(t=>`<span class="dc-tag">${t}</span>`).join('');
+  return `<div class="dc ${d.cls}">
+    <div class="dc-s"></div>
+    <div class="dc-b">
+      <div class="dc-hd"><span class="dc-em">${d.e}</span><div><p class="dc-name">${d.n}</p><p class="dc-sub">${d.sub}</p></div></div>
+      <div class="dc-rw"><p class="dc-rl">${d.rl}</p><p class="dc-rv">${d.reward}</p></div>
+      <p class="dc-desc">${d.desc}</p>
+      ${codeBox}
+      <div class="dc-tags">${tags}</div>
+    </div>
+    <div class="dc-ft">
+      <a href="${d.link}" target="_blank" rel="noopener" class="dc-cta">${d.cta}</a>
+    </div>
+  </div>`;
+}
+
+// ─────────────────────────────────
+//  ROUTER
+// ─────────────────────────────────
+const pages = ['home','freebies','birthday','signup','melbourne','events','deals','dinners','rewards','about'];
+let pendingFilter = null;
+
+function go(id) {
+  pages.forEach(p => document.getElementById('pg-'+p).classList.remove('active'));
+  const el = document.getElementById('pg-'+id);
+  if (el) { el.classList.add('active'); window.scrollTo(0,0); }
+  const freebiesSubs = ['freebies','birthday','signup','melbourne','events'];
+  document.querySelectorAll('.nl').forEach(b => {
+    const match = b.id === 'nl-'+id || (b.id === 'nl-freebies' && freebiesSubs.includes(id));
+    b.classList.toggle('on', match);
+  });
+  history.pushState(null, '', '#'+id);
+  if (id==='birthday' && pendingFilter) { setFilter(pendingFilter); pendingFilter=null; }
+}
+
+// ─────────────────────────────────
+//  FILTER (Birthday Freebies)
+// ─────────────────────────────────
+function setFilter(type) {
+  if (!document.getElementById('pg-birthday').classList.contains('active')) {
+    pendingFilter = type; return;
+  }
+  ['all','food','beauty','nospend'].forEach(t => document.getElementById('fb-'+t).classList.toggle('on', t===type));
+  const fd = document.getElementById('bday-food');
+  const bd = document.getElementById('bday-beauty');
+  const sfh = document.getElementById('ssh-food');
+  const sbh = document.getElementById('ssh-beauty');
+  if (type==='all') {
+    fd.innerHTML = BDAY_FOOD.map(f=>makeFCard(f,'food')).join('');
+    bd.innerHTML = BDAY_BEAUTY.map(f=>makeFCard(f,'bty')).join('');
+    sfh.style.display=''; sbh.style.display='';
+  } else if (type==='food') {
+    fd.innerHTML = BDAY_FOOD.map(f=>makeFCard(f,'food')).join('');
+    bd.innerHTML = ''; sfh.style.display=''; sbh.style.display='none';
+  } else if (type==='beauty') {
+    fd.innerHTML = '';
+    bd.innerHTML = BDAY_BEAUTY.map(f=>makeFCard(f,'bty')).join('');
+    sfh.style.display='none'; sbh.style.display='';
+  } else if (type==='nospend') {
+    fd.innerHTML = BDAY_FOOD.filter(f=>f.ns).map(f=>makeFCard(f,'food')).join('');
+    bd.innerHTML = BDAY_BEAUTY.filter(f=>f.ns).map(f=>makeFCard(f,'bty')).join('');
+    sfh.style.display=''; sbh.style.display='';
+  }
+}
+
+// ─────────────────────────────────
+//  LIVE SEARCH (basic)
+// ─────────────────────────────────
+function liveSearch(q) {
+  if (!q || q.length < 2) return;
+  const lq = q.toLowerCase();
+  const all = [...BDAY_FOOD, ...BDAY_BEAUTY, ...SIGNUP_FREEBIES];
+  const matches = all.filter(f =>
+    f.n.toLowerCase().includes(lq) ||
+    f.r.toLowerCase().includes(lq) ||
+    (f.pg && f.pg.toLowerCase().includes(lq))
+  );
+  if (matches.length > 0) {
+    const first = matches[0];
+    const isBeauty = BDAY_BEAUTY.some(f=>f.n===first.n);
+    go('birthday');
+    if (isBeauty) setFilter('beauty'); else setFilter('food');
+  }
+}
+
+// ─────────────────────────────────
+//  WAITLIST FORM
+// ─────────────────────────────────
+function submitWF(e) {
+  e.preventDefault();
+  document.getElementById('wf-form').style.display = 'none';
+  document.getElementById('wf-success').style.display = 'block';
+}
+
+// ─────────────────────────────────
+//  MOBILE MENU
+// ─────────────────────────────────
+function toggleMobile() {
+  const m = document.getElementById('mob-nav');
+  m.style.display = m.style.display === 'block' ? 'none' : 'block';
+}
+
+// ─────────────────────────────────
+//  INIT — render all dynamic content
+// ─────────────────────────────────
+function init() {
+  // Birthday freebies
+  document.getElementById('bday-food').innerHTML = BDAY_FOOD.map(f=>makeFCard(f,'food')).join('');
+  document.getElementById('bday-beauty').innerHTML = BDAY_BEAUTY.map(f=>makeFCard(f,'bty')).join('');
+
+  // Sign-up freebies
+  document.getElementById('signup-cards').innerHTML = SIGNUP_FREEBIES.map(f=>makeFCard(f,'sgn')).join('');
+
+  // Free Melbourne
+  document.getElementById('melb-transport').innerHTML = MELB_TRANSPORT.map(makeXCard).join('');
+  document.getElementById('melb-culture').innerHTML = MELB_CULTURE.map(makeXCard).join('');
+  document.getElementById('melb-classes').innerHTML = MELB_CLASSES.map(makeXCard).join('');
+  document.getElementById('melb-outdoors').innerHTML = MELB_OUTDOORS.map(makeXCard).join('');
+
+  // Events
+  document.getElementById('event-cards').innerHTML = EVENTS.map(makeEventCard).join('');
+
+  // Deals
+  document.getElementById('deal-cards').innerHTML = DEALS.map(makeDealCard).join('');
+
+  // Home: top 3 picks
+  const topPicks = [BDAY_FOOD[0], BDAY_FOOD[1], BDAY_BEAUTY[0]];
+  document.getElementById('home-top').innerHTML = topPicks.map((f,i) => {
+    const cat = i<2?'food':'bty';
+    return makeFCard(f,cat);
+  }).join('');
+
+  // Home: free Melbourne tiles (4)
+  const melbSample = [MELB_TRANSPORT[0], MELB_CULTURE[0], MELB_CULTURE[2], MELB_CULTURE[1]];
+  document.getElementById('home-melb').innerHTML = melbSample.map(makeXCard).join('');
+
+  // Home: deals (compact, 4)
+  document.getElementById('home-deals').innerHTML = DEALS.map(makeDealCard).join('');
+
+  // Hash routing on load
+  const hash = location.hash.slice(1);
+  if (hash && pages.includes(hash)) go(hash);
+}
+
+window.addEventListener('popstate', () => {
+  const h = location.hash.slice(1);
+  if (h && pages.includes(h)) go(h);
+});
+
+init();
+</script>
+</body>
+</html>

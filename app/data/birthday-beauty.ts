@@ -1,0 +1,52 @@
+import type { Freebie } from "./types";
+
+export const BDAY_BEAUTY: Freebie[] = [
+  {
+    e: "💄", n: "Mecca", pg: "Beauty Loop",
+    r: "Birthday Edit gift product (your choice from the curated selection)", m: "App or in-store · Beauty Loop",
+    t: "During birthday month",
+    c: "Join Beauty Loop for free. From Oct 2025: physical product gift, not a gift card",
+    ns: true, cat: "bty",
+    link: "https://www.mecca.com.au/mecca-beauty-loop",
+  },
+  {
+    e: "✨", n: "Sephora", pg: "Beauty Pass (White tier)",
+    r: "Birthday gift + double points during birthday month", m: "In-store · No purchase needed",
+    t: "During birthday month",
+    c: "Free White tier membership",
+    ns: true, cat: "bty",
+    link: "https://www.sephora.com.au/beauty-pass",
+  },
+  {
+    e: "💊", n: "Priceline", pg: "Sister Club",
+    r: "$5 birthday reward voucher + bonus points", m: "App",
+    t: "Birthday month (valid 28 days)",
+    c: "Free Sister Club membership",
+    ns: true, cat: "bty",
+    link: "https://www.priceline.com.au/sister-club",
+  },
+  {
+    e: "👗", n: "Country Road", pg: "Rewards",
+    r: "15% off your first full-priced online order on sign-up", m: "Email on sign-up",
+    t: "On sign-up",
+    c: "Full-priced items only · Birthday rewards unlock with spend tiers",
+    ns: true, cat: "bty",
+    link: "https://www.countryroad.com.au",
+  },
+  {
+    e: "🌿", n: "The Body Shop", pg: "Love Your Body Club",
+    r: "$10 birthday reward", m: "In-store or online",
+    t: "Birthday month (expires 1 month from issue)",
+    c: "Requires at least 1 purchase in the prior 12 months",
+    ns: false, cat: "bty",
+    link: "https://www.thebodyshop.com/en-au/love-your-body",
+  },
+  {
+    e: "🛍️", n: "Myer", pg: "Myer One",
+    r: "$10 (Member) · $15 (Silver) · $20 (Gold) · $30 (Platinum) birthday reward", m: "App",
+    t: "Birthday month",
+    c: "Requires ≥1 month membership + ≥$30 annual spend",
+    ns: false, cat: "bty",
+    link: "https://www.myer.com.au/help/myer-one",
+  },
+];
