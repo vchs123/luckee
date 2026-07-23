@@ -44,13 +44,17 @@ export async function action({ request }: ActionFunctionArgs) {
     return { error: "Something went wrong. Please try again." };
   }
 
-  const resend = getResend();
-  await resend.emails.send({
-    from: "Vanessa at Luckee <hello@luckee.com.au>",
-    to: email,
-    subject: "You're on the Luckee dinner waitlist ✓",
-    html: waitlistEmailHtml(firstName, dinnerLanguage),
-  });
+  try {
+    const resend = getResend();
+    await resend.emails.send({
+      from: "Vanessa at Luckee <hello@luckee.com.au>",
+      to: email,
+      subject: "You're on the Luckee dinner waitlist ✓",
+      html: waitlistEmailHtml(firstName, dinnerLanguage),
+    });
+  } catch (e) {
+    console.error("Resend error (non-fatal):", e);
+  }
 
   return { success: true };
 }

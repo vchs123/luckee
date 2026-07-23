@@ -7,6 +7,9 @@
 	"name": "luckee",
 	"compatibility_date": "2026-07-23",
 	"main": "./workers/app.ts",
+	"assets": {
+		"directory": "./build/client"
+	},
 	"vars": {
 		"SUPABASE_URL": "",
 		"SUPABASE_SERVICE_KEY": "",
