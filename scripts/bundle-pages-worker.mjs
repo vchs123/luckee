@@ -1,4 +1,5 @@
 import { build } from 'esbuild';
+import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { resolve, dirname } from 'node:path';
 
@@ -32,5 +33,12 @@ await build({
   },
   logLevel: 'info',
 });
+
+// The Vite plugin generates build/client/wrangler.json with an "assets" field that
+// Pages config validation rejects. Redirect the deploy config to wrangler.jsonc instead.
+writeFileSync(
+  resolve(root, '.wrangler/deploy/config.json'),
+  JSON.stringify({ configPath: '../../wrangler.jsonc', auxiliaryWorkers: [] }),
+);
 
 console.log('✓ Pages Worker bundled → build/client/_worker.js');
