@@ -3,9 +3,6 @@
 	"name": "luckee-app",
 	"compatibility_date": "2026-07-24",
 	"pages_build_output_dir": "./build/client",
-	"vars": {
-		"GA4_MEASUREMENT_ID": ""
-	},
 	"compatibility_flags": [
 		"nodejs_compat"
 	]
