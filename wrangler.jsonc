@@ -4,11 +4,10 @@
 	"compatibility_date": "2026-07-24",
 	"pages_build_output_dir": "./build/client",
 	"vars": {
-		"SUPABASE_URL": "",
-		"SUPABASE_SERVICE_KEY": "",
-		"RESEND_API_KEY": "",
-		"STRIPE_SECRET_KEY": "",
 		"GA4_MEASUREMENT_ID": ""
+	},
+	"secrets": {
+		"required": ["SUPABASE_URL", "SUPABASE_SERVICE_KEY", "RESEND_API_KEY", "STRIPE_SECRET_KEY"]
 	},
 	"compatibility_flags": [
 		"nodejs_compat"
