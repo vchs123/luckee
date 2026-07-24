@@ -14,7 +14,7 @@ const STATIC_ROUTES = [
   { url: "/blog", priority: "0.7", changefreq: "weekly" },
 ];
 
-const BASE = "https://luckee.com.au";
+const BASE = "https://luckee-app.pages.dev";
 
 export async function loader({ context }: LoaderFunctionArgs) {
   let blogRoutes: { url: string; priority: string; changefreq: string }[] = [];

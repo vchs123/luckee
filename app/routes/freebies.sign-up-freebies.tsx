@@ -7,7 +7,7 @@ export const meta: MetaFunction = () => [
   { title: "Sign-up Freebies Melbourne — One-Time Welcome Bonuses | Luckee" },
   { name: "description", content: "No birthday required. One-time sign-up bonuses from Melbourne loyalty programs worth joining: GYG, The Pass, Ferguson Plarre, Grill'd and Kathmandu." },
   { property: "og:title", content: "Sign-up Freebies Melbourne | Luckee" },
-  { tagName: "link", rel: "canonical", href: "https://luckee.com.au/freebies/sign-up-freebies" },
+  { tagName: "link", rel: "canonical", href: "https://luckee-app.pages.dev/freebies/sign-up-freebies" },
 ];
 
 export default function SignUpFreebies() {

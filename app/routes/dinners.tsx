@@ -7,7 +7,7 @@ export const meta: MetaFunction = () => [
   { title: "Community Dinners — Language-Matched Dining in Melbourne | Luckee" },
   { name: "description", content: "Language-matched community dinners with 2–6 people in Melbourne. Starting with Teochew dinners. Non-profit — you pay exactly what the venue charges." },
   { property: "og:title", content: "Community Dinners Melbourne | Luckee" },
-  { tagName: "link", rel: "canonical", href: "https://luckee.com.au/dinners" },
+  { tagName: "link", rel: "canonical", href: "https://luckee-app.pages.dev/dinners" },
 ];
 
 export async function action({ request, context }: ActionFunctionArgs) {
@@ -71,8 +71,8 @@ function waitlistEmailHtml(firstName: string, language: string) {
     <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px;">
       <h1 style="font-size: 24px; color: #1e0a2e; margin-bottom: 12px;">You're on the list, ${firstName}! ✓</h1>
       <p style="color: #6b4d82; line-height: 1.7;">Thanks for signing up for a <strong>${language}</strong> dinner. I'll be in touch when a table opens up for your language group.</p>
-      <p style="color: #6b4d82; line-height: 1.7;">In the meantime, check out the <a href="https://luckee.com.au/freebies/birthday-freebies" style="color: #e91e8c;">birthday freebies guide</a> — free food is always a good start.</p>
-      <p style="color: #a08bb8; font-size: 13px; margin-top: 32px;">— Vanessa · <a href="https://luckee.com.au" style="color: #e91e8c;">luckee.com.au</a></p>
+      <p style="color: #6b4d82; line-height: 1.7;">In the meantime, check out the <a href="https://luckee-app.pages.dev/freebies/birthday-freebies" style="color: #e91e8c;">birthday freebies guide</a> — free food is always a good start.</p>
+      <p style="color: #a08bb8; font-size: 13px; margin-top: 32px;">— Vanessa · <a href="https://luckee-app.pages.dev" style="color: #e91e8c;">luckee.com.au</a></p>
     </div>
   `;
 }

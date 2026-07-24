@@ -7,7 +7,7 @@ export const meta: MetaFunction = () => [
   { title: "Free Events in Melbourne 2026 — Annual Events Calendar | Luckee" },
   { name: "description", content: "Melbourne's best recurring free events: Moomba, St Kilda Festival, White Night, MIFF outdoor screenings, ANZAC Dawn Service and more — verified dates and details." },
   { property: "og:title", content: "Free Events in Melbourne 2026 | Luckee" },
-  { tagName: "link", rel: "canonical", href: "https://luckee.com.au/freebies/events-calendar" },
+  { tagName: "link", rel: "canonical", href: "https://luckee-app.pages.dev/freebies/events-calendar" },
 ];
 
 export default function EventsCalendar() {

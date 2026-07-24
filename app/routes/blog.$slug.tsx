@@ -29,7 +29,7 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
   }
 
   const html = await marked.parse(data.body);
-  return { ...data, html };
+  return { ...data, html, slug: params.slug };
 }
 
 export const meta: Route.MetaFunction = ({ loaderData }) => {
@@ -39,7 +39,7 @@ export const meta: Route.MetaFunction = ({ loaderData }) => {
     { name: "description", content: loaderData.description ?? "" },
     { property: "og:title", content: loaderData.title },
     { property: "og:description", content: loaderData.description ?? "" },
-    { tagName: "link", rel: "canonical", href: `https://luckee.com.au/blog/${loaderData.title}` },
+    { tagName: "link", rel: "canonical", href: `https://luckee-app.pages.dev/blog/${loaderData.slug}` },
   ];
 };
 

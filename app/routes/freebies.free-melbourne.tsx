@@ -8,7 +8,7 @@ export const meta: MetaFunction = () => [
   { title: "Free Things to Do in Melbourne 2026 — Complete Guide | Luckee" },
   { name: "description", content: "A full day out in Melbourne CBD can cost nothing. Free trams, world-class galleries, walking tours, outdoor fitness and workshops — year-round guide by a local." },
   { property: "og:title", content: "Free Things to Do in Melbourne 2026 | Luckee" },
-  { tagName: "link", rel: "canonical", href: "https://luckee.com.au/freebies/free-melbourne" },
+  { tagName: "link", rel: "canonical", href: "https://luckee-app.pages.dev/freebies/free-melbourne" },
 ];
 
 export default function FreeMelbourne() {

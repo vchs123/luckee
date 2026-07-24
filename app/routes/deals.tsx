@@ -8,7 +8,7 @@ export const meta: MetaFunction = () => [
   { title: "Deals I Recommend — Referral Bonuses & Savings Apps | Luckee" },
   { name: "description", content: "Products Vanessa actually uses. Sign up via referral links to get a welcome bonus — Claude Pro, Blossom, Kris+ and Macadam." },
   { property: "og:title", content: "Deals | Luckee" },
-  { tagName: "link", rel: "canonical", href: "https://luckee.com.au/deals" },
+  { tagName: "link", rel: "canonical", href: "https://luckee-app.pages.dev/deals" },
 ];
 
 export default function Deals() {

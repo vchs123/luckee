@@ -13,7 +13,7 @@ export const meta: MetaFunction = () => [
   { name: "description", content: "The complete guide to birthday freebies in Melbourne. 15+ verified offers across food, beauty and retail — with honest notes on minimum spend requirements." },
   { property: "og:title", content: "Birthday Freebies Melbourne 2026 | Luckee" },
   { property: "og:description", content: "15+ verified birthday freebies in Melbourne. Nando's, Krispy Kreme, Mecca, Sephora and more — updated July 2026." },
-  { tagName: "link", rel: "canonical", href: "https://luckee.com.au/freebies/birthday-freebies" },
+  { tagName: "link", rel: "canonical", href: "https://luckee-app.pages.dev/freebies/birthday-freebies" },
 ];
 
 export default function BirthdayFreebies() {
