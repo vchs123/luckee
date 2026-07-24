@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "react-router build",
+    "build": "react-router build && node scripts/bundle-pages-worker.mjs",
     "dev": "react-router dev",
     "typecheck": "wrangler types && react-router typegen && tsc -b",
     "deploy": "npm run build && wrangler deploy",
