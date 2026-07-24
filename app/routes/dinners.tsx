@@ -54,7 +54,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   try {
     const resend = getResend(env);
     await resend.emails.send({
-      from: "Vanessa at Luckee <hello@luckee.com.au>",
+      from: "Vanessa at Luckee <luckee.app@gmail.com>",
       to: email,
       subject: "You're on the Luckee dinner waitlist ✓",
       html: waitlistEmailHtml(firstName, dinnerLanguage),
