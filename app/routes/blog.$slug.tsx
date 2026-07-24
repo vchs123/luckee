@@ -9,7 +9,14 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
   const { getSupabase } = await import("~/lib/supabase.server");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const env = (context as any)?.cloudflare?.env as Env;
-  const supabase = getSupabase(env);
+
+  let supabase;
+  try {
+    supabase = getSupabase(env);
+  } catch {
+    throw new Response("Not found", { status: 404 });
+  }
+
   const { data, error } = await supabase
     .from("posts")
     .select("title, description, body, published_at")

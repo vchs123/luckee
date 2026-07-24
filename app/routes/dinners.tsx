@@ -28,7 +28,12 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return { error: "Please fill in all required fields." };
   }
 
-  const supabase = getSupabase(env);
+  let supabase;
+  try {
+    supabase = getSupabase(env);
+  } catch {
+    return { error: "Service temporarily unavailable. Please try again later." };
+  }
   const { error: dbError } = await supabase.from("dinner_waitlist").insert({
     first_name: firstName,
     last_name: lastName,
