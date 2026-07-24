@@ -1,8 +1,10 @@
 import { createRequestHandler, RouterContextProvider } from "react-router";
 
+type PagesEnv = Env & { ASSETS: Fetcher };
+
 class CloudflareContext extends RouterContextProvider {
-  readonly cloudflare: { env: Env; ctx: ExecutionContext };
-  constructor(env: Env, ctx: ExecutionContext) {
+  readonly cloudflare: { env: PagesEnv; ctx: ExecutionContext };
+  constructor(env: PagesEnv, ctx: ExecutionContext) {
     super();
     this.cloudflare = { env, ctx };
   }
@@ -14,7 +16,11 @@ const requestHandler = createRequestHandler(
 );
 
 export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext) {
+  async fetch(request: Request, env: PagesEnv, ctx: ExecutionContext) {
+    if (env.ASSETS) {
+      const assetResponse = await env.ASSETS.fetch(request.url);
+      if (assetResponse.status !== 404) return assetResponse;
+    }
     return requestHandler(request, new CloudflareContext(env, ctx));
   },
-} satisfies ExportedHandler<Env>;
+} satisfies ExportedHandler<PagesEnv>;
