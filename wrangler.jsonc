@@ -6,9 +6,6 @@
 	"vars": {
 		"GA4_MEASUREMENT_ID": ""
 	},
-	"secrets": {
-		"required": ["SUPABASE_URL", "SUPABASE_SERVICE_KEY", "RESEND_API_KEY", "STRIPE_SECRET_KEY"]
-	},
 	"compatibility_flags": [
 		"nodejs_compat"
 	]
