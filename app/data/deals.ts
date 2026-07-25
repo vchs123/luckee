@@ -53,6 +53,15 @@ export const DEALS: Deal[] = [
     link: "https://app.krisplus.com/BAOwqtUTU4b",
   },
   {
+    cls: "rvl", e: "💳", n: "Revolut", sub: "Digital banking & money transfers · Australia",
+    reward: "$15 cash bonus", rl: "Referral bonus — DM us on IG first",
+    desc: "The card I use for overseas spending and fee-free international transfers. To get your $15 bonus, DM Luckee on Instagram before signing up — then use my referral link. The bonus is applied once you activate your card.",
+    code: null,
+    tags: ["🇦🇺 Australia", "💳 Banking", "🌍 Travel & transfers"],
+    cta: "Get $15 with Revolut →",
+    link: "https://revolut.com/referral/?referral-code=vanesskirh!JUL2-26-AR-AU-H1&geo-redirect",
+  },
+  {
     cls: "mac", e: "🚶", n: "Macadam", sub: "Walking rewards app · Australia",
     reward: "1,000 coins on sign-up", rl: "Code: RE65K8",
     desc: "A walking rewards app. Earn coins for every step you take and redeem via PayPal, Visa gift cards or Amazon vouchers. The more you walk, the more you earn.",

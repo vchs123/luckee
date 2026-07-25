@@ -28,7 +28,7 @@ export interface Event {
 }
 
 export interface Deal {
-  cls: "cld" | "bls" | "krs" | "mac";
+  cls: "cld" | "bls" | "krs" | "mac" | "rvl";
   e: string;
   n: string;
   sub: string;
