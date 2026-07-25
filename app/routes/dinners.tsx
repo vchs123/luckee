@@ -1,4 +1,5 @@
 import { Form, useActionData, useNavigation } from "react-router";
+import { useEffect } from "react";
 import type { MetaFunction, ActionFunctionArgs } from "react-router";
 import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
@@ -81,6 +82,12 @@ export default function Dinners() {
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const submitting = navigation.state === "submitting";
+
+  useEffect(() => {
+    if (actionData?.success && typeof window !== "undefined" && (window as any).gtag) {
+      (window as any).gtag("event", "waitlist_signup", { event_category: "engagement" });
+    }
+  }, [actionData?.success]);
 
   return (
     <>
