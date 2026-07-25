@@ -43,7 +43,17 @@ export function DealCard({ deal: d }: { deal: Deal }) {
         </div>
       </div>
       <div className="dc-ft">
-        <a href={d.link} target="_blank" rel="noopener noreferrer" className="dc-cta">
+        <a
+          href={d.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="dc-cta"
+          onClick={() => {
+            if (typeof window !== "undefined" && (window as any).gtag) {
+              (window as any).gtag("event", "referral_click", { deal_name: d.n });
+            }
+          }}
+        >
           {d.cta}
         </a>
       </div>
