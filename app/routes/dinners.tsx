@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import type { MetaFunction, ActionFunctionArgs } from "react-router";
 import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
+import { MELBOURNE_SUBURBS } from "~/data/suburbs";
 
 export const meta: MetaFunction = () => [
   { title: "Community Dinners — Language-Matched Dining in Melbourne | Luckee" },
@@ -24,6 +25,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const suburb = form.get("suburb") as string;
   const dinnerLanguage = form.get("dinner_language") as string;
   const dietary = (form.get("dietary") as string) || null;
+  const ageGroup = (form.get("age_group") as string) || null;
+  const gender = (form.get("gender") as string) || null;
 
   if (!firstName || !lastName || !email || !suburb || !dinnerLanguage) {
     return { error: "Please fill in all required fields." };
@@ -42,6 +45,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
     suburb,
     dinner_language: dinnerLanguage,
     dietary,
+    age_group: ageGroup,
+    gender,
   });
 
   if (dbError?.code === "23505") {
@@ -66,12 +71,20 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   try {
     if (env.DISCORD_WEBHOOK_URL) {
+      const lines = [
+        `🍜 **New dinner signup!**`,
+        `**Name:** ${firstName} ${lastName}`,
+        `**Email:** ${email}`,
+        `**Language:** ${dinnerLanguage}`,
+        `**Suburb:** ${suburb}`,
+        ageGroup ? `**Age group:** ${ageGroup}` : null,
+        gender ? `**Gender:** ${gender}` : null,
+        dietary ? `**Dietary:** ${dietary}` : null,
+      ].filter(Boolean).join("\n");
       await fetch(env.DISCORD_WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content: `🍜 **New dinner signup!**\n**${firstName} ${lastName}** · ${dinnerLanguage} · ${suburb}${dietary ? ` · ${dietary}` : ""}`,
-        }),
+        body: JSON.stringify({ content: lines }),
       });
     }
   } catch { /* non-fatal */ }
@@ -137,9 +150,15 @@ export default function Dinners() {
                   </div>
                   <div className="fr">
                     <div className="fg"><label className="fl">Email</label><input className="fi" type="email" name="email" placeholder="you@example.com" required /></div>
-                    <div className="fg"><label className="fl">Melbourne suburb</label><input className="fi" type="text" name="suburb" placeholder="e.g. Fitzroy, Docklands" required /></div>
+                    <div className="fg">
+                      <label className="fl">Melbourne suburb</label>
+                      <input className="fi" type="text" name="suburb" placeholder="e.g. Fitzroy" list="melbourne-suburbs" required autoComplete="off" />
+                      <datalist id="melbourne-suburbs">
+                        {MELBOURNE_SUBURBS.map(s => <option key={s} value={s} />)}
+                      </datalist>
+                    </div>
                   </div>
-                  <div className="fr" style={{ marginBottom: 0 }}>
+                  <div className="fr">
                     <div className="fg">
                       <label className="fl">Preferred dinner language</label>
                       <select className="fs" name="dinner_language" required>
@@ -162,6 +181,30 @@ export default function Dinners() {
                         <option>No pork</option>
                         <option>No shellfish</option>
                         <option>Gluten-free</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="fr" style={{ marginBottom: 0 }}>
+                    <div className="fg">
+                      <label className="fl">Age group <span style={{ color: "var(--t3)", fontWeight: 400 }}>(optional)</span></label>
+                      <select className="fs" name="age_group">
+                        <option value="">Prefer not to say</option>
+                        <option>18–24</option>
+                        <option>25–34</option>
+                        <option>35–44</option>
+                        <option>45–54</option>
+                        <option>55–64</option>
+                        <option>65+</option>
+                      </select>
+                    </div>
+                    <div className="fg">
+                      <label className="fl">Gender <span style={{ color: "var(--t3)", fontWeight: 400 }}>(optional)</span></label>
+                      <select className="fs" name="gender">
+                        <option value="">Prefer not to say</option>
+                        <option>Woman</option>
+                        <option>Man</option>
+                        <option>Non-binary</option>
+                        <option>Other</option>
                       </select>
                     </div>
                   </div>

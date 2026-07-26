@@ -15,6 +15,7 @@ export default [
   route("about", "routes/about.tsx"),
   route("blog", "routes/blog._index.tsx"),
   route("blog/:slug", "routes/blog.$slug.tsx"),
+  route("api/track-click", "routes/api.track-click.tsx"),
   route("sitemap.xml", "routes/sitemap.xml.tsx"),
   route("robots.txt", "routes/robots.txt.tsx"),
 ] satisfies RouteConfig;
