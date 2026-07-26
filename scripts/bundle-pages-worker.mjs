@@ -1,4 +1,5 @@
 import { build } from 'esbuild';
+import { execSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { resolve, dirname } from 'node:path';
@@ -41,4 +42,17 @@ writeFileSync(
   JSON.stringify({ configPath: '../../wrangler.jsonc', auxiliaryWorkers: [] }),
 );
 
+// Write version.json for client-side update detection
+let version;
+try {
+  version = execSync('git rev-parse --short HEAD').toString().trim();
+} catch {
+  version = Date.now().toString();
+}
+writeFileSync(
+  resolve(root, 'build/client/version.json'),
+  JSON.stringify({ version }),
+);
+
 console.log('✓ Pages Worker bundled → build/client/_worker.js');
+console.log(`✓ version.json written → ${version}`);
