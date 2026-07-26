@@ -64,6 +64,18 @@ export async function action({ request, context }: ActionFunctionArgs) {
     console.error("Resend error (non-fatal):", e);
   }
 
+  try {
+    if (env.DISCORD_WEBHOOK_URL) {
+      await fetch(env.DISCORD_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: `🍜 **New dinner signup!**\n**${firstName} ${lastName}** · ${dinnerLanguage} · ${suburb}${dietary ? ` · ${dietary}` : ""}`,
+        }),
+      });
+    }
+  } catch { /* non-fatal */ }
+
   return { success: true };
 }
 

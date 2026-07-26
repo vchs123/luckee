@@ -52,6 +52,11 @@ export function DealCard({ deal: d }: { deal: Deal }) {
             if (typeof window !== "undefined" && (window as any).gtag) {
               (window as any).gtag("event", "referral_click", { deal_name: d.n });
             }
+            fetch("/api/track-click", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ deal_name: d.n }),
+            }).catch(() => {});
           }}
         >
           {d.cta}
