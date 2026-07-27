@@ -2,6 +2,22 @@ import { redirect } from "react-router";
 import type { User } from "@supabase/supabase-js";
 import { getSupabase, getSupabaseAnon } from "~/lib/supabase.server";
 
+// Custom storage adapter that persists PKCE code verifier across stateless Worker requests via a cookie.
+export class CookieStorage {
+  private data: Map<string, string>;
+  constructor(initial: Record<string, string> = {}) {
+    this.data = new Map(Object.entries(initial));
+  }
+  getItem(key: string): string | null { return this.data.get(key) ?? null; }
+  setItem(key: string, value: string): void { this.data.set(key, value); }
+  removeItem(key: string): void { this.data.delete(key); }
+  serialize(): string { return btoa(JSON.stringify(Object.fromEntries(this.data))); }
+  static from(cookie: string | null): CookieStorage {
+    if (!cookie) return new CookieStorage();
+    try { return new CookieStorage(JSON.parse(atob(cookie))); } catch { return new CookieStorage(); }
+  }
+}
+
 export function getCookie(request: Request, name: string): string | null {
   const header = request.headers.get("Cookie");
   if (!header) return null;

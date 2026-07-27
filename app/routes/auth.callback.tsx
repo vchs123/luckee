@@ -1,7 +1,7 @@
 import { redirect } from "react-router";
 import type { LoaderFunctionArgs } from "react-router";
-import { getSupabaseAnon, getSupabase } from "~/lib/supabase.server";
-import { authCookies, getCookie } from "~/lib/auth.server";
+import { getSupabaseAnonWithStorage, getSupabase } from "~/lib/supabase.server";
+import { authCookies, getCookie, CookieStorage } from "~/lib/auth.server";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -14,7 +14,10 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   if (!token_hash && !code) return redirect("/login?error=missing_code");
 
   try {
-    const supabase = getSupabaseAnon(env);
+    // Restore the PKCE code verifier from cookie so exchangeCodeForSession works in stateless Workers
+    const storage = CookieStorage.from(getCookie(request, "luckee_pkce"));
+    const supabase = getSupabaseAnonWithStorage(env, storage);
+
     let session = null;
     if (token_hash) {
       const { data, error } = await supabase.auth.verifyOtp({ token_hash, type });
@@ -25,7 +28,6 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       if (error || !data.session) return redirect("/login?error=auth_failed");
       session = data.session;
     }
-    if (!session) return redirect("/login?error=auth_failed");
 
     const adminSupabase = getSupabase(env);
     const { data: profile } = await adminSupabase
@@ -38,16 +40,16 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     authCookies(session.access_token, session.refresh_token!, session.expires_in ?? 3600, request)
       .forEach((c) => headers.append("Set-Cookie", c));
 
+    // Clear the PKCE cookie — it's single-use
+    headers.append("Set-Cookie", "luckee_pkce=; Path=/auth/callback; HttpOnly; SameSite=Lax; Max-Age=0");
+
     // Wire referral: if ref cookie present and this is a new user, store referred_by
     if (!profile) {
       const refUserId = getCookie(request, "luckee_ref");
       if (refUserId && refUserId !== session.user.id) {
-        // Will be applied in profile setup when the profile row is created
-        // Store temporarily in cookie so profile.setup.tsx can read it
         const isSecure = new URL(request.url).protocol === "https:";
         const secure = isSecure ? "; Secure" : "";
         headers.append("Set-Cookie", `luckee_ref_pending=${refUserId}; Path=/; HttpOnly; SameSite=Lax; Max-Age=3600${secure}`);
-        // Clear the public ref cookie
         headers.append("Set-Cookie", "luckee_ref=; Path=/; SameSite=Lax; Max-Age=0");
       }
     }

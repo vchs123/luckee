@@ -1,8 +1,9 @@
-import { Form, useActionData, useNavigation } from "react-router";
+import { data, Form, useActionData, useNavigation } from "react-router";
 import type { MetaFunction, ActionFunctionArgs } from "react-router";
 import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
-import { getSupabaseAnon } from "~/lib/supabase.server";
+import { getSupabaseAnonWithStorage } from "~/lib/supabase.server";
+import { CookieStorage } from "~/lib/auth.server";
 
 export const meta: MetaFunction = () => [
   { title: "Sign in — Luckee" },
@@ -20,14 +21,22 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 
   try {
-    const supabase = getSupabaseAnon(env);
+    const storage = new CookieStorage();
+    const supabase = getSupabaseAnonWithStorage(env, storage);
     const origin = new URL(request.url).origin;
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: `${origin}/auth/callback` },
     });
     if (error) return { error: error.message };
-    return { success: true, email };
+    // Store the PKCE code verifier in a short-lived cookie so the callback can exchange the code
+    const isSecure = new URL(request.url).protocol === "https:";
+    const headers = new Headers();
+    headers.append(
+      "Set-Cookie",
+      `luckee_pkce=${storage.serialize()}; Path=/auth/callback; HttpOnly; SameSite=Lax; Max-Age=600${isSecure ? "; Secure" : ""}`,
+    );
+    return data({ success: true, email }, { headers });
   } catch {
     return { error: "Service unavailable. Please try again." };
   }
