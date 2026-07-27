@@ -57,7 +57,7 @@ export default function Login() {
             <h1 className="auth-h">Sign in to Luckee</h1>
             <p className="auth-sub">Enter your email and we'll send you a magic link — no password needed.</p>
 
-            {actionData?.success ? (
+            {actionData && "success" in actionData ? (
               <div className="auth-sent">
                 <div className="auth-sent-ico">📬</div>
                 <h2>Check your inbox</h2>
@@ -76,7 +76,7 @@ export default function Login() {
               </div>
             ) : (
               <Form method="post" className="auth-form">
-                {actionData?.error && (
+                {actionData && "error" in actionData && (
                   <div className="wf-error">{actionData.error}</div>
                 )}
                 <div className="fg">
