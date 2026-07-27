@@ -7,14 +7,25 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const env = (context as any)?.cloudflare?.env as Env;
   const url = new URL(request.url);
+  const token_hash = url.searchParams.get("token_hash");
+  const type = (url.searchParams.get("type") ?? "email") as "email" | "magiclink";
   const code = url.searchParams.get("code");
 
-  if (!code) return redirect("/login?error=missing_code");
+  if (!token_hash && !code) return redirect("/login?error=missing_code");
 
   try {
     const supabase = getSupabaseAnon(env);
-    const { data: { session }, error } = await supabase.auth.exchangeCodeForSession(code);
-    if (error || !session) return redirect("/login?error=auth_failed");
+    let session = null;
+    if (token_hash) {
+      const { data, error } = await supabase.auth.verifyOtp({ token_hash, type });
+      if (error || !data.session) return redirect("/login?error=auth_failed");
+      session = data.session;
+    } else {
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code!);
+      if (error || !data.session) return redirect("/login?error=auth_failed");
+      session = data.session;
+    }
+    if (!session) return redirect("/login?error=auth_failed");
 
     const adminSupabase = getSupabase(env);
     const { data: profile } = await adminSupabase
