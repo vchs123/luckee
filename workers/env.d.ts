@@ -4,6 +4,7 @@
 interface Env {
   SUPABASE_URL: string;
   SUPABASE_SERVICE_KEY: string;
+  SUPABASE_ANON_KEY: string;
   RESEND_API_KEY: string;
   STRIPE_SECRET_KEY: string;
   DISCORD_WEBHOOK_URL: string;

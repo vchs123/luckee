@@ -6,7 +6,7 @@
     "build": "react-router build && node scripts/bundle-pages-worker.mjs",
     "dev": "react-router dev",
     "typecheck": "wrangler types && react-router typegen && tsc -b",
-    "deploy": "npm run build && wrangler deploy",
+    "deploy": "npm run build && wrangler pages deploy",
     "preview": "npm run build && vite preview",
     "cf-typegen": "wrangler types",
     "postinstall": "wrangler types"

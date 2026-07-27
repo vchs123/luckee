@@ -1,13 +1,14 @@
 "use client";
 import { useState } from "react";
-import { Link, useLocation } from "react-router";
+import { Link, useLocation, Form } from "react-router";
+import { useAuth } from "~/hooks/useAuth";
 
 export function Nav() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { pathname } = useLocation();
+  const { user, profile, isAdmin } = useAuth();
 
   const isFreebies = ["/freebies", "/freebies/birthday-freebies", "/freebies/sign-up-freebies", "/freebies/free-melbourne", "/freebies/events-calendar"].some(p => pathname.startsWith(p));
-
   const nlCls = (path: string) => `nl${pathname === path || (path === "/freebies" && isFreebies) ? " on" : ""}`;
 
   return (
@@ -30,9 +31,26 @@ export function Nav() {
             <Link to="/dinners" className={nlCls("/dinners")}>Dinners</Link>
             <Link to="/rewards" className={nlCls("/rewards")}>Rewards</Link>
             <Link to="/about" className={nlCls("/about")}>About</Link>
+            {isAdmin && <Link to="/admin" className={nlCls("/admin")} style={{ color: "var(--t3)", fontSize: 13 }}>Admin</Link>}
           </div>
           <div className="nav-r">
-            <Link to="/dinners" className="btn-pink">Join free</Link>
+            {user ? (
+              <div className="nav-user">
+                {profile && <Link to="/rewards" className="nav-pts">{profile.totalPoints} pts</Link>}
+                <div className="nd">
+                  <button className="nav-avatar">{(user.email?.[0] ?? "?").toUpperCase()}</button>
+                  <div className="nd-m nd-m-right">
+                    <Link to="/profile">My profile</Link>
+                    <Link to="/rewards">Rewards</Link>
+                    <Form method="post" action="/api/logout">
+                      <button type="submit" style={{ background: "none", border: "none", cursor: "pointer", font: "inherit", color: "inherit", width: "100%", textAlign: "left", padding: 0 }}>Sign out</button>
+                    </Form>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <Link to="/login" className="btn-pink">Sign in</Link>
+            )}
           </div>
           <button className="hamburger" onClick={() => setMobileOpen(o => !o)} aria-label="Menu">
             {mobileOpen ? "✕" : "☰"}
@@ -49,6 +67,16 @@ export function Nav() {
         <Link to="/dinners" onClick={() => setMobileOpen(false)}>Dinners</Link>
         <Link to="/rewards" onClick={() => setMobileOpen(false)}>Rewards</Link>
         <Link to="/about" onClick={() => setMobileOpen(false)}>About</Link>
+        {user ? (
+          <>
+            <Link to="/profile" onClick={() => setMobileOpen(false)}>My profile {profile ? `· ${profile.totalPoints} pts` : ""}</Link>
+            <Form method="post" action="/api/logout">
+              <button type="submit" className="ind" style={{ background: "none", border: "none", cursor: "pointer", font: "inherit", color: "inherit", width: "100%", textAlign: "left" }}>Sign out</button>
+            </Form>
+          </>
+        ) : (
+          <Link to="/login" onClick={() => setMobileOpen(false)}>Sign in</Link>
+        )}
       </div>
     </>
   );

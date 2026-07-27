@@ -15,7 +15,35 @@ export default [
   route("about", "routes/about.tsx"),
   route("blog", "routes/blog._index.tsx"),
   route("blog/:slug", "routes/blog.$slug.tsx"),
+
+  // Auth
+  route("login", "routes/login.tsx"),
+  route("auth/callback", "routes/auth.callback.tsx"),
+  route("profile/setup", "routes/profile.setup.tsx"),
+  route("profile", "routes/profile.tsx"),
+  route("r/:username", "routes/r.$username.tsx"),
+
+  // Admin
+  layout("routes/admin-layout.tsx", [
+    route("admin", "routes/admin.tsx"),
+    route("admin/users", "routes/admin.users.tsx"),
+    route("admin/users/:id", "routes/admin.users.$id.tsx"),
+    route("admin/trivia", "routes/admin.trivia.tsx"),
+    route("admin/trivia/new", "routes/admin.trivia.new.tsx"),
+    route("admin/trivia/:id", "routes/admin.trivia.$id.tsx"),
+    route("admin/proof", "routes/admin.proof.tsx"),
+    route("admin/proof/:id", "routes/admin.proof.$id.tsx"),
+  ]),
+
+  // API
+  route("api/logout", "routes/api.logout.tsx"),
+  route("api/spin", "routes/api.spin.tsx"),
+  route("api/trivia", "routes/api.trivia.tsx"),
+  route("api/award-points", "routes/api.award-points.tsx"),
+  route("api/proof", "routes/api.proof.tsx"),
+  route("api/proof/upload-url", "routes/api.proof.upload-url.tsx"),
   route("api/track-click", "routes/api.track-click.tsx"),
+
   route("sitemap.xml", "routes/sitemap.xml.tsx"),
   route("robots.txt", "routes/robots.txt.tsx"),
 ] satisfies RouteConfig;

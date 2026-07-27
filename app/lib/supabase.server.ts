@@ -9,3 +9,13 @@ export function getSupabase(env: Env) {
     auth: { persistSession: false },
   });
 }
+
+export function getSupabaseAnon(env: Env) {
+  const { SUPABASE_URL, SUPABASE_ANON_KEY } = env;
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error("Missing SUPABASE_URL or SUPABASE_ANON_KEY");
+  }
+  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: false },
+  });
+}

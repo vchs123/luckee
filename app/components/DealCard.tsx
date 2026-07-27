@@ -1,7 +1,9 @@
 import type { Deal } from "~/data/types";
 import { BLOSSOM_TIERS } from "~/data/deals";
+import { useAuth } from "~/hooks/useAuth";
 
 export function DealCard({ deal: d }: { deal: Deal }) {
+  const { user } = useAuth();
   return (
     <div className={`dc ${d.cls}`}>
       <div className="dc-s" />
@@ -57,6 +59,13 @@ export function DealCard({ deal: d }: { deal: Deal }) {
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ deal_name: d.n }),
             }).catch(() => {});
+            if (user) {
+              fetch("/api/award-points", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "deal_click", description: `Clicked ${d.n} deal` }),
+              }).catch(() => {});
+            }
           }}
         >
           {d.cta}
