@@ -63,6 +63,16 @@ export default function Login() {
                 <h2>Check your inbox</h2>
                 <p>We sent a sign-in link to <strong>{actionData.email}</strong>. It expires in 10 minutes.</p>
                 <p className="auth-sent-note">Can't find it? Check your spam folder.</p>
+                <Form method="post" style={{ marginTop: 16 }}>
+                  <input type="hidden" name="email" value={actionData.email} />
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    style={{ background: "none", border: "none", color: "var(--purple)", fontSize: 14, fontWeight: 600, cursor: "pointer", textDecoration: "underline", padding: 0 }}
+                  >
+                    {submitting ? "Sending…" : "Resend magic link"}
+                  </button>
+                </Form>
               </div>
             ) : (
               <Form method="post" className="auth-form">
