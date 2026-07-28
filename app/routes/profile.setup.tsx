@@ -77,11 +77,16 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const firstName = (form.get("first_name") as string)?.trim() || null;
     const lastName = (form.get("last_name") as string)?.trim() || null;
     const dob = (form.get("dob") as string) || null;
-    let mobile = (form.get("mobile") as string)?.trim().replace(/\s/g, "") || null;
-    if (mobile && !/^(\+61|0)[0-9]{9}$/.test(mobile)) {
-      return { error: "Mobile must be a valid Australian number (e.g. 0412 345 678).", step: "2" };
+    if (dob) {
+      const minDate = new Date();
+      minDate.setFullYear(minDate.getFullYear() - 18);
+      if (new Date(dob) > minDate) {
+        return { error: "You must be 18 or older to join Luckee.", step: "2" };
+      }
     }
-    if (mobile?.startsWith("0")) mobile = "+61" + mobile.slice(1);
+    const countryCode = (form.get("country_code") as string) || "+61";
+    const mobileRaw = (form.get("mobile_number") as string)?.trim().replace(/\s/g, "") || null;
+    const mobile = mobileRaw ? `${countryCode}${mobileRaw.replace(/^0/, "")}` : null;
     const { error } = await supabase
       .from("user_profiles")
       .update({ first_name: firstName, last_name: lastName, dob, mobile })
@@ -186,17 +191,28 @@ export default function ProfileSetup() {
                   <input type="hidden" name="step" value="2" />
                   {actionData?.error && <div className="wf-error">{actionData.error}</div>}
                   <div className="fr">
-                    <div className="fg"><label className="fl">First name</label><input className="fi" type="text" name="first_name" placeholder="Vanessa" /></div>
-                    <div className="fg"><label className="fl">Last name</label><input className="fi" type="text" name="last_name" placeholder="Chua" /></div>
+                    <div className="fg"><label className="fl">First name</label><input className="fi" type="text" name="first_name" placeholder="Jane" /></div>
+                    <div className="fg"><label className="fl">Last name</label><input className="fi" type="text" name="last_name" placeholder="Doe" /></div>
                   </div>
+                  <p className="field-hint">Use your legal name — must match ID for reward redemptions.</p>
                   <div className="fr">
                     <div className="fg">
                       <label className="fl">Date of birth</label>
-                      <input className="fi" type="date" name="dob" />
+                      <input className="fi" type="date" name="dob" max={(() => { const d = new Date(); d.setFullYear(d.getFullYear() - 18); return d.toISOString().slice(0, 10); })()} />
                     </div>
                     <div className="fg">
-                      <label className="fl">Mobile <span style={{ color: "var(--t3)", fontWeight: 400 }}>(AU)</span></label>
-                      <input className="fi" type="tel" name="mobile" placeholder="0412 345 678" />
+                      <label className="fl">Mobile</label>
+                      <div className="phone-wrap">
+                        <select className="fi phone-code" name="country_code" defaultValue="+61">
+                          <option value="+61">AU +61</option>
+                          <option value="+1">US +1</option>
+                          <option value="+44">UK +44</option>
+                          <option value="+64">NZ +64</option>
+                          <option value="+65">SG +65</option>
+                          <option value="+852">HK +852</option>
+                        </select>
+                        <input className="fi phone-num" type="tel" name="mobile_number" placeholder="412 345 678" />
+                      </div>
                     </div>
                   </div>
                   <button className="btn-pink auth-btn" type="submit" disabled={submitting}>

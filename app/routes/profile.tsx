@@ -32,16 +32,20 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const supabase = getSupabase(env);
   const form = await request.formData();
 
-  let mobile = (form.get("mobile") as string)?.trim().replace(/\s/g, "") || null;
-  if (mobile && !/^(\+61|0)[0-9]{9}$/.test(mobile)) {
-    return { error: "Mobile must be a valid Australian number." };
+  const dob = (form.get("dob") as string) || null;
+  if (dob) {
+    const minDate = new Date();
+    minDate.setFullYear(minDate.getFullYear() - 18);
+    if (new Date(dob) > minDate) return { error: "You must be 18 or older." };
   }
-  if (mobile?.startsWith("0")) mobile = "+61" + mobile.slice(1);
+  const countryCode = (form.get("country_code") as string) || "+61";
+  const mobileRaw = (form.get("mobile_number") as string)?.trim().replace(/\s/g, "") || null;
+  const mobile = mobileRaw ? `${countryCode}${mobileRaw.replace(/^0/, "")}` : null;
 
   const updates = {
     first_name: (form.get("first_name") as string)?.trim() || null,
     last_name: (form.get("last_name") as string)?.trim() || null,
-    dob: (form.get("dob") as string) || null,
+    dob,
     mobile,
     instagram: (form.get("instagram") as string)?.trim().replace(/^@/, "") || null,
     tiktok: (form.get("tiktok") as string)?.trim().replace(/^@/, "") || null,
@@ -113,15 +117,35 @@ export default function Profile() {
 
             <div className="fr">
               <div className="fg"><label className="fl">First name</label>
-                <input className="fi" type="text" name="first_name" defaultValue={profile.first_name ?? ""} placeholder="Vanessa" /></div>
+                <input className="fi" type="text" name="first_name" defaultValue={profile.first_name ?? ""} placeholder="Jane" /></div>
               <div className="fg"><label className="fl">Last name</label>
-                <input className="fi" type="text" name="last_name" defaultValue={profile.last_name ?? ""} placeholder="Chua" /></div>
+                <input className="fi" type="text" name="last_name" defaultValue={profile.last_name ?? ""} placeholder="Doe" /></div>
             </div>
+            <p className="field-hint">Use your legal name — must match ID for reward redemptions.</p>
             <div className="fr">
               <div className="fg"><label className="fl">Date of birth</label>
-                <input className="fi" type="date" name="dob" defaultValue={profile.dob ?? ""} /></div>
-              <div className="fg"><label className="fl">Mobile (AU)</label>
-                <input className="fi" type="tel" name="mobile" defaultValue={profile.mobile ?? ""} placeholder="0412 345 678" /></div>
+                <input className="fi" type="date" name="dob" defaultValue={profile.dob ?? ""} max={(() => { const d = new Date(); d.setFullYear(d.getFullYear() - 18); return d.toISOString().slice(0, 10); })()} /></div>
+              <div className="fg"><label className="fl">Mobile</label>
+                {(() => {
+                  const codes = ["+852", "+65", "+64", "+44", "+1", "+61"];
+                  const stored = profile.mobile ?? "";
+                  const code = codes.find(c => stored.startsWith(c)) ?? "+61";
+                  const num = stored.startsWith(code) ? stored.slice(code.length) : stored;
+                  return (
+                    <div className="phone-wrap">
+                      <select className="fi phone-code" name="country_code" defaultValue={code}>
+                        <option value="+61">AU +61</option>
+                        <option value="+1">US +1</option>
+                        <option value="+44">UK +44</option>
+                        <option value="+64">NZ +64</option>
+                        <option value="+65">SG +65</option>
+                        <option value="+852">HK +852</option>
+                      </select>
+                      <input className="fi phone-num" type="tel" name="mobile_number" defaultValue={num} placeholder="412 345 678" />
+                    </div>
+                  );
+                })()}
+              </div>
             </div>
 
             <h3 style={{ marginTop: 24 }}>Social handles</h3>

@@ -205,15 +205,19 @@ function SpinWheel({ hasSpunToday, initialPtsWon }: { hasSpunToday: boolean; ini
             style={{ background: conicGradient() }}
           >
             {SEGMENTS.map((s, i) => {
-              const start = i === 0 ? 0 : segDegrees[i - 1];
               const mid = segMid(i);
+              const rad = ((mid - 90) * Math.PI) / 180;
+              const r = 91; // label radius from wheel centre (280px wheel → 140px radius → 65%)
+              const x = 140 + r * Math.cos(rad);
+              const y = 140 + r * Math.sin(rad);
+              const fontSize = s.pct >= 15 ? 11 : s.pct >= 8 ? 9 : 7;
               return (
                 <div
                   key={s.pts}
                   className="spin-label"
-                  style={{ transform: `rotate(${mid}deg) translateY(-38%)`, transformOrigin: "center center" }}
+                  style={{ left: x, top: y, transform: `translate(-50%,-50%) rotate(${mid}deg)`, fontSize }}
                 >
-                  {s.label}
+                  {s.pts}
                 </div>
               );
             })}
@@ -390,10 +394,10 @@ function TriviaSection({
 
 // ── Proof upload section ───────────────────────────────────────────────────────
 const PROOF_ACTIONS = [
-  { value: "revolut_signup", label: "Revolut signup" },
-  { value: "dinner_attended", label: "Dinner attended" },
-  { value: "referral_signup", label: "Referred a friend (deal signup)" },
-  { value: "other", label: "Other" },
+  { value: "revolut_signup",  label: "Revolut signup",              hint: "up to 500 pts" },
+  { value: "dinner_attended", label: "Dinner attended",             hint: "25 pts" },
+  { value: "referral_signup", label: "Referred a friend (deal)",    hint: "150 pts to referrer" },
+  { value: "other",           label: "Other",                       hint: "" },
 ];
 
 type ProofSub = {
@@ -468,7 +472,7 @@ function ProofSection({ submissions }: { submissions: ProofSub[] }) {
     <div className="proof-section">
       <div className="proof-header">
         <h3>Proof submissions</h3>
-        <button className="btn-pink" onClick={() => setShowForm((s) => !s)} style={{ fontSize: 13, padding: "6px 14px" }}>
+        <button className="btn-pink" onClick={() => { if (showForm) { setShowForm(false); setFiles([]); } else setShowForm(true); }} style={{ fontSize: 13, padding: "6px 14px" }}>
           {showForm ? "Cancel" : "+ Submit proof"}
         </button>
       </div>
@@ -481,7 +485,7 @@ function ProofSection({ submissions }: { submissions: ProofSub[] }) {
             <label className="fl">Action type</label>
             <select className="fs" name="action" required>
               <option value="">Select action…</option>
-              {PROOF_ACTIONS.map((a) => <option key={a.value} value={a.value}>{a.label}</option>)}
+              {PROOF_ACTIONS.map((a) => <option key={a.value} value={a.value}>{a.label}{a.hint ? ` — ${a.hint}` : ""}</option>)}
             </select>
           </div>
           <div className="fg">
@@ -492,10 +496,23 @@ function ProofSection({ submissions }: { submissions: ProofSub[] }) {
             <label className="fl">Screenshots (up to 6)</label>
             <input
               type="file" accept="image/*" multiple
-              onChange={(e) => setFiles(Array.from(e.target.files ?? []).slice(0, 6))}
+              onChange={(e) => {
+                const picked = Array.from(e.target.files ?? []);
+                setFiles(prev => [...prev, ...picked].slice(0, 6));
+                e.target.value = "";
+              }}
               className="fi"
             />
-            {files.length > 0 && <p style={{ fontSize: 12, color: "var(--t3)", marginTop: 4 }}>{files.length} file{files.length > 1 ? "s" : ""} selected</p>}
+            {files.length > 0 && (
+              <div className="proof-preview-grid">
+                {files.map((f, i) => (
+                  <div key={i} className="proof-preview-item">
+                    <img src={URL.createObjectURL(f)} alt={f.name} />
+                    <button type="button" className="proof-preview-del" onClick={() => setFiles(prev => prev.filter((_, idx) => idx !== i))}>✕</button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <button className="wf-btn" type="submit" disabled={uploading}>
             {uploading ? "Uploading…" : "Submit for review"}
