@@ -45,8 +45,16 @@ export async function action({ request, context }: ActionFunctionArgs) {
       .eq("username", username)
       .maybeSingle();
     if (existing) return { error: "That username is taken. Try another.", step: "1" };
-    // Wire referral if present
-    const refUserId = getCookie(request, "luckee_ref_pending");
+    // Wire referral: cookie takes priority, then manual code field
+    let refUserId: string | null = getCookie(request, "luckee_ref_pending");
+    if (!refUserId) {
+      const referralCode = (form.get("referral_code") as string)?.trim().toLowerCase();
+      if (referralCode) {
+        const { data: refProfile } = await supabase
+          .from("user_profiles").select("id").eq("username", referralCode).maybeSingle();
+        if (refProfile && refProfile.id !== user.id) refUserId = refProfile.id;
+      }
+    }
     const insertData: Record<string, unknown> = { id: user.id, username };
     if (refUserId && refUserId !== user.id) insertData.referred_by = refUserId;
 
@@ -175,6 +183,10 @@ export default function ProfileSetup() {
                       pattern="[a-z0-9_]{3,30}" minLength={3} maxLength={30} required autoFocus
                       style={{ textTransform: "lowercase" }} />
                     <p style={{ fontSize: 12, color: "var(--t3)", marginTop: 4 }}>3–30 characters · letters, numbers, underscores</p>
+                  </div>
+                  <div className="fg">
+                    <label className="fl">Referral code <span style={{ color: "var(--t3)", fontWeight: 400 }}>(optional)</span></label>
+                    <input className="fi" type="text" name="referral_code" placeholder="Friend's username" style={{ textTransform: "lowercase" }} />
                   </div>
                   <button className="btn-pink auth-btn" type="submit" disabled={submitting}>
                     {submitting ? "Checking…" : "Continue →"}

@@ -54,6 +54,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       }
     }
 
+    if (session.user.email === "luckee.app@gmail.com") return redirect("/admin", { headers });
     return redirect(profile ? "/rewards" : "/profile/setup", { headers });
   } catch {
     return redirect("/login?error=auth_failed");
