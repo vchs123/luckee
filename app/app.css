@@ -502,6 +502,7 @@ img { max-width: 100%; }
 .ledger-desc { font-size: 14px; font-weight: 600; color: var(--t1); }
 .ledger-date { font-size: 11px; color: var(--t3); margin-top: 2px; }
 .ledger-pts { font-size: 15px; font-weight: 800; color: var(--sgn); }
+.ledger-ref { font-size: 10px; color: var(--t3); font-family: monospace; margin-top: 1px; letter-spacing: 0.04em; }
 
 /* ── proof section ── */
 .proof-section { background: var(--card); border: 1px solid var(--cb); border-radius: var(--r); padding: 24px; box-shadow: var(--cs); }
@@ -520,6 +521,9 @@ img { max-width: 100%; }
 .proof-badge.pending { background: #fef3c7; color: #92400e; }
 .proof-badge.approved { background: var(--sb); color: #15803d; }
 .proof-badge.rejected { background: #fee2e2; color: #dc2626; }
+.proof-ref { font-size: 10px; color: var(--t3); font-family: monospace; margin-top: 4px; letter-spacing: 0.04em; }
+.fi-locked { background: #f5f3f7; color: var(--t2); cursor: not-allowed; border: 1px solid var(--cb); border-radius: var(--rs); padding: 9px 12px; font-size: 14px; }
+.field-locked { font-size: 10px; font-weight: 700; color: var(--t3); background: #f0edf8; padding: 2px 6px; border-radius: 4px; margin-left: 6px; letter-spacing: 0.04em; text-transform: uppercase; }
 
 /* ── earn grid ── */
 .earn-grid { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--cb); border-radius: var(--r); overflow: hidden; max-width: 560px; }

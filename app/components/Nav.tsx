@@ -43,7 +43,7 @@ export function Nav() {
                     <Link to="/profile">My profile</Link>
                     <Link to="/rewards">Rewards</Link>
                     <Form method="post" action="/api/logout">
-                      <button type="submit" style={{ background: "none", border: "none", cursor: "pointer", font: "inherit", color: "inherit", width: "100%", textAlign: "left", padding: 0 }}>Sign out</button>
+                      <button type="submit"><span>🚪</span> Sign out</button>
                     </Form>
                   </div>
                 </div>
@@ -71,7 +71,7 @@ export function Nav() {
           <>
             <Link to="/profile" onClick={() => setMobileOpen(false)}>My profile {profile ? `· ${profile.totalPoints} pts` : ""}</Link>
             <Form method="post" action="/api/logout">
-              <button type="submit" className="ind" style={{ background: "none", border: "none", cursor: "pointer", font: "inherit", color: "inherit", width: "100%", textAlign: "left" }}>Sign out</button>
+              <button type="submit" className="ind"><span>🚪</span> Sign out</button>
             </Form>
           </>
         ) : (

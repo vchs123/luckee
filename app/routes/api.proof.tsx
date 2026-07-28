@@ -10,11 +10,13 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   let proofAction: string;
   let description: string | undefined;
+  let ledgerEntryId: string | null;
   let filePaths: string[];
   try {
-    const body = await request.json() as { action: string; description?: string; filePaths: string[] };
+    const body = await request.json() as { action: string; description?: string; ledgerEntryId?: string | null; filePaths: string[] };
     proofAction = body.action;
     description = body.description;
+    ledgerEntryId = body.ledgerEntryId ?? null;
     filePaths = body.filePaths;
     if (!proofAction || !filePaths?.length) throw new Error();
   } catch {
@@ -31,6 +33,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     description: description ?? null,
     file_paths: filePaths,
     status: "pending",
+    ledger_entry_id: ledgerEntryId,
   });
 
   if (error) return Response.json({ ok: false, error: "Failed to save submission" }, { status: 500 });

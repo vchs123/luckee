@@ -216,7 +216,7 @@ export default function ProfileSetup() {
                     </div>
                   </div>
                   <button className="btn-pink auth-btn" type="submit" disabled={submitting}>
-                    {submitting ? "Saving…" : "Continue ���"}
+                    {submitting ? "Saving…" : "Continue →"}
                   </button>
                   <a href="/profile/setup?step=3" className="setup-skip">Skip for now</a>
                 </Form>

@@ -115,38 +115,63 @@ export default function Profile() {
             )}
             {actionData?.error && <div className="wf-error">{actionData.error}</div>}
 
-            <div className="fr">
-              <div className="fg"><label className="fl">First name</label>
-                <input className="fi" type="text" name="first_name" defaultValue={profile.first_name ?? ""} placeholder="Jane" /></div>
-              <div className="fg"><label className="fl">Last name</label>
-                <input className="fi" type="text" name="last_name" defaultValue={profile.last_name ?? ""} placeholder="Doe" /></div>
-            </div>
-            <p className="field-hint">Use your legal name — must match ID for reward redemptions.</p>
-            <div className="fr">
-              <div className="fg"><label className="fl">Date of birth</label>
-                <input className="fi" type="date" name="dob" defaultValue={profile.dob ?? ""} max={(() => { const d = new Date(); d.setFullYear(d.getFullYear() - 18); return d.toISOString().slice(0, 10); })()} /></div>
-              <div className="fg"><label className="fl">Mobile</label>
-                {(() => {
-                  const codes = ["+852", "+65", "+64", "+44", "+1", "+61"];
-                  const stored = profile.mobile ?? "";
-                  const code = codes.find(c => stored.startsWith(c)) ?? "+61";
-                  const num = stored.startsWith(code) ? stored.slice(code.length) : stored;
-                  return (
-                    <div className="phone-wrap">
-                      <select className="fi phone-code" name="country_code" defaultValue={code}>
-                        <option value="+61">AU +61</option>
-                        <option value="+1">US +1</option>
-                        <option value="+44">UK +44</option>
-                        <option value="+64">NZ +64</option>
-                        <option value="+65">SG +65</option>
-                        <option value="+852">HK +852</option>
-                      </select>
-                      <input className="fi phone-num" type="tel" name="mobile_number" defaultValue={num} placeholder="412 345 678" />
+            {(() => {
+              const codes = ["+852", "+65", "+64", "+44", "+1", "+61"];
+              const stored = profile.mobile ?? "";
+              const mCode = codes.find(c => stored.startsWith(c)) ?? "+61";
+              const mNum = stored.startsWith(mCode) ? stored.slice(mCode.length) : stored;
+              return (
+                <>
+                  <div className="fr">
+                    <div className="fg">
+                      <label className="fl">First name {profile.first_name ? <span className="field-locked">Locked</span> : null}</label>
+                      {profile.first_name ? (
+                        <><div className="fi fi-locked">{profile.first_name}</div><input type="hidden" name="first_name" value={profile.first_name} /></>
+                      ) : (
+                        <input className="fi" type="text" name="first_name" defaultValue="" placeholder="Jane" />
+                      )}
                     </div>
-                  );
-                })()}
-              </div>
-            </div>
+                    <div className="fg">
+                      <label className="fl">Last name {profile.last_name ? <span className="field-locked">Locked</span> : null}</label>
+                      {profile.last_name ? (
+                        <><div className="fi fi-locked">{profile.last_name}</div><input type="hidden" name="last_name" value={profile.last_name} /></>
+                      ) : (
+                        <input className="fi" type="text" name="last_name" defaultValue="" placeholder="Doe" />
+                      )}
+                    </div>
+                  </div>
+                  <p className="field-hint">Use your legal name — must match ID for reward redemptions.</p>
+                  <div className="fr">
+                    <div className="fg">
+                      <label className="fl">Date of birth {profile.dob ? <span className="field-locked">Locked</span> : null}</label>
+                      {profile.dob ? (
+                        <><div className="fi fi-locked">{new Date(profile.dob + "T00:00:00").toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })}</div><input type="hidden" name="dob" value={profile.dob} /></>
+                      ) : (
+                        <input className="fi" type="date" name="dob" defaultValue="" max={(() => { const d = new Date(); d.setFullYear(d.getFullYear() - 18); return d.toISOString().slice(0, 10); })()} />
+                      )}
+                    </div>
+                    <div className="fg">
+                      <label className="fl">Mobile {profile.mobile ? <span className="field-locked">Locked</span> : null}</label>
+                      {profile.mobile ? (
+                        <><div className="fi fi-locked">{mCode} {mNum}</div><input type="hidden" name="country_code" value={mCode} /><input type="hidden" name="mobile_number" value={mNum} /></>
+                      ) : (
+                        <div className="phone-wrap">
+                          <select className="fi phone-code" name="country_code" defaultValue="+61">
+                            <option value="+61">AU +61</option>
+                            <option value="+1">US +1</option>
+                            <option value="+44">UK +44</option>
+                            <option value="+64">NZ +64</option>
+                            <option value="+65">SG +65</option>
+                            <option value="+852">HK +852</option>
+                          </select>
+                          <input className="fi phone-num" type="tel" name="mobile_number" defaultValue="" placeholder="412 345 678" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
 
             <h3 style={{ marginTop: 24 }}>Social handles</h3>
             {[

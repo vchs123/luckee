@@ -92,14 +92,14 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
 // ── Spin wheel config ──────────────────────────────────────────────────────────
 const SEGMENTS = [
-  { pts: 10,  pct: 35, color: "#fbbf24", label: "10 pts"  },
-  { pts: 15,  pct: 25, color: "#e91e8c", label: "15 pts"  },
-  { pts: 20,  pct: 15, color: "#7c3aed", label: "20 pts"  },
-  { pts: 25,  pct: 10, color: "#0d9488", label: "25 pts"  },
-  { pts: 50,  pct: 8,  color: "#f97316", label: "50 pts"  },
-  { pts: 100, pct: 4,  color: "#16a34a", label: "100 pts" },
-  { pts: 200, pct: 2,  color: "#3b82f6", label: "200 pts" },
-  { pts: 500, pct: 1,  color: "#dc2626", label: "500 pts" },
+  { pts: 10,  pct: 12.5, color: "#fbbf24" },
+  { pts: 15,  pct: 12.5, color: "#e91e8c" },
+  { pts: 20,  pct: 12.5, color: "#7c3aed" },
+  { pts: 25,  pct: 12.5, color: "#0d9488" },
+  { pts: 50,  pct: 12.5, color: "#f97316" },
+  { pts: 100, pct: 12.5, color: "#16a34a" },
+  { pts: 200, pct: 12.5, color: "#3b82f6" },
+  { pts: 500, pct: 12.5, color: "#dc2626" },
 ];
 
 // Cumulative degrees for each segment boundary
@@ -210,7 +210,7 @@ function SpinWheel({ hasSpunToday, initialPtsWon }: { hasSpunToday: boolean; ini
               const r = 91; // label radius from wheel centre (280px wheel → 140px radius → 65%)
               const x = 140 + r * Math.cos(rad);
               const y = 140 + r * Math.sin(rad);
-              const fontSize = s.pct >= 15 ? 11 : s.pct >= 8 ? 9 : 7;
+              const fontSize = 11;
               return (
                 <div
                   key={s.pts}
@@ -404,10 +404,12 @@ type ProofSub = {
   id: string; action: string; description?: string | null;
   status: string; created_at: string;
   points_awarded?: number | null; admin_note?: string | null;
-  file_paths?: string[];
+  file_paths?: string[]; ledger_entry_id?: string | null;
 };
 
-function ProofSection({ submissions }: { submissions: ProofSub[] }) {
+type LedgerEntry = { id: string; action: string; description?: string | null; points: number; created_at: string };
+
+function ProofSection({ submissions, ledger }: { submissions: ProofSub[]; ledger: LedgerEntry[] }) {
   const fetcher = useFetcher<{ ok: boolean; error?: string }>();
   const urlFetcher = useFetcher<{ uploads: { signedUrl: string; path: string }[] }>();
   const revalidator = useRevalidator();
@@ -426,6 +428,7 @@ function ProofSection({ submissions }: { submissions: ProofSub[] }) {
       const form = new FormData(e.currentTarget);
       const action = form.get("action") as string;
       const description = form.get("description") as string;
+      const ledgerEntryId = (form.get("ledger_entry_id") as string) || null;
 
       // Get signed upload URLs
       const urlRes = await fetch("/api/proof/upload-url", {
@@ -447,7 +450,7 @@ function ProofSection({ submissions }: { submissions: ProofSub[] }) {
       const submitRes = await fetch("/api/proof", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action, description, filePaths: uploads.map((u) => u.path) }),
+        body: JSON.stringify({ action, description, ledgerEntryId, filePaths: uploads.map((u) => u.path) }),
       });
       const result = await submitRes.json() as { ok: boolean; error?: string };
       if (!result.ok) throw new Error(result.error ?? "Submit failed");
@@ -492,6 +495,19 @@ function ProofSection({ submissions }: { submissions: ProofSub[] }) {
             <label className="fl">Description <span style={{ color: "var(--t3)", fontWeight: 400 }}>(optional)</span></label>
             <input className="fi" type="text" name="description" placeholder="Any extra context…" />
           </div>
+          {ledger.length > 0 && (
+            <div className="fg">
+              <label className="fl">Related activity <span style={{ color: "var(--t3)", fontWeight: 400 }}>(optional)</span></label>
+              <select className="fs" name="ledger_entry_id">
+                <option value="">None</option>
+                {ledger.map(e => (
+                  <option key={e.id} value={e.id}>
+                    #{e.id.slice(0, 8).toUpperCase()} — {e.description ?? e.action} (+{e.points} pts · {new Date(e.created_at).toLocaleDateString("en-AU")})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <div className="fg">
             <label className="fl">Screenshots (up to 6)</label>
             <input
@@ -530,6 +546,7 @@ function ProofSection({ submissions }: { submissions: ProofSub[] }) {
                 <p className="proof-action">{PROOF_ACTIONS.find((a) => a.value === s.action)?.label ?? s.action as string}</p>
                 {s.description && <p className="proof-desc">{s.description as string}</p>}
                 <p className="proof-date">{new Date(s.created_at as string).toLocaleDateString("en-AU")}</p>
+                {s.ledger_entry_id && <p className="proof-ref">Ref: #{(s.ledger_entry_id as string).slice(0, 8).toUpperCase()}</p>}
               </div>
               <div style={{ textAlign: "right" }}>
                 {statusBadge(s.status as string)}
@@ -622,6 +639,7 @@ export default function Rewards() {
                   <span className="ledger-ico">{ACTION_ICONS[entry.action] ?? "⭐"}</span>
                   <div className="ledger-info">
                     <p className="ledger-desc">{entry.description ?? entry.action}</p>
+                    <p className="ledger-ref">#{entry.id.slice(0, 8).toUpperCase()}</p>
                     <p className="ledger-date">{new Date(entry.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}</p>
                   </div>
                   <span className="ledger-pts">+{entry.points}</span>
@@ -635,7 +653,7 @@ export default function Rewards() {
         <section className="rewards-sec">
           <h2 className="rewards-sec-h">📸 Proof submissions</h2>
           <p className="rewards-sec-sub">Submit screenshots to earn points for actions that need verification.</p>
-          <ProofSection submissions={proofSubmissions} />
+          <ProofSection submissions={proofSubmissions} ledger={ledger} />
         </section>
 
         {/* How to earn */}
