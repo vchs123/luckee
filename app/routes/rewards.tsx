@@ -409,14 +409,24 @@ type ProofSub = {
 
 type LedgerEntry = { id: string; action: string; description?: string | null; points: number; created_at: string };
 
+const LEDGER_TO_PROOF_ACTION: Record<string, string> = {
+  dinner_attended: "dinner_attended",
+  referral_deal: "referral_signup",
+  referral_account: "referral_signup",
+};
+
 function ProofSection({ submissions, ledger }: { submissions: ProofSub[]; ledger: LedgerEntry[] }) {
   const fetcher = useFetcher<{ ok: boolean; error?: string }>();
   const urlFetcher = useFetcher<{ uploads: { signedUrl: string; path: string }[] }>();
   const revalidator = useRevalidator();
   const [showForm, setShowForm] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
+  const [selectedLedgerId, setSelectedLedgerId] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const selectedEntry = ledger.find(e => e.id === selectedLedgerId) ?? null;
+  const derivedAction = selectedEntry ? (LEDGER_TO_PROOF_ACTION[selectedEntry.action] ?? "other") : "other";
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -475,7 +485,7 @@ function ProofSection({ submissions, ledger }: { submissions: ProofSub[]; ledger
     <div className="proof-section">
       <div className="proof-header">
         <h3>Proof submissions</h3>
-        <button className="btn-pink" onClick={() => { if (showForm) { setShowForm(false); setFiles([]); } else setShowForm(true); }} style={{ fontSize: 13, padding: "6px 14px" }}>
+        <button className="btn-pink" onClick={() => { if (showForm) { setShowForm(false); setFiles([]); setSelectedLedgerId(""); } else setShowForm(true); }} style={{ fontSize: 13, padding: "6px 14px" }}>
           {showForm ? "Cancel" : "+ Submit proof"}
         </button>
       </div>
@@ -485,29 +495,21 @@ function ProofSection({ submissions, ledger }: { submissions: ProofSub[]; ledger
           <p className="wf-sub">Upload screenshots to claim points for completed actions.</p>
           {uploadError && <div className="wf-error">{uploadError}</div>}
           <div className="fg">
-            <label className="fl">Action type</label>
-            <select className="fs" name="action" required>
-              <option value="">Select action…</option>
-              {PROOF_ACTIONS.map((a) => <option key={a.value} value={a.value}>{a.label}{a.hint ? ` — ${a.hint}` : ""}</option>)}
+            <label className="fl">Related activity</label>
+            <select className="fs" name="ledger_entry_id" value={selectedLedgerId} onChange={e => setSelectedLedgerId(e.target.value)}>
+              <option value="">Select an activity…</option>
+              {ledger.map(e => (
+                <option key={e.id} value={e.id}>
+                  #{e.id.slice(0, 8).toUpperCase()} — {e.description ?? e.action} (+{e.points} pts · {new Date(e.created_at).toLocaleDateString("en-AU")})
+                </option>
+              ))}
             </select>
+            <input type="hidden" name="action" value={derivedAction} />
           </div>
           <div className="fg">
             <label className="fl">Description <span style={{ color: "var(--t3)", fontWeight: 400 }}>(optional)</span></label>
             <input className="fi" type="text" name="description" placeholder="Any extra context…" />
           </div>
-          {ledger.length > 0 && (
-            <div className="fg">
-              <label className="fl">Related activity <span style={{ color: "var(--t3)", fontWeight: 400 }}>(optional)</span></label>
-              <select className="fs" name="ledger_entry_id">
-                <option value="">None</option>
-                {ledger.map(e => (
-                  <option key={e.id} value={e.id}>
-                    #{e.id.slice(0, 8).toUpperCase()} — {e.description ?? e.action} (+{e.points} pts · {new Date(e.created_at).toLocaleDateString("en-AU")})
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
           <div className="fg">
             <label className="fl">Screenshots (up to 6)</label>
             <input

@@ -79,8 +79,10 @@ export async function refreshAndGetUser(
 
 export async function requireAuth(request: Request, env: Env): Promise<User> {
   const user = await verifyUser(request, env);
-  if (!user) throw redirect("/login");
-  return user;
+  if (user) return user;
+  const refreshed = await refreshAndGetUser(request, env);
+  if (refreshed) return refreshed.user;
+  throw redirect("/login");
 }
 
 export async function requireAdmin(request: Request, env: Env): Promise<User> {
