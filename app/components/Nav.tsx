@@ -1,15 +1,26 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useLocation, Form } from "react-router";
 import { useAuth } from "~/hooks/useAuth";
 
 export function Nav() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
   const { pathname } = useLocation();
   const { user, profile, isAdmin } = useAuth();
 
   const isFreebies = ["/freebies", "/freebies/birthday-freebies", "/freebies/sign-up-freebies", "/freebies/free-melbourne", "/freebies/events-calendar"].some(p => pathname.startsWith(p));
   const nlCls = (path: string) => `nl${pathname === path || (path === "/freebies" && isFreebies) ? " on" : ""}`;
+
+  useEffect(() => {
+    if (!profileOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (!profileRef.current?.contains(e.target as Node)) setProfileOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [profileOpen]);
 
   return (
     <>
@@ -37,15 +48,25 @@ export function Nav() {
             {user ? (
               <div className="nav-user">
                 {profile && <Link to="/rewards" className="nav-pts">{profile.totalPoints} pts</Link>}
-                <div className="nd">
-                  <button className="nav-avatar">{(user.email?.[0] ?? "?").toUpperCase()}</button>
-                  <div className="nd-m nd-m-right">
-                    <Link to="/profile">My profile</Link>
-                    <Link to="/rewards">Rewards</Link>
-                    <Form method="post" action="/api/logout">
-                      <button type="submit"><span>🚪</span> Sign out</button>
-                    </Form>
-                  </div>
+                <div className="nd" ref={profileRef}>
+                  <button className="nav-avatar" onClick={() => setProfileOpen(o => !o)}>
+                    {(user.email?.[0] ?? "?").toUpperCase()}
+                  </button>
+                  {profileOpen && (
+                    <div className="nd-m nd-m-right">
+                      {isAdmin ? (
+                        <Link to="/admin" onClick={() => setProfileOpen(false)}><span>⚙️</span> Admin dashboard</Link>
+                      ) : (
+                        <>
+                          <Link to="/profile" onClick={() => setProfileOpen(false)}><span>👤</span> My profile</Link>
+                          <Link to="/rewards" onClick={() => setProfileOpen(false)}><span>⭐</span> Rewards</Link>
+                        </>
+                      )}
+                      <Form method="post" action="/api/logout">
+                        <button type="submit" onClick={() => setProfileOpen(false)}><span>🚪</span> Sign out</button>
+                      </Form>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
@@ -69,7 +90,11 @@ export function Nav() {
         <Link to="/about" onClick={() => setMobileOpen(false)}>About</Link>
         {user ? (
           <>
-            <Link to="/profile" onClick={() => setMobileOpen(false)}>My profile {profile ? `· ${profile.totalPoints} pts` : ""}</Link>
+            {isAdmin ? (
+              <Link to="/admin" onClick={() => setMobileOpen(false)}>Admin dashboard</Link>
+            ) : (
+              <Link to="/profile" onClick={() => setMobileOpen(false)}>My profile {profile ? `· ${profile.totalPoints} pts` : ""}</Link>
+            )}
             <Form method="post" action="/api/logout">
               <button type="submit" className="ind"><span>🚪</span> Sign out</button>
             </Form>

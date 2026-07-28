@@ -95,6 +95,7 @@ img { max-width: 100%; }
 .nl { background: none; border: none; padding: 7px 13px; font-size: 13.5px; font-weight: 700; color: var(--t2); border-radius: var(--rs); transition: all 0.18s; cursor: pointer; }
 .nl:hover, .nl.on { color: var(--pink); background: var(--pm); }
 .nd { position: relative; }
+.nd::after { content: ""; position: absolute; bottom: -6px; left: 0; right: 0; height: 6px; }
 .nd-m { display: none; position: absolute; top: calc(100% + 6px); left: 0; background: white; border: 1px solid var(--cb); border-radius: var(--rs); box-shadow: var(--cs); padding: 8px; min-width: 210px; z-index: 200; }
 .nd:hover .nd-m { display: block; }
 .nd-m a, .nd-m button { display: flex; align-items: center; gap: 8px; padding: 9px 12px; font-size: 13px; font-weight: 700; color: var(--t2); border-radius: 9px; transition: all 0.15s; width: 100%; text-align: left; background: none; border: none; cursor: pointer; font-family: inherit; }
@@ -418,7 +419,7 @@ img { max-width: 100%; }
 .social-tick { color: var(--sgn); font-weight: 800; font-size: 16px; }
 
 /* ── profile page ── */
-.profile-grid { display: grid; grid-template-columns: 300px 1fr; gap: 24px; align-items: start; }
+.profile-grid { display: block; max-width: 680px; margin: 0 auto; }
 .profile-card { background: var(--card); border: 1px solid var(--cb); border-radius: var(--r); padding: 24px; box-shadow: var(--cs); }
 .profile-email-row { display: flex; align-items: center; gap: 14px; }
 .profile-avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--pink); color: #fff; font-size: 20px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }

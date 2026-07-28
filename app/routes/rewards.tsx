@@ -32,6 +32,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = (context as any)?.cloudflare?.env as Env;
   const user = await verifyUser(request, env);
   if (!user) return redirect("/login");
+  if (user.email === "luckee.app@gmail.com") return redirect("/admin");
 
   const supabase = getSupabase(env);
   const today = todayDate();

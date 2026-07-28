@@ -16,6 +16,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const env = (context as any)?.cloudflare?.env as Env;
   const user = await requireAuth(request, env);
+  if (user.email === "luckee.app@gmail.com") return redirect("/admin");
   const supabase = getSupabase(env);
   const { data: profile } = await supabase
     .from("user_profiles")
@@ -121,16 +122,13 @@ export default function Profile() {
 
         <div className="profile-grid">
           <div className="profile-card">
-            <div className="profile-email-row">
+            <div className="profile-email-row" style={{ marginBottom: 20, paddingBottom: 20, borderBottom: "1px solid var(--cb)" }}>
               <span className="profile-avatar">{profile.first_name?.[0] ?? email[0].toUpperCase()}</span>
               <div>
                 <p className="profile-uname">@{profile.username}</p>
                 <p className="profile-email">{email}</p>
               </div>
             </div>
-          </div>
-
-          <div className="wf profile-form">
             <div className="profile-tabs">
               <button className={`profile-tab${tab === "profile" ? " active" : ""}`} onClick={() => setTab("profile")}>Profile</button>
               <button className={`profile-tab${tab === "referral" ? " active" : ""}`} onClick={() => setTab("referral")}>Referral</button>
