@@ -12,10 +12,16 @@ export async function loader({ request, context, params }: LoaderFunctionArgs) {
 
   const { data: submission } = await supabase
     .from("proof_submissions")
-    .select("*, user_profiles(username, first_name, last_name, total_points, referred_by)")
+    .select("*")
     .eq("id", params.id)
     .single();
   if (!submission) throw new Response("Not found", { status: 404 });
+
+  const { data: userProfile } = await supabase
+    .from("user_profiles")
+    .select("username, first_name, last_name, total_points, referred_by")
+    .eq("id", submission.user_id)
+    .single();
 
   // Get signed download URLs for each file
   const filePaths = (submission.file_paths as string[]) ?? [];
@@ -28,7 +34,7 @@ export async function loader({ request, context, params }: LoaderFunctionArgs) {
     }),
   );
 
-  return { submission, signedUrls };
+  return { submission, userProfile, signedUrls };
 }
 
 export async function action({ request, context, params }: ActionFunctionArgs) {
@@ -57,12 +63,16 @@ export async function action({ request, context, params }: ActionFunctionArgs) {
     // Load submission to get user_id and action
     const { data: sub } = await supabase
       .from("proof_submissions")
-      .select("user_id, action, user_profiles(total_points, referred_by)")
+      .select("user_id, action")
       .eq("id", params.id)
       .single();
     if (!sub) return { error: "Submission not found." };
 
-    const profile = (sub as Record<string, unknown>).user_profiles as { total_points: number; referred_by: string | null } | null;
+    const { data: profile } = await supabase
+      .from("user_profiles")
+      .select("total_points, referred_by")
+      .eq("id", sub.user_id)
+      .single();
     const currentPts = profile?.total_points ?? 0;
     const newPts = currentPts + pts;
 
@@ -106,11 +116,10 @@ export async function action({ request, context, params }: ActionFunctionArgs) {
 }
 
 export default function AdminProofReview() {
-  const { submission: s, signedUrls } = useLoaderData<typeof loader>();
+  const { submission: s, userProfile: profile, signedUrls } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const submitting = navigation.state === "submitting";
-  const profile = (s as Record<string, unknown>).user_profiles as { username: string; first_name?: string } | null;
 
   return (
     <div className="admin-content" style={{ maxWidth: 700 }}>

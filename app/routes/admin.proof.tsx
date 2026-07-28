@@ -14,12 +14,19 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   const { data: submissions } = await supabase
     .from("proof_submissions")
-    .select("*, user_profiles(username, first_name, last_name)")
+    .select("*")
     .eq("status", status)
     .order("created_at", { ascending: true })
     .limit(50);
 
-  return { submissions: submissions ?? [], status };
+  const rows = submissions ?? [];
+  const userIds = [...new Set(rows.map((s) => s.user_id as string))];
+  const { data: profiles } = userIds.length > 0
+    ? await supabase.from("user_profiles").select("id, username, first_name, last_name").in("id", userIds)
+    : { data: [] };
+  const profileMap = Object.fromEntries((profiles ?? []).map((p) => [p.id, p]));
+
+  return { submissions: rows.map((s) => ({ ...s, profile: profileMap[s.user_id as string] ?? null })), status };
 }
 
 const ACTION_LABELS: Record<string, string> = {
@@ -64,7 +71,7 @@ export default function AdminProof() {
             </thead>
             <tbody>
               {submissions.map((s) => {
-                const profile = (s as Record<string, unknown>).user_profiles as { username: string; first_name?: string; last_name?: string } | null;
+                const profile = s.profile as { username: string; first_name?: string; last_name?: string } | null;
                 return (
                   <tr key={s.id}>
                     <td>
