@@ -70,6 +70,7 @@ export default function Home() {
     let ctx: { revert: () => void } | null = null;
     import("gsap").then(({ gsap }) => {
       import("gsap/ScrollTrigger").then(({ ScrollTrigger }) => {
+        gsap.registerPlugin(ScrollTrigger);
         ctx = gsap.context(() => {
           // Hero entrance sequence
           const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
