@@ -64,6 +64,7 @@ export default function AdminProof() {
               <tr>
                 <th>User</th>
                 <th>Action</th>
+                <th>Activity ref</th>
                 <th>Files</th>
                 <th>Submitted</th>
                 <th></th>
@@ -72,6 +73,7 @@ export default function AdminProof() {
             <tbody>
               {submissions.map((s) => {
                 const profile = s.profile as { username: string; first_name?: string; last_name?: string } | null;
+                const refId = s.ledger_entry_id as string | null | undefined;
                 return (
                   <tr key={s.id}>
                     <td>
@@ -83,6 +85,7 @@ export default function AdminProof() {
                       )}
                     </td>
                     <td>{ACTION_LABELS[s.action] ?? s.action}</td>
+                    <td className="ledger-ref">{refId ? `#${refId.slice(0, 8).toUpperCase()}` : "—"}</td>
                     <td>{(s.file_paths as string[])?.length ?? 0} files</td>
                     <td className="admin-muted">{new Date(s.created_at).toLocaleDateString("en-AU")}</td>
                     <td><Link to={`/admin/proof/${s.id}`} className="admin-link">Review →</Link></td>

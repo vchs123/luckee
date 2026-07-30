@@ -39,7 +39,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   const [profileRes, ledgerRes, spinRes, triviaRes, proofRes, qsRes] = await Promise.all([
     supabase.from("user_profiles").select("*").eq("id", user.id).single(),
-    supabase.from("points_ledger").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20),
+    supabase.from("points_ledger").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(100),
     supabase.from("daily_spins").select("*").eq("user_id", user.id).eq("spin_date", today).maybeSingle(),
     supabase.from("daily_trivia_attempts").select("*").eq("user_id", user.id).eq("trivia_date", today).maybeSingle(),
     supabase.from("proof_submissions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
@@ -593,6 +593,27 @@ export default function Rewards() {
 
   const { profile, ledger, hasSpunToday, spinPointsWon, triviaCompleted, triviaScore, proofSubmissions, triviaQuestions } = data;
 
+  const [filterAction, setFilterAction] = useState("all");
+  const [filterPeriod, setFilterPeriod] = useState("all");
+
+  const filteredLedger = ledger.filter((entry) => {
+    if (filterAction !== "all") {
+      if (filterAction === "referral") {
+        if (!(entry.action as string).startsWith("referral_")) return false;
+      } else if (entry.action !== filterAction) {
+        return false;
+      }
+    }
+    if (filterPeriod !== "all") {
+      const date = new Date(entry.created_at as string);
+      const now = new Date();
+      if (filterPeriod === "today" && date.toDateString() !== now.toDateString()) return false;
+      if (filterPeriod === "week" && date < new Date(now.getTime() - 7 * 864e5)) return false;
+      if (filterPeriod === "month" && date < new Date(now.getTime() - 30 * 864e5)) return false;
+    }
+    return true;
+  });
+
   return (
     <>
       <Nav />
@@ -636,19 +657,42 @@ export default function Rewards() {
           {ledger.length === 0 ? (
             <p className="rewards-empty">No points earned yet. Spin the wheel or complete trivia to get started!</p>
           ) : (
-            <div className="ledger">
-              {ledger.map((entry) => (
-                <div key={entry.id} className="ledger-row">
-                  <span className="ledger-ico">{ACTION_ICONS[entry.action] ?? "⭐"}</span>
-                  <div className="ledger-info">
-                    <p className="ledger-desc">{entry.description ?? entry.action}</p>
-                    <p className="ledger-ref">#{entry.id.slice(0, 8).toUpperCase()}</p>
-                    <p className="ledger-date">{new Date(entry.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}</p>
-                  </div>
-                  <span className="ledger-pts">+{entry.points}</span>
+            <>
+              <div className="ledger-filters">
+                <select className="fs" value={filterAction} onChange={e => setFilterAction(e.target.value)}>
+                  <option value="all">All activities</option>
+                  <option value="daily_login">Login</option>
+                  <option value="daily_spin">Spin</option>
+                  <option value="trivia">Trivia</option>
+                  <option value="referral">Referral</option>
+                  <option value="proof_approved">Proof approved</option>
+                  <option value="admin_bonus">Bonus</option>
+                </select>
+                <select className="fs" value={filterPeriod} onChange={e => setFilterPeriod(e.target.value)}>
+                  <option value="all">All time</option>
+                  <option value="today">Today</option>
+                  <option value="week">Last 7 days</option>
+                  <option value="month">Last 30 days</option>
+                </select>
+              </div>
+              {filteredLedger.length === 0 ? (
+                <p className="rewards-empty">No entries match this filter.</p>
+              ) : (
+                <div className="ledger">
+                  {filteredLedger.map((entry) => (
+                    <div key={entry.id} className="ledger-row">
+                      <span className="ledger-ico">{ACTION_ICONS[entry.action as string] ?? "⭐"}</span>
+                      <div className="ledger-info">
+                        <p className="ledger-desc">{entry.description ?? entry.action}</p>
+                        <p className="ledger-ref">#{(entry.id as string).slice(0, 8).toUpperCase()}</p>
+                        <p className="ledger-date">{new Date(entry.created_at as string).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}</p>
+                      </div>
+                      <span className="ledger-pts">+{entry.points}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </section>
 

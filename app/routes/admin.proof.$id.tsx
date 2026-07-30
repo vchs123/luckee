@@ -130,6 +130,7 @@ export default function AdminProofReview() {
         <dl className="admin-dl">
           <dt>User</dt><dd>@{profile?.username ?? "—"}{profile?.first_name ? ` (${profile.first_name})` : ""}</dd>
           <dt>Action</dt><dd>{s.action}</dd>
+          {s.ledger_entry_id && <><dt>Activity ref</dt><dd className="ledger-ref">#{(s.ledger_entry_id as string).slice(0, 8).toUpperCase()}</dd></>}
           <dt>Status</dt><dd><span className={`proof-badge ${s.status}`}>{s.status}</span></dd>
           {s.description && <><dt>Note</dt><dd>{s.description}</dd></>}
           <dt>Submitted</dt><dd>{new Date(s.created_at).toLocaleDateString("en-AU")}</dd>
