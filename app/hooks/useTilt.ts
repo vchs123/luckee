@@ -7,7 +7,7 @@ export function useTilt(selector: string) {
     if (!window.matchMedia("(pointer: fine)").matches) return;
     let destroy: (() => void) | null = null;
     import("vanilla-tilt").then(({ default: VanillaTilt }) => {
-      const cards = document.querySelectorAll<HTMLElement>(selector);
+      const cards = Array.from(document.querySelectorAll<HTMLElement>(selector));
       if (!cards.length) return;
       VanillaTilt.init(cards, {
         max: 7,
@@ -18,6 +18,7 @@ export function useTilt(selector: string) {
       });
       destroy = () =>
         cards.forEach((c) => (c as HTMLElement & { vanillaTilt?: { destroy: () => void } }).vanillaTilt?.destroy());
+
     });
     return () => destroy?.();
   }, [selector]);
