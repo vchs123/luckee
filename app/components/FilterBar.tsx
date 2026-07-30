@@ -1,4 +1,5 @@
 "use client";
+import { motion } from "framer-motion";
 
 export type FilterType = "all" | "food" | "beauty" | "nospend";
 
@@ -9,8 +10,27 @@ interface Props {
 
 export function FilterBar({ active, onChange }: Props) {
   const btn = (id: FilterType, label: string) => (
-    <button className={`fb${active === id ? " on" : ""}`} onClick={() => onChange(id)}>
-      {label}
+    <button
+      key={id}
+      className={`fb${active === id ? " on" : ""}`}
+      onClick={() => onChange(id)}
+      style={{ position: "relative", overflow: "hidden" }}
+    >
+      {active === id && (
+        <motion.span
+          layoutId="filter-pill-bg"
+          className="filter-active-bg"
+          style={{
+            position: "absolute",
+            inset: 0,
+            borderRadius: 9999,
+            background: "var(--pink)",
+            zIndex: 0,
+          }}
+          transition={{ type: "spring", stiffness: 380, damping: 30 }}
+        />
+      )}
+      <span style={{ position: "relative", zIndex: 1 }}>{label}</span>
     </button>
   );
   return (

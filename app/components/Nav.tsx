@@ -2,11 +2,13 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useLocation, Form } from "react-router";
 import { useAuth } from "~/hooks/useAuth";
+import { prefersReducedMotion } from "~/lib/reducedMotion";
 
 export function Nav() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
   const { pathname } = useLocation();
   const { user, profile, isAdmin } = useAuth();
 
@@ -22,10 +24,23 @@ export function Nav() {
     return () => document.removeEventListener("mousedown", handler);
   }, [profileOpen]);
 
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+    const nav = navRef.current;
+    if (!nav) return;
+    const onScroll = () => {
+      const progress = Math.min(window.scrollY / 200, 1);
+      nav.style.backdropFilter = `blur(${8 + progress * 16}px)`;
+      nav.style.background = `rgba(255,240,248,${0.7 + progress * 0.18})`;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <>
       <div className="disco">🔗 Some links on this site are affiliate links — I earn a small commission if you sign up, at no cost to you. All recommendations are genuine.</div>
-      <nav className="nav">
+      <nav className="nav" ref={navRef}>
         <div className="nav-i">
           <Link to="/" className="nav-logo">Luckee</Link>
           <div className="nav-links">

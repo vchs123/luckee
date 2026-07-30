@@ -1,6 +1,6 @@
 import type { MetaFunction } from "react-router";
 import { Link, useNavigate } from "react-router";
-import { useState } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
 import { FreebieCard } from "~/components/FreebieCard";
@@ -10,6 +10,9 @@ import { BDAY_FOOD } from "~/data/birthday-food";
 import { BDAY_BEAUTY } from "~/data/birthday-beauty";
 import { MELB_TRANSPORT, MELB_CULTURE } from "~/data/free-melbourne";
 import { DEALS } from "~/data/deals";
+import { prefersReducedMotion } from "~/lib/reducedMotion";
+
+const HeroScene = lazy(() => import("~/components/HeroScene"));
 
 export const meta: MetaFunction = () => [
   { title: "Luckee — Melbourne Freebies, Deals & Community Dinners" },
@@ -25,6 +28,9 @@ const MELB_SAMPLE = [MELB_TRANSPORT[0], MELB_CULTURE[0], MELB_CULTURE[2], MELB_C
 export default function Home() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
+  const [showCanvas, setShowCanvas] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const heroRef = useRef<HTMLDivElement>(null);
 
   function handleSearch(q: string) {
     setQuery(q);
@@ -42,12 +48,99 @@ export default function Home() {
     }
   }
 
+  // Mount canvas after hydration
+  useEffect(() => {
+    setShowCanvas(true);
+  }, []);
+
+  // Scroll tracking for canvas fade/drift and unmount
+  useEffect(() => {
+    const onScroll = () => {
+      const progress = Math.min(window.scrollY / window.innerHeight, 1);
+      setScrollProgress(progress);
+      setShowCanvas(window.scrollY <= window.innerHeight);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // GSAP hero entrance + section reveals
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+    let ctx: { revert: () => void } | null = null;
+    import("gsap").then(({ gsap }) => {
+      import("gsap/ScrollTrigger").then(({ ScrollTrigger }) => {
+        ctx = gsap.context(() => {
+          // Hero entrance sequence
+          const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+          tl.from(".hero-badge", { y: -20, opacity: 0, duration: 0.4, ease: "power2.out" })
+            .from(".hero-h", { y: 30, opacity: 0, duration: 0.6 }, "-=0.1")
+            .from(".hero-p", { y: 20, opacity: 0, duration: 0.5 }, "-=0.2")
+            .from(".search", { y: 16, opacity: 0, duration: 0.4 }, "-=0.15")
+            .from(".hcat", { y: 12, opacity: 0, duration: 0.35, stagger: 0.04 }, "-=0.1");
+
+          // Disco banner entrance
+          gsap.from(".disco", { y: -60, opacity: 0, duration: 0.5, ease: "power3.out", delay: 0.2 });
+
+          // Section header reveals
+          document.querySelectorAll(".sec-hd").forEach((el) => {
+            gsap.from(el.querySelector(".eyebrow"), {
+              x: -30, opacity: 0, duration: 0.6, ease: "power3.out",
+              scrollTrigger: { trigger: el, start: "top 85%" },
+            });
+            gsap.from(el.querySelector(".sec-h"), {
+              x: 30, opacity: 0, duration: 0.6, delay: 0.08, ease: "power3.out",
+              scrollTrigger: { trigger: el, start: "top 85%" },
+            });
+          });
+
+          // Top picks stagger
+          const topGrid = document.querySelector(".g3");
+          if (topGrid) {
+            const cards = topGrid.querySelectorAll(".fc");
+            gsap.from(cards, {
+              y: 40, opacity: 0, duration: 0.5, ease: "power3.out", stagger: 0.06,
+              scrollTrigger: { trigger: topGrid, start: "top 85%" },
+            });
+            gsap.from(topGrid.querySelectorAll(".fc-stripe"), {
+              scaleX: 0, duration: 0.4, ease: "power2.out", transformOrigin: "left center", stagger: 0.06,
+              scrollTrigger: { trigger: topGrid, start: "top 85%" },
+            });
+          }
+
+          // Free Melbourne + deals grids (g4)
+          document.querySelectorAll(".g4").forEach((grid) => {
+            gsap.from(grid.querySelectorAll(".xc, .dc"), {
+              scale: 0.93, opacity: 0, duration: 0.5, ease: "back.out(1.2)", stagger: 0.08,
+              scrollTrigger: { trigger: grid, start: "top 85%" },
+            });
+          });
+
+          // Earn cards stagger
+          const ecsGrid = document.querySelector(".ecs");
+          if (ecsGrid) {
+            gsap.from(ecsGrid.querySelectorAll(".ec"), {
+              y: 30, opacity: 0, duration: 0.5, ease: "power2.out", stagger: 0.1,
+              scrollTrigger: { trigger: ecsGrid, start: "top 85%" },
+            });
+          }
+        }, heroRef);
+      });
+    });
+    return () => ctx?.revert();
+  }, []);
+
   return (
     <>
       <Nav />
-      <div>
-        <div className="hero">
-          <div className="wrap">
+      <div ref={heroRef}>
+        <div className="hero" style={{ position: "relative" }}>
+          {showCanvas && (
+            <Suspense fallback={null}>
+              <HeroScene scrollProgress={scrollProgress} />
+            </Suspense>
+          )}
+          <div className="wrap" style={{ position: "relative", zIndex: 2 }}>
             <div className="hero-badge">✦ Melbourne's freebie hub</div>
             <h1 className="hero-h">Score Melbourne's best <span className="ac">freebies</span> every day</h1>
             <p className="hero-p">Birthday perks, loyalty sign-ups, free galleries and community dinners — curated for Melbourne locals.</p>
@@ -86,20 +179,24 @@ export default function Home() {
 
           <div className="dv" />
 
-          <p className="eyebrow">🌿 No cost, ever</p>
-          <h2 className="sec-h">Free in Melbourne right now</h2>
+          <div className="sec-hd">
+            <p className="eyebrow">🌿 No cost, ever</p>
+            <h2 className="sec-h">Free in Melbourne right now</h2>
+          </div>
           <p className="sec-p">World-class galleries, free trams, walking tours and workshops — your zero-dollar day out starts here.</p>
           <div className="g4">
             {MELB_SAMPLE.map(x => <ExperienceCard key={x.n} x={x} />)}
           </div>
           <Link to="/freebies/free-melbourne" className="btn-pink" style={{ display: "inline-block", marginTop: 20 }}>
-            Explore all free experiences →
+            Explore all free experiences <span className="arrow">→</span>
           </Link>
 
           <div className="dv" />
 
-          <p className="eyebrow">💸 Referral deals</p>
-          <h2 className="sec-h">Deals I genuinely use</h2>
+          <div className="sec-hd">
+            <p className="eyebrow">💸 Referral deals</p>
+            <h2 className="sec-h">Deals I genuinely use</h2>
+          </div>
           <p className="sec-p">Products I recommend. Sign up through my links and you'll usually get a bonus — so do I.</p>
           <div className="g4">
             {DEALS.map(d => <DealCard key={d.n} deal={d} />)}
@@ -120,8 +217,10 @@ export default function Home() {
 
           <div className="dv" />
 
-          <p className="eyebrow">🎰 Rewards</p>
-          <h2 className="sec-h">Earn points, win prizes</h2>
+          <div className="sec-hd">
+            <p className="eyebrow">🎰 Rewards</p>
+            <h2 className="sec-h">Earn points, win prizes</h2>
+          </div>
           <p className="sec-p">Every deal click, dinner and daily login earns points toward the monthly lucky draw.</p>
           <div className="ecs">
             <div className="ec"><div className="ec-ico">⭐</div><h4>Earn points</h4><p>Click deals, attend dinners, play trivia, log in daily</p><span className="ec-pts">Up to 200 pts per action</span></div>

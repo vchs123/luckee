@@ -38,7 +38,7 @@ export function FreebieCard({ freebie: f }: Props) {
         <div className="fc-ft">
           <span className="fc-ver">✓ Verified Jul 2026</span>
           <a href={f.link} target="_blank" rel="noopener noreferrer" className="fc-cta">
-            Get freebie →
+            Get freebie <span className="arrow">→</span>
           </a>
         </div>
       </div>

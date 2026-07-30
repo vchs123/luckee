@@ -68,7 +68,7 @@ export function DealCard({ deal: d }: { deal: Deal }) {
             }
           }}
         >
-          {d.cta}
+          {d.cta.endsWith("→") ? <>{d.cta.slice(0, -1)}<span className="arrow">→</span></> : d.cta}
         </a>
       </div>
     </div>
