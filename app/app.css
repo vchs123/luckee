@@ -273,6 +273,50 @@ img { max-width: 100%; }
 .bls-tier-note { font-size: 10px; color: var(--t3); }
 .bls-disclaimer { font-size: 10.5px; color: var(--t3); line-height: 1.55; padding: 8px 10px; background: #f8f7f9; border-radius: 8px; margin-top: 4px; }
 
+/* ── deal tiles (homepage horizontal rail) ── */
+.dl-rail { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 4px 2px 18px; }
+.dl-rail::-webkit-scrollbar { display: none; }
+.dl-tile { flex: 0 0 210px; border-radius: var(--r); padding: 24px 20px 18px; display: flex; flex-direction: column; gap: 10px; scroll-snap-align: start; transition: transform 0.22s ease, box-shadow 0.22s ease; }
+.dl-tile:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.18); }
+.dl-tile.cld { background: linear-gradient(140deg, #7c3aed, #9333ea); }
+.dl-tile.bls { background: linear-gradient(140deg, #059669, #10b981); }
+.dl-tile.krs { background: linear-gradient(140deg, #ea580c, #f97316); }
+.dl-tile.mac { background: linear-gradient(140deg, #0891b2, #06b6d4); }
+.dl-tile.rvl { background: linear-gradient(140deg, #1a56db, #3b82f6); }
+.dl-tile-em { font-size: 38px; line-height: 1; }
+.dl-tile-name { font-size: 15px; font-weight: 800; color: white; }
+.dl-tile-sub { font-size: 10.5px; color: rgba(255,255,255,0.72); margin-top: -4px; }
+.dl-tile-bonus { background: rgba(255,255,255,0.96); border-radius: 10px; padding: 8px 12px; font-size: 13px; font-weight: 800; margin-top: 4px; }
+.dl-tile.cld .dl-tile-bonus { color: var(--cld); }
+.dl-tile.bls .dl-tile-bonus { color: var(--bls); }
+.dl-tile.krs .dl-tile-bonus { color: var(--krs); }
+.dl-tile.mac .dl-tile-bonus { color: var(--mac); }
+.dl-tile.rvl .dl-tile-bonus { color: var(--rvl); }
+.dl-tile-cta { display: block; text-align: center; padding: 9px 14px; margin-top: auto; border-radius: var(--rp); border: 1.5px solid rgba(255,255,255,0.5); color: white; font-size: 12.5px; font-weight: 700; transition: background 0.15s, border-color 0.15s; }
+.dl-tile-cta:hover { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.85); }
+
+/* ── deal feature rows (deals page) ── */
+.dl-rows { display: flex; flex-direction: column; gap: 18px; }
+.dl-row { display: flex; border-radius: var(--r); overflow: hidden; box-shadow: var(--cs); transition: transform 0.22s ease, box-shadow 0.22s ease; }
+.dl-row:hover { transform: translateY(-3px); box-shadow: var(--cs2); }
+.dl-row:nth-child(even) { flex-direction: row-reverse; }
+.dl-row-left { flex: 0 0 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 40px 28px; text-align: center; }
+.dl-row.cld .dl-row-left { background: linear-gradient(160deg, #7c3aed, #9333ea); }
+.dl-row.bls .dl-row-left { background: linear-gradient(160deg, #059669, #10b981); }
+.dl-row.krs .dl-row-left { background: linear-gradient(160deg, #ea580c, #f97316); }
+.dl-row.mac .dl-row-left { background: linear-gradient(160deg, #0891b2, #06b6d4); }
+.dl-row.rvl .dl-row-left { background: linear-gradient(160deg, #1a56db, #3b82f6); }
+.dl-row-em { font-size: 60px; line-height: 1; }
+.dl-row-name { font-size: 18px; font-weight: 800; color: white; }
+.dl-row-sub { font-size: 11px; color: rgba(255,255,255,0.72); }
+.dl-row-right { flex: 1; background: var(--card); padding: 28px 30px; display: flex; flex-direction: column; gap: 14px; }
+.dl-row-rw { border-radius: var(--rs); padding: 12px 14px; }
+.dl-row.cld .dl-row-rw { background: var(--clb); }
+.dl-row.bls .dl-row-rw { background: var(--blb); }
+.dl-row.krs .dl-row-rw { background: var(--krb); }
+.dl-row.mac .dl-row-rw { background: var(--mcb); }
+.dl-row.rvl .dl-row-rw { background: var(--rvb); }
+
 /* ── teasers ── */
 .tsr { background: var(--card); border: 1px solid var(--cb); border-radius: var(--r); padding: 28px 32px; box-shadow: var(--cs); display: flex; align-items: center; justify-content: space-between; gap: 24px; transition: all 0.2s; }
 .tsr:hover { box-shadow: var(--cs2); }
@@ -646,4 +690,9 @@ img { max-width: 100%; }
   .phone-code { width: 100%; }
   .trivia-card { padding: 20px 16px; }
   .rw-pts-num { font-size: 52px; }
+  .dl-tile { flex: 0 0 180px; }
+  .dl-row, .dl-row:nth-child(even) { flex-direction: column; }
+  .dl-row-left { flex: none; padding: 28px 24px 20px; flex-direction: row; gap: 14px; text-align: left; justify-content: flex-start; }
+  .dl-row-em { font-size: 44px; }
+  .dl-row-right { padding: 20px 20px 24px; }
 }

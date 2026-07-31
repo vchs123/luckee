@@ -1,7 +1,7 @@
 import type { MetaFunction } from "react-router";
 import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
-import { DealCard } from "~/components/DealCard";
+import { DealRow } from "~/components/DealRow";
 import { DEALS } from "~/data/deals";
 
 export const meta: MetaFunction = () => [
@@ -21,8 +21,8 @@ export default function Deals() {
           <h1 className="sec-h">Deals I recommend</h1>
           <p className="sec-p wide">Products I actually use. Sign up through my referral link and you'll usually get a welcome bonus — and so will I. Marked clearly where a referral code is involved.</p>
         </div>
-        <div className="g4">
-          {DEALS.map(d => <DealCard key={d.n} deal={d} />)}
+        <div className="dl-rows">
+          {DEALS.map(d => <DealRow key={d.n} deal={d} />)}
         </div>
       </div>
       <Footer />
