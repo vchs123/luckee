@@ -15,7 +15,7 @@ const SPREAD_X = [-380, -190, 0, 190, 380];
 const FLOAT_DURATION = [2.8, 3.2, 2.6, 3.4, 3.0];
 
 export function DealExplosion() {
-  const sectionRef = useRef<HTMLDivElement>(null);
+  const outerRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -24,8 +24,8 @@ export function DealExplosion() {
 
   useEffect(() => {
     if (isMobile || prefersReducedMotion()) return;
-    const section = sectionRef.current;
-    if (!section) return;
+    const outer = outerRef.current;
+    if (!outer) return;
 
     let ctx: { revert: () => void } | null = null;
 
@@ -33,37 +33,31 @@ export function DealExplosion() {
       import("gsap/ScrollTrigger").then(({ ScrollTrigger }) => {
         gsap.registerPlugin(ScrollTrigger);
         ctx = gsap.context(() => {
-          const items = section.querySelectorAll<HTMLElement>(".dlx-item");
-          const labels = section.querySelectorAll<HTMLElement>(".dlx-label");
-
-          gsap.set(items, { x: 0 });
-          gsap.set(labels, { opacity: 0, y: 10 });
+          const items = outer.querySelectorAll<HTMLElement>(".dlx-item");
+          const labels = outer.querySelectorAll<HTMLElement>(".dlx-label");
 
           const tl = gsap.timeline({
             scrollTrigger: {
-              trigger: section,
+              trigger: outer,
               start: "top top",
               end: "+=600",
-              pin: true,
               scrub: 1.2,
-              anticipatePin: 1,
             },
           });
 
-          tl.to(items, {
-            x: (i: number) => SPREAD_X[i],
-            ease: "power2.inOut",
-            duration: 1,
-          });
+          tl.fromTo(
+            items,
+            { x: 0 },
+            { x: (i: number) => SPREAD_X[i], ease: "power2.inOut", duration: 1 }
+          );
 
-          tl.to(labels, {
-            opacity: 1,
-            y: 0,
-            ease: "power2.out",
-            stagger: 0.05,
-            duration: 0.4,
-          }, 0.6);
-        }, section);
+          tl.fromTo(
+            labels,
+            { opacity: 0, y: 8 },
+            { opacity: 1, y: 0, ease: "power2.out", stagger: 0.05, duration: 0.4 },
+            0.55
+          );
+        }, outer);
       });
     });
 
@@ -71,9 +65,16 @@ export function DealExplosion() {
   }, [isMobile]);
 
   return (
-    <div className="dlx" ref={sectionRef}>
+    <div className="dlx" ref={outerRef}>
       <div className="dlx-inner">
-        <div className="dlx-items">
+        <div className="wrap">
+          <div className="sec-hd">
+            <p className="eyebrow">💸 Referral deals</p>
+            <h2 className="sec-h">Deals I genuinely use</h2>
+          </div>
+          <p className="sec-p">Products I recommend. Sign up through my links and you'll usually get a bonus — so do I.</p>
+        </div>
+        <div className="dlx-stage">
           {DEALS.map((d, i) => (
             <Link
               key={d.cls}

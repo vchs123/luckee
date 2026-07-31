@@ -135,14 +135,11 @@ export default function Home() {
           </Link>
 
           <div className="dv" />
+        </div>
 
-          <div className="sec-hd">
-            <p className="eyebrow">💸 Referral deals</p>
-            <h2 className="sec-h">Deals I genuinely use</h2>
-          </div>
-          <p className="sec-p">Products I recommend. Sign up through my links and you'll usually get a bonus — so do I.</p>
-          <DealExplosion />
+        <DealExplosion />
 
+        <div className="wrap">
           <div className="dv" />
 
           <div className="tsr">
