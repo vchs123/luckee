@@ -5,11 +5,10 @@ import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
 import { FreebieCard } from "~/components/FreebieCard";
 import { ExperienceCard } from "~/components/ExperienceCard";
-import { DealTile } from "~/components/DealTile";
+import { DealExplosion } from "~/components/DealExplosion";
 import { BDAY_FOOD } from "~/data/birthday-food";
 import { BDAY_BEAUTY } from "~/data/birthday-beauty";
 import { MELB_TRANSPORT, MELB_CULTURE } from "~/data/free-melbourne";
-import { DEALS } from "~/data/deals";
 import { prefersReducedMotion } from "~/lib/reducedMotion";
 
 export const meta: MetaFunction = () => [
@@ -142,12 +141,7 @@ export default function Home() {
             <h2 className="sec-h">Deals I genuinely use</h2>
           </div>
           <p className="sec-p">Products I recommend. Sign up through my links and you'll usually get a bonus — so do I.</p>
-          <div className="dl-rail">
-            {DEALS.map(d => <DealTile key={d.n} deal={d} />)}
-          </div>
-          <Link to="/deals" className="btn-ghost" style={{ display: "inline-block", marginTop: 4 }}>
-            See all deals →
-          </Link>
+          <DealExplosion />
 
           <div className="dv" />
 
