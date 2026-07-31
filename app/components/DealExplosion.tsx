@@ -14,6 +14,10 @@ const LOGO_MAP: Record<string, string> = {
 const SPREAD_X = [-380, -190, 0, 190, 380];
 const FLOAT_DURATION = [2.8, 3.2, 2.6, 3.4, 3.0];
 
+function easeInOut(t: number) {
+  return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+}
+
 export function DealExplosion() {
   const outerRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -23,45 +27,44 @@ export function DealExplosion() {
   }, []);
 
   useEffect(() => {
-    if (isMobile || prefersReducedMotion()) return;
+    if (isMobile) return;
     const outer = outerRef.current;
     if (!outer) return;
 
-    let ctx: { revert: () => void } | null = null;
+    const items = Array.from(outer.querySelectorAll<HTMLElement>(".dlx-item"));
+    const labels = Array.from(outer.querySelectorAll<HTMLElement>(".dlx-label"));
 
-    import("gsap").then(({ gsap }) => {
-      import("gsap/ScrollTrigger").then(({ ScrollTrigger }) => {
-        gsap.registerPlugin(ScrollTrigger);
-        ctx = gsap.context(() => {
-          const items = outer.querySelectorAll<HTMLElement>(".dlx-item");
-          const labels = outer.querySelectorAll<HTMLElement>(".dlx-label");
+    if (prefersReducedMotion()) {
+      items.forEach((item, i) => { item.style.transform = `translateX(${SPREAD_X[i]}px)`; });
+      labels.forEach(label => { label.style.opacity = "1"; });
+      return;
+    }
 
-          const tl = gsap.timeline({
-            scrollTrigger: {
-              trigger: outer,
-              start: "top top",
-              end: "+=600",
-              scrub: 1.2,
-            },
-          });
+    function update() {
+      const rect = outer!.getBoundingClientRect();
+      // progress 0→1 as outer scrolls from top:0 to top:-600
+      const progress = Math.max(0, Math.min(1, -rect.top / 600));
 
-          tl.fromTo(
-            items,
-            { x: 0 },
-            { x: (i: number) => SPREAD_X[i], ease: "power2.inOut", duration: 1 }
-          );
-
-          tl.fromTo(
-            labels,
-            { opacity: 0, y: 8 },
-            { opacity: 1, y: 0, ease: "power2.out", stagger: 0.05, duration: 0.4 },
-            0.55
-          );
-        }, outer);
+      items.forEach((item, i) => {
+        item.style.transform = `translateX(${SPREAD_X[i] * easeInOut(progress)}px)`;
       });
-    });
 
-    return () => ctx?.revert();
+      // labels fade in during the last 45% of the animation
+      const lp = Math.max(0, Math.min(1, (progress - 0.55) / 0.45));
+      labels.forEach(label => {
+        label.style.opacity = String(lp);
+        label.style.transform = `translateY(${8 * (1 - lp)}px)`;
+      });
+    }
+
+    window.addEventListener("scroll", update, { passive: true });
+    update();
+
+    return () => {
+      window.removeEventListener("scroll", update);
+      items.forEach(item => { item.style.transform = ""; });
+      labels.forEach(label => { label.style.opacity = ""; label.style.transform = ""; });
+    };
   }, [isMobile]);
 
   return (
@@ -76,22 +79,13 @@ export function DealExplosion() {
         </div>
         <div className="dlx-stage">
           {DEALS.map((d, i) => (
-            <Link
-              key={d.cls}
-              to="/deals"
-              className="dlx-item"
-              style={{ animationDuration: `${FLOAT_DURATION[i]}s` }}
-            >
-              <img
-                src={LOGO_MAP[d.cls]}
-                alt={d.n}
-                className="dlx-logo"
-                width={90}
-                height={90}
-              />
-              <div className="dlx-label">
-                <p className="dlx-name">{d.n}</p>
-                <span className="dlx-bonus">{d.reward}</span>
+            <Link key={d.cls} to="/deals" className="dlx-item">
+              <div className="dlx-float" style={{ animationDuration: `${FLOAT_DURATION[i]}s` }}>
+                <img src={LOGO_MAP[d.cls]} alt={d.n} className="dlx-logo" width={90} height={90} />
+                <div className="dlx-label">
+                  <p className="dlx-name">{d.n}</p>
+                  <span className="dlx-bonus">{d.reward}</span>
+                </div>
               </div>
             </Link>
           ))}
