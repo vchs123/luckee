@@ -2,6 +2,14 @@ import type { Deal } from "~/data/types";
 import { BLOSSOM_TIERS } from "~/data/deals";
 import { useAuth } from "~/hooks/useAuth";
 
+const LOGO_MAP: Record<string, string> = {
+  cld: "/claude-logo.png",
+  bls: "/blossom-logo.png",
+  krs: "/kris-plus-logo.png",
+  mac: "/macadam-logo.png",
+  rvl: "/revolut-logo.jpg",
+};
+
 export function DealRow({ deal: d }: { deal: Deal }) {
   const { user } = useAuth();
 
@@ -26,7 +34,7 @@ export function DealRow({ deal: d }: { deal: Deal }) {
   return (
     <div id={d.cls} className={`dl-row ${d.cls}`}>
       <div className="dl-row-left">
-        <div className="dl-row-em">{d.e}</div>
+        <img src={LOGO_MAP[d.cls]} alt={d.n} className="dl-row-logo" width={80} height={80} />
         <p className="dl-row-name">{d.n}</p>
         <p className="dl-row-sub">{d.sub}</p>
       </div>

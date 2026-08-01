@@ -27,20 +27,17 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const heroRef = useRef<HTMLDivElement>(null);
 
-  function handleSearch(q: string) {
-    setQuery(q);
-    if (q.length < 2) return;
-    const lq = q.toLowerCase();
+  function handleSearchSubmit() {
+    if (query.length < 2) return;
+    const lq = query.toLowerCase();
     const allFreebies = [...BDAY_FOOD, ...BDAY_BEAUTY];
     const match = allFreebies.find(f =>
       f.n.toLowerCase().includes(lq) ||
       f.r.toLowerCase().includes(lq) ||
       f.pg.toLowerCase().includes(lq)
     );
-    if (match) {
-      const filter = match.cat === "bty" ? "?filter=beauty" : "?filter=food";
-      navigate(`/freebies/birthday-freebies${filter}`);
-    }
+    const filter = match?.cat === "bty" ? "?filter=beauty" : match ? "?filter=food" : "";
+    navigate(`/freebies/birthday-freebies${filter}`);
   }
 
   // GSAP hero entrance + section reveals
@@ -87,17 +84,18 @@ export default function Home() {
             <div className="hero-badge">✦ Melbourne's freebie hub</div>
             <h1 className="hero-h">Score Melbourne's best <span className="ac">freebies</span> every day</h1>
             <p className="hero-p">Birthday perks, loyalty sign-ups, free galleries and community dinners — curated for Melbourne locals.</p>
-            <div className="search">
+            <form className="search" onSubmit={e => { e.preventDefault(); handleSearchSubmit(); }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
               </svg>
               <input
-                type="text"
+                type="search"
                 placeholder="Search freebies, deals, events..."
                 value={query}
-                onChange={e => handleSearch(e.target.value)}
+                onChange={e => setQuery(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && handleSearchSubmit()}
               />
-            </div>
+            </form>
             <div className="hcats">
               <Link to="/freebies/birthday-freebies" className="hcat">🎂 Birthday</Link>
               <Link to="/freebies/free-melbourne" className="hcat">🎨 Experiences</Link>

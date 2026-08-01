@@ -243,7 +243,7 @@ img { max-width: 100%; }
 .dc.mac .dc-tag { background: var(--mcb); color: var(--mac); border-color: rgba(8, 145, 178, 0.2); }
 .dc.rvl .dc-tag { background: var(--rvb); color: var(--rvl); border-color: rgba(26, 86, 219, 0.2); }
 .dc-ft { padding: 0 20px 20px; }
-.dc-cta { display: block; text-align: center; padding: 12px; border-radius: var(--rs); font-size: 14px; font-weight: 800; color: white; transition: all 0.18s; border: none; cursor: pointer; width: 100%; font-family: inherit; position: relative; overflow: hidden; }
+.dc-cta { display: block; text-align: center; padding: 12px; border-radius: var(--rs); font-size: 14px; font-weight: 800; color: white; transition: all 0.18s; border: none; cursor: pointer; width: 100%; font-family: inherit; position: relative; overflow: hidden; opacity: 0.9; }
 .dc.cld .dc-cta { background: var(--cld); }
 .dc.bls .dc-cta { background: var(--bls); }
 .dc.krs .dc-cta { background: var(--krs); }
@@ -326,7 +326,7 @@ img { max-width: 100%; }
 .dl-row.krs .dl-row-left { background: linear-gradient(160deg, #ea580c, #f97316); }
 .dl-row.mac .dl-row-left { background: linear-gradient(160deg, #0891b2, #06b6d4); }
 .dl-row.rvl .dl-row-left { background: linear-gradient(160deg, #1a56db, #3b82f6); }
-.dl-row-em { font-size: 60px; line-height: 1; }
+.dl-row-logo { width: 80px; height: 80px; border-radius: 18px; object-fit: cover; box-shadow: 0 4px 16px rgba(0,0,0,0.18); }
 .dl-row-name { font-size: 18px; font-weight: 800; color: white; }
 .dl-row-sub { font-size: 11px; color: rgba(255,255,255,0.72); }
 .dl-row-right { flex: 1; background: var(--card); padding: 28px 30px; display: flex; flex-direction: column; gap: 14px; }
