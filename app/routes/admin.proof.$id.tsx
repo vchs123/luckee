@@ -133,7 +133,7 @@ export default function AdminProofReview() {
           {s.ledger_entry_id && <><dt>Activity ref</dt><dd className="ledger-ref">#{(s.ledger_entry_id as string).slice(0, 8).toUpperCase()}</dd></>}
           <dt>Status</dt><dd><span className={`proof-badge ${s.status}`}>{s.status}</span></dd>
           {s.description && <><dt>Note</dt><dd>{s.description}</dd></>}
-          <dt>Submitted</dt><dd>{new Date(s.created_at).toLocaleDateString("en-AU")}</dd>
+          <dt>Submitted</dt><dd>{new Date(s.created_at).toLocaleString("en-AU", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" })}</dd>
         </dl>
       </div>
 
@@ -185,7 +185,7 @@ export default function AdminProofReview() {
 
       {s.status !== "pending" && (
         <div className="admin-card" style={{ marginTop: 16 }}>
-          <p><strong>Reviewed:</strong> {s.reviewed_at ? new Date(s.reviewed_at).toLocaleDateString("en-AU") : "—"}</p>
+          <p><strong>Reviewed:</strong> {s.reviewed_at ? new Date(s.reviewed_at).toLocaleString("en-AU", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" }) : "—"}</p>
           {s.points_awarded && <p><strong>Points awarded:</strong> {s.points_awarded}</p>}
           {s.admin_note && <p><strong>Note:</strong> {s.admin_note}</p>}
         </div>

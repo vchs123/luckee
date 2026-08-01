@@ -14,8 +14,8 @@ const LOGO_MAP: Record<string, string> = {
 const SPREAD_X = [-380, -190, 0, 190, 380];
 const FLOAT_DURATION = [2.8, 3.2, 2.6, 3.4, 3.0];
 
-function easeOut(t: number) {
-  return 1 - (1 - t) * (1 - t);
+function easeInOut(t: number) {
+  return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 }
 
 export function DealExplosion() {
@@ -28,31 +28,26 @@ export function DealExplosion() {
     const items = Array.from(el.querySelectorAll<HTMLElement>(".dlx-item"));
 
     if (prefersReducedMotion()) {
-      items.forEach((item, i) => {
-        item.style.transform = `translateX(${SPREAD_X[i]}px)`;
-      });
+      items.forEach((item, i) => { item.style.transform = `translateX(${SPREAD_X[i]}px)`; });
       return;
     }
 
-    function update() {
-      const rect = el!.getBoundingClientRect();
-      const vh = window.innerHeight;
-      // How much of the section is visible in the viewport
-      const visible = Math.max(0, Math.min(rect.bottom, vh) - Math.max(rect.top, 0));
-      const maxVisible = Math.min(rect.height, vh);
-      // Reach full spread when 75% of max-visible height is in view
-      const raw = maxVisible > 0 ? visible / (maxVisible * 0.75) : 0;
-      const progress = easeOut(Math.min(1, raw));
+    let rafId: number;
 
+    function tick() {
+      const rect = el!.getBoundingClientRect();
+      // progress: 0 when .dlx top is at viewport top, 1 after 600px of scroll
+      const raw = Math.max(0, Math.min(1, -rect.top / 600));
+      const progress = easeInOut(raw);
       items.forEach((item, i) => {
         item.style.transform = `translateX(${SPREAD_X[i] * progress}px)`;
       });
+      rafId = requestAnimationFrame(tick);
     }
 
-    window.addEventListener("scroll", update, { passive: true });
-    update();
+    rafId = requestAnimationFrame(tick);
     return () => {
-      window.removeEventListener("scroll", update);
+      cancelAnimationFrame(rafId);
       items.forEach(item => { item.style.transform = ""; });
     };
   }, []);
@@ -73,7 +68,6 @@ export function DealExplosion() {
               key={d.cls}
               to="/deals"
               className="dlx-item"
-              style={{ "--tx": `${SPREAD_X[i]}px` } as React.CSSProperties}
             >
               <div className="dlx-float" style={{ animationDuration: `${FLOAT_DURATION[i]}s` }}>
                 <img src={LOGO_MAP[d.cls]} alt={d.n} className="dlx-logo" width={90} height={90} />

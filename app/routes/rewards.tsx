@@ -685,7 +685,7 @@ export default function Rewards() {
                       <div className="ledger-info">
                         <p className="ledger-desc">{entry.description ?? entry.action}</p>
                         <p className="ledger-ref">#{(entry.id as string).slice(0, 8).toUpperCase()}</p>
-                        <p className="ledger-date">{new Date(entry.created_at as string).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}</p>
+                        <p className="ledger-date">{new Date(entry.created_at as string).toLocaleString("en-AU", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" })}</p>
                       </div>
                       <span className="ledger-pts">+{entry.points}</span>
                     </div>

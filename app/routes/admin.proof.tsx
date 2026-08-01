@@ -87,7 +87,7 @@ export default function AdminProof() {
                     <td>{ACTION_LABELS[s.action] ?? s.action}</td>
                     <td className="ledger-ref">{refId ? `#${refId.slice(0, 8).toUpperCase()}` : "—"}</td>
                     <td>{(s.file_paths as string[])?.length ?? 0} files</td>
-                    <td className="admin-muted">{new Date(s.created_at).toLocaleDateString("en-AU")}</td>
+                    <td className="admin-muted">{new Date(s.created_at).toLocaleString("en-AU", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" })}</td>
                     <td><Link to={`/admin/proof/${s.id}`} className="admin-link">Review →</Link></td>
                   </tr>
                 );

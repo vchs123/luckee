@@ -116,7 +116,7 @@ export default function AdminUserDetail() {
                 <td>{e.description ?? "—"}</td>
                 <td><strong>+{e.points}</strong></td>
                 <td className="admin-muted">{e.awarded_by ?? "system"}</td>
-                <td className="admin-muted">{new Date(e.created_at).toLocaleDateString("en-AU")}</td>
+                <td className="admin-muted">{new Date(e.created_at).toLocaleString("en-AU", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" })}</td>
               </tr>
             ))}
           </tbody>
@@ -135,7 +135,7 @@ export default function AdminUserDetail() {
                   <td>{p.action}</td>
                   <td><span className={`proof-badge ${p.status}`}>{p.status}</span></td>
                   <td>{(p.file_paths as string[])?.length ?? 0} files</td>
-                  <td className="admin-muted">{new Date(p.created_at).toLocaleDateString("en-AU")}</td>
+                  <td className="admin-muted">{new Date(p.created_at).toLocaleString("en-AU", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" })}</td>
                   <td><Link to={`/admin/proof/${p.id}`} className="admin-link">Review →</Link></td>
                 </tr>
               ))}
