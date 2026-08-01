@@ -244,11 +244,11 @@ img { max-width: 100%; }
 .dc.rvl .dc-tag { background: var(--rvb); color: var(--rvl); border-color: rgba(26, 86, 219, 0.2); }
 .dc-ft { padding: 0 20px 20px; }
 .dc-cta { display: block; text-align: center; padding: 12px; border-radius: var(--rs); font-size: 14px; font-weight: 800; color: white; transition: all 0.18s; border: none; cursor: pointer; width: 100%; font-family: inherit; position: relative; overflow: hidden; opacity: 0.9; }
-.dc.cld .dc-cta { background: var(--cld); }
-.dc.bls .dc-cta { background: var(--bls); }
-.dc.krs .dc-cta { background: var(--krs); }
-.dc.mac .dc-cta { background: var(--mac); }
-.dc.rvl .dc-cta { background: var(--rvl); }
+.dc.cld .dc-cta, .dl-row.cld .dc-cta { background: var(--cld); }
+.dc.bls .dc-cta, .dl-row.bls .dc-cta { background: var(--bls); }
+.dc.krs .dc-cta, .dl-row.krs .dc-cta { background: var(--krs); }
+.dc.mac .dc-cta, .dl-row.mac .dc-cta { background: var(--mac); }
+.dc.rvl .dc-cta, .dl-row.rvl .dc-cta { background: var(--rvl); }
 .dc-cta:hover { filter: brightness(0.88); transform: translateY(-1px); }
 
 /* ── button shine sweep ── */
