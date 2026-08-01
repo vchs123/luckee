@@ -66,7 +66,7 @@ export function DealExplosion() {
           {DEALS.map((d, i) => (
             <Link
               key={d.cls}
-              to="/deals"
+              to={`/deals#${d.cls}`}
               className="dlx-item"
             >
               <div className="dlx-float" style={{ animationDuration: `${FLOAT_DURATION[i]}s` }}>

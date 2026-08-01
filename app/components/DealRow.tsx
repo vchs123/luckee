@@ -24,7 +24,7 @@ export function DealRow({ deal: d }: { deal: Deal }) {
   }
 
   return (
-    <div className={`dl-row ${d.cls}`}>
+    <div id={d.cls} className={`dl-row ${d.cls}`}>
       <div className="dl-row-left">
         <div className="dl-row-em">{d.e}</div>
         <p className="dl-row-name">{d.n}</p>

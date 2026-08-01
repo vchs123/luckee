@@ -304,6 +304,7 @@ img { max-width: 100%; }
 .dlx-inner { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 40px; padding: 40px 0; }
 .dlx-inner .wrap { width: 100%; text-align: center; }
 .dlx-inner .sec-hd { margin-bottom: 0; }
+.dlx-inner .sec-p { margin: 0 auto; text-align: center; }
 .dlx-stage { position: relative; width: 100%; height: 180px; display: flex; align-items: center; justify-content: center; }
 .dlx-item { position: absolute; transform: translateX(0); will-change: transform; }
 .dlx-float { display: flex; flex-direction: column; align-items: center; gap: 12px; animation: dlxFloat 3s ease-in-out infinite alternate; }
