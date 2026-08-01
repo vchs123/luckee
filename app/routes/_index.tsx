@@ -57,7 +57,7 @@ export default function Home() {
             .from(".hero-h", { y: 30, opacity: 0, duration: 0.6 }, "-=0.1")
             .from(".hero-p", { y: 20, opacity: 0, duration: 0.5 }, "-=0.2")
             .from(".search", { y: 16, opacity: 0, duration: 0.4 }, "-=0.15")
-            .from(".hcat", { y: 12, opacity: 0, duration: 0.35, stagger: 0.04 }, "-=0.1");
+            .from(".hcat", { y: 12, opacity: 0, duration: 0.35, stagger: 0.04, immediateRender: false }, "-=0.1");
 
           // Section header reveals
           document.querySelectorAll(".sec-hd").forEach((el) => {

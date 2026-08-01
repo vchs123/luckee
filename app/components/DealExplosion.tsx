@@ -14,6 +14,10 @@ const LOGO_MAP: Record<string, string> = {
 const SPREAD_X = [-380, -190, 0, 190, 380];
 const FLOAT_DURATION = [2.8, 3.2, 2.6, 3.4, 3.0];
 
+function easeOut(t: number) {
+  return 1 - (1 - t) * (1 - t);
+}
+
 export function DealExplosion() {
   const outerRef = useRef<HTMLDivElement>(null);
 
@@ -21,22 +25,36 @@ export function DealExplosion() {
     const el = outerRef.current;
     if (!el) return;
 
+    const items = Array.from(el.querySelectorAll<HTMLElement>(".dlx-item"));
+
     if (prefersReducedMotion()) {
-      el.classList.add("dlx--entered");
+      items.forEach((item, i) => {
+        item.style.transform = `translateX(${SPREAD_X[i]}px)`;
+      });
       return;
     }
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          el.classList.add("dlx--entered");
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.25 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
+    function update() {
+      const rect = el!.getBoundingClientRect();
+      const vh = window.innerHeight;
+      // How much of the section is visible in the viewport
+      const visible = Math.max(0, Math.min(rect.bottom, vh) - Math.max(rect.top, 0));
+      const maxVisible = Math.min(rect.height, vh);
+      // Reach full spread when 75% of max-visible height is in view
+      const raw = maxVisible > 0 ? visible / (maxVisible * 0.75) : 0;
+      const progress = easeOut(Math.min(1, raw));
+
+      items.forEach((item, i) => {
+        item.style.transform = `translateX(${SPREAD_X[i] * progress}px)`;
+      });
+    }
+
+    window.addEventListener("scroll", update, { passive: true });
+    update();
+    return () => {
+      window.removeEventListener("scroll", update);
+      items.forEach(item => { item.style.transform = ""; });
+    };
   }, []);
 
   return (
