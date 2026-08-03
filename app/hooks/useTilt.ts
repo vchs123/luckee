@@ -1,25 +1,24 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { prefersReducedMotion } from "~/lib/reducedMotion";
 
-export function useTilt(selector: string) {
-  useEffect(() => {
-    if (prefersReducedMotion()) return;
-    if (!window.matchMedia("(pointer: fine)").matches) return;
-    let destroy: (() => void) | null = null;
-    import("vanilla-tilt").then(({ default: VanillaTilt }) => {
-      const cards = Array.from(document.querySelectorAll<HTMLElement>(selector));
-      if (!cards.length) return;
-      VanillaTilt.init(cards, {
-        max: 7,
-        speed: 400,
-        glare: true,
-        "max-glare": 0.12,
-        perspective: 800,
-      });
-      destroy = () =>
-        cards.forEach((c) => (c as HTMLElement & { vanillaTilt?: { destroy: () => void } }).vanillaTilt?.destroy());
+type VanillaTiltEl = HTMLElement & { vanillaTilt?: { destroy: () => void } };
 
+const TILT_OPTS = { max: 7, speed: 400, glare: true, "max-glare": 0.12, perspective: 800 };
+
+export function useTilt<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || prefersReducedMotion()) return;
+    if (!window.matchMedia("(pointer: fine)").matches) return;
+
+    import("vanilla-tilt").then(({ default: VanillaTilt }) => {
+      if (ref.current) VanillaTilt.init([ref.current], TILT_OPTS);
     });
-    return () => destroy?.();
-  }, [selector]);
+
+    return () => (el as VanillaTiltEl).vanillaTilt?.destroy();
+  }, []);
+
+  return ref;
 }

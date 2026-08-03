@@ -1,7 +1,8 @@
 import { Form, useActionData, useLoaderData, useNavigation } from "react-router";
 import { redirect } from "react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { MetaFunction, ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
+import { isSoundEnabled, setSoundEnabled } from "~/lib/sound";
 import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
 import { requireAuth } from "~/lib/auth.server";
@@ -18,13 +19,45 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const user = await requireAuth(request, env);
   if (user.email === "luckee.app@gmail.com") return redirect("/admin");
   const supabase = getSupabase(env);
+
   const { data: profile } = await supabase
     .from("user_profiles")
     .select("*")
     .eq("id", user.id)
     .single();
   if (!profile) return redirect("/profile/setup");
-  return { email: user.email!, profile };
+
+  // Referral ledger: who signed up via my link
+  const { data: referred } = await supabase
+    .from("user_profiles")
+    .select("id, first_name, created_at")
+    .eq("referred_by", user.id)
+    .order("created_at", { ascending: false });
+
+  // For each referred user, check if they completed a deal signup
+  const referrals = await Promise.all(
+    (referred ?? []).map(async (r) => {
+      const { data: proof } = await supabase
+        .from("proof_submissions")
+        .select("id")
+        .eq("user_id", r.id)
+        .eq("action", "referral_signup")
+        .eq("status", "approved")
+        .maybeSingle();
+      return { id: r.id as string, firstName: r.first_name as string | null, joinedAt: r.created_at as string, completedDeal: !!proof };
+    })
+  );
+
+  // Points earned from referrals
+  const { data: refPtsRows } = await supabase
+    .from("points_ledger")
+    .select("action, points")
+    .eq("user_id", user.id)
+    .in("action", ["referral_account", "referral_deal"]);
+
+  const referralPts = (refPtsRows ?? []).reduce((sum, r) => sum + (r.points as number), 0);
+
+  return { email: user.email!, profile, referrals, referralPts };
 }
 
 export async function action({ request, context }: ActionFunctionArgs) {
@@ -90,12 +123,19 @@ export async function action({ request, context }: ActionFunctionArgs) {
 }
 
 export default function Profile() {
-  const { email, profile } = useLoaderData<typeof loader>();
+  const { email, profile, referrals, referralPts } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const submitting = navigation.state === "submitting";
   const [tab, setTab] = useState<"profile" | "referral" | "socials">("profile");
   const [copied, setCopied] = useState(false);
+  const [soundOn, setSoundOn] = useState(false);
+  useEffect(() => { setSoundOn(isSoundEnabled()); }, []);
+  const toggleSound = () => {
+    const next = !soundOn;
+    setSoundOn(next);
+    setSoundEnabled(next);
+  };
 
   const codes = ["+852", "+65", "+64", "+44", "+1", "+61"];
   const stored = profile.mobile ?? "";
@@ -133,6 +173,12 @@ export default function Profile() {
               <button className={`profile-tab${tab === "profile" ? " active" : ""}`} onClick={() => setTab("profile")}>Profile</button>
               <button className={`profile-tab${tab === "referral" ? " active" : ""}`} onClick={() => setTab("referral")}>Referral</button>
               <button className={`profile-tab${tab === "socials" ? " active" : ""}`} onClick={() => setTab("socials")}>Socials</button>
+            </div>
+            <div className="sound-pref">
+              <span className="sound-pref-label">{soundOn ? "🔊" : "🔇"} Sounds</span>
+              <button className={`sound-toggle${soundOn ? " on" : ""}`} onClick={toggleSound} type="button" aria-label="Toggle sounds">
+                <span className="sound-knob" />
+              </button>
             </div>
 
             {tab === "profile" && (
@@ -207,6 +253,29 @@ export default function Profile() {
                 <button className="btn-pink referral-copy" onClick={handleCopy}>
                   {copied ? "✓ Copied!" : "Copy link"}
                 </button>
+
+                <div className="ref-ledger">
+                  <div className="ref-ledger-hd">
+                    <h4>Your referrals</h4>
+                    {referralPts > 0 && <span className="ref-pts-earned">+{referralPts} pts earned</span>}
+                  </div>
+                  {referrals.length === 0 ? (
+                    <p className="ref-empty">No referrals yet — share your link to start earning!</p>
+                  ) : (
+                    <table className="ref-table">
+                      <thead><tr><th>Name</th><th>Joined</th><th>Deal</th></tr></thead>
+                      <tbody>
+                        {referrals.map(r => (
+                          <tr key={r.id}>
+                            <td>{r.firstName ?? "—"}</td>
+                            <td className="ref-date">{new Date(r.joinedAt).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}</td>
+                            <td>{r.completedDeal ? <span className="ref-done">✓ Done</span> : <span className="ref-pending">Pending</span>}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
               </div>
             )}
 

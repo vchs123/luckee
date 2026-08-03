@@ -1,9 +1,12 @@
-import { Form, useActionData, useNavigation } from "react-router";
-import { useEffect } from "react";
-import type { MetaFunction, ActionFunctionArgs } from "react-router";
+import { Form, useActionData, useNavigation, useLoaderData } from "react-router";
+import { useEffect, useRef } from "react";
+import type { MetaFunction, ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
+import { getSupabase } from "~/lib/supabase.server";
 import { MELBOURNE_SUBURBS } from "~/data/suburbs";
+import { prefersReducedMotion } from "~/lib/reducedMotion";
+import { initScrollReveals } from "~/lib/scrollReveal";
 
 export const meta: MetaFunction = () => [
   { title: "Community Dinners — Language-Matched Dining in Melbourne | Luckee" },
@@ -11,6 +14,20 @@ export const meta: MetaFunction = () => [
   { property: "og:title", content: "Community Dinners Melbourne | Luckee" },
   { tagName: "link", rel: "canonical", href: "https://luckee-app.pages.dev/dinners" },
 ];
+
+export async function loader({ context }: LoaderFunctionArgs) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const env = (context as any)?.cloudflare?.env as Env;
+  try {
+    const supabase = getSupabase(env);
+    const { count } = await supabase
+      .from("dinner_waitlist")
+      .select("*", { count: "exact", head: true });
+    return { waitlistCount: count ?? 0 };
+  } catch {
+    return { waitlistCount: 0 };
+  }
+}
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const { getSupabase } = await import("~/lib/supabase.server");
@@ -104,9 +121,11 @@ function waitlistEmailHtml(firstName: string, language: string) {
 }
 
 export default function Dinners() {
+  const { waitlistCount } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const submitting = navigation.state === "submitting";
+  const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (actionData?.success && typeof window !== "undefined" && (window as any).gtag) {
@@ -114,10 +133,15 @@ export default function Dinners() {
     }
   }, [actionData?.success]);
 
+  useEffect(() => {
+    if (prefersReducedMotion() || !rootRef.current) return;
+    initScrollReveals(rootRef.current);
+  }, []);
+
   return (
     <>
       <Nav />
-      <div className="wrap">
+      <div className="wrap" ref={rootRef}>
         <div className="sec-hd">
           <p className="eyebrow">🍜 Community dining</p>
           <h1 className="sec-h">Community Dinners</h1>
@@ -135,6 +159,9 @@ export default function Dinners() {
             <h3 style={{ fontFamily: "'Fraunces', serif", fontStyle: "italic", fontSize: 20, fontWeight: 700, color: "var(--t1)", marginBottom: 16 }}>Join the waitlist</h3>
             <div className="wf">
               <h3>Register your interest</h3>
+              {waitlistCount > 0 && (
+                <p className="dinner-count">{waitlistCount} {waitlistCount === 1 ? "person" : "people"} on the waitlist</p>
+              )}
               <p className="wf-sub">Once you're matched, I'll reach out by email with date, venue and payment details. No commitment until you confirm.</p>
 
               {actionData?.success ? (

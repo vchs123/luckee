@@ -7,5 +7,6 @@ export function useAuth() {
     user: data?.user ?? null,
     profile: data?.profile ?? null,
     isAdmin: data?.user?.email === "luckee.app@gmail.com",
+    luckboard: (data?.luckboard ?? {}) as Record<string, string>,
   };
 }

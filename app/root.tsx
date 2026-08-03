@@ -40,21 +40,23 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   }
 
   let profile: { username: string; totalPoints: number } | null = null;
+  let luckboard: Record<string, string> = {};
   if (user) {
     try {
       const supabase = getSupabase(env);
-      const { data: p } = await supabase
-        .from("user_profiles")
-        .select("username, total_points")
-        .eq("id", user.id)
-        .single();
-      if (p) profile = { username: p.username, totalPoints: p.total_points };
+      const [profileRes, lbRes] = await Promise.all([
+        supabase.from("user_profiles").select("username, total_points").eq("id", user.id).single(),
+        supabase.from("luckboard").select("item_type, item_slug, status").eq("user_id", user.id),
+      ]);
+      if (profileRes.data) profile = { username: profileRes.data.username, totalPoints: profileRes.data.total_points };
+      if (lbRes.data) lbRes.data.forEach(r => { luckboard[`${r.item_type}:${r.item_slug}`] = r.status as string; });
     } catch { /* non-fatal */ }
   }
 
   const payload = {
     user: user ? { id: user.id, email: user.email! } : null,
     profile,
+    luckboard,
   };
 
   if (extraCookies) {

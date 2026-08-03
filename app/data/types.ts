@@ -18,6 +18,8 @@ export interface Experience {
   d: string;
   t: string;
   col: "melb" | "amber";
+  lat?: number;
+  lng?: number;
 }
 
 export interface Event {

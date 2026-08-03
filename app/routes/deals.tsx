@@ -1,8 +1,11 @@
+import { useEffect, useRef } from "react";
 import type { MetaFunction } from "react-router";
 import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
 import { DealRow } from "~/components/DealRow";
 import { DEALS } from "~/data/deals";
+import { prefersReducedMotion } from "~/lib/reducedMotion";
+import { initScrollReveals } from "~/lib/scrollReveal";
 
 export const meta: MetaFunction = () => [
   { title: "Deals I Recommend — Referral Bonuses & Savings Apps | Luckee" },
@@ -12,10 +15,20 @@ export const meta: MetaFunction = () => [
 ];
 
 export default function Deals() {
+  const rootRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (prefersReducedMotion() || !rootRef.current) return;
+    let cleanup: (() => void) | undefined;
+    initScrollReveals(rootRef.current).then(() => {
+      cleanup = undefined;
+    });
+    return () => { cleanup?.(); };
+  }, []);
+
   return (
     <>
       <Nav />
-      <div className="wrap">
+      <div className="wrap" ref={rootRef}>
         <div className="sec-hd">
           <p className="eyebrow">💸 Referral deals</p>
           <h1 className="sec-h">Deals I recommend</h1>

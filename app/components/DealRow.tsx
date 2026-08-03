@@ -1,6 +1,10 @@
+import { useState, useEffect } from "react";
+import { useFetcher } from "react-router";
 import type { Deal } from "~/data/types";
 import { BLOSSOM_TIERS } from "~/data/deals";
 import { useAuth } from "~/hooks/useAuth";
+import { useTilt } from "~/hooks/useTilt";
+import { LuckboardToggle } from "~/components/LuckboardToggle";
 
 const LOGO_MAP: Record<string, string> = {
   cld: "/claude-logo.png",
@@ -12,6 +16,17 @@ const LOGO_MAP: Record<string, string> = {
 
 export function DealRow({ deal: d }: { deal: Deal }) {
   const { user } = useAuth();
+  const fetcher = useFetcher<{ ok: boolean; pts: number }>();
+  const tiltRef = useTilt<HTMLDivElement>();
+  const [toast, setToast] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (fetcher.state === "idle" && fetcher.data?.pts) {
+      setToast(`+${fetcher.data.pts} pts`);
+      const t = setTimeout(() => setToast(null), 2500);
+      return () => clearTimeout(t);
+    }
+  }, [fetcher.state, fetcher.data]);
 
   function handleClick() {
     if (typeof window !== "undefined" && (window as any).gtag) {
@@ -23,16 +38,16 @@ export function DealRow({ deal: d }: { deal: Deal }) {
       body: JSON.stringify({ deal_name: d.n }),
     }).catch(() => {});
     if (user) {
-      fetch("/api/award-points", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "deal_click", description: `Clicked ${d.n} deal` }),
-      }).catch(() => {});
+      fetcher.submit(
+        { action: "deal_click", description: `Clicked ${d.n} deal` },
+        { method: "POST", action: "/api/award-points", encType: "application/json" },
+      );
     }
   }
 
   return (
-    <div id={d.cls} className={`dl-row ${d.cls}`}>
+    <div ref={tiltRef} id={d.cls} className={`dl-row ${d.cls}`} style={{ position: "relative" }}>
+      {toast && <div className="pts-toast">{toast}</div>}
       <div className="dl-row-left">
         <img src={LOGO_MAP[d.cls]} alt={d.n} className="dl-row-logo" width={80} height={80} />
         <p className="dl-row-name">{d.n}</p>
@@ -76,15 +91,18 @@ export function DealRow({ deal: d }: { deal: Deal }) {
           ))}
         </div>
 
-        <a
-          href={d.link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="dc-cta"
-          onClick={handleClick}
-        >
-          {d.cta.endsWith("→") ? <>{d.cta.slice(0, -1)}<span className="arrow">→</span></> : d.cta}
-        </a>
+        <div className="dl-row-actions">
+          <a
+            href={d.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="dc-cta"
+            onClick={handleClick}
+          >
+            {d.cta.endsWith("→") ? <>{d.cta.slice(0, -1)}<span className="arrow">→</span></> : d.cta}
+          </a>
+          <LuckboardToggle itemType="deal" itemSlug={d.cls} />
+        </div>
       </div>
     </div>
   );

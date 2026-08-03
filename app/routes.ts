@@ -22,6 +22,7 @@ export default [
   route("profile/setup", "routes/profile.setup.tsx"),
   route("profile", "routes/profile.tsx"),
   route("r/:username", "routes/r.$username.tsx"),
+  route("luckboard", "routes/luckboard.tsx"),
 
   // Admin
   layout("routes/admin-layout.tsx", [
@@ -43,6 +44,7 @@ export default [
   route("api/proof", "routes/api.proof.tsx"),
   route("api/proof/upload-url", "routes/api.proof.upload-url.tsx"),
   route("api/track-click", "routes/api.track-click.tsx"),
+  route("api/luckboard", "routes/api.luckboard.tsx"),
 
   route("sitemap.xml", "routes/sitemap.xml.tsx"),
   route("robots.txt", "routes/robots.txt.tsx"),

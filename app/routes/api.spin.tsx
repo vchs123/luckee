@@ -1,6 +1,7 @@
 import type { ActionFunctionArgs } from "react-router";
 import { requireAuth } from "~/lib/auth.server";
 import { getSupabase } from "~/lib/supabase.server";
+import { melbToday } from "~/lib/melbDate";
 
 const SEGMENTS = [
   { pts: 10,  pct: 35 },
@@ -28,7 +29,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const env = (context as any)?.cloudflare?.env as Env;
   const user = await requireAuth(request, env);
   const supabase = getSupabase(env);
-  const today = new Date().toISOString().slice(0, 10);
+  const today = melbToday();
 
   // Check if already spun today
   const { data: existing } = await supabase

@@ -74,7 +74,8 @@ export function Nav() {
                       ) : (
                         <>
                           <Link to="/profile" onClick={() => setProfileOpen(false)}><span>👤</span> My profile</Link>
-                          <Link to="/rewards" onClick={() => setProfileOpen(false)}><span>⭐</span> Rewards</Link>
+                          <Link to="/luckboard" onClick={() => setProfileOpen(false)}><span>⭐</span> Luckboard</Link>
+                          <Link to="/rewards" onClick={() => setProfileOpen(false)}><span>🎡</span> Rewards</Link>
                         </>
                       )}
                       <Form method="post" action="/api/logout">
@@ -108,7 +109,10 @@ export function Nav() {
             {isAdmin ? (
               <Link to="/admin" onClick={() => setMobileOpen(false)}>Admin dashboard</Link>
             ) : (
-              <Link to="/profile" onClick={() => setMobileOpen(false)}>My profile {profile ? `· ${profile.totalPoints} pts` : ""}</Link>
+              <>
+                <Link to="/profile" onClick={() => setMobileOpen(false)}>My profile {profile ? `· ${profile.totalPoints} pts` : ""}</Link>
+                <Link to="/luckboard" onClick={() => setMobileOpen(false)}>Luckboard</Link>
+              </>
             )}
             <Form method="post" action="/api/logout">
               <button type="submit" className="ind"><span>🚪</span> Sign out</button>

@@ -4,7 +4,7 @@ export const MELB_TRANSPORT: Experience[] = [
   {
     e: "🚃", cat: "Getting around", n: "Free Tram Zone",
     d: "All trams within the CBD and Docklands are free — no myki needed. Includes the City Circle heritage tram. If you tap on accidentally, you'll be charged Zone 1.",
-    t: "Always free", col: "melb",
+    t: "Always free", col: "melb", lat: -37.8136, lng: 144.9631,
   },
   {
     e: "🎟️", cat: "Getting around", n: "Half-price public transport",
@@ -22,32 +22,32 @@ export const MELB_CULTURE: Experience[] = [
   {
     e: "🎨", cat: "Culture & arts", n: "NGV International & Ian Potter Centre",
     d: "Two world-class galleries, permanent collections always free. Ian Potter Centre (Federation Square) covers Australian art; NGV International (St Kilda Rd) covers international art. Ticketed exhibitions charged separately.",
-    t: "Always free (permanent)", col: "melb",
+    t: "Always free (permanent)", col: "melb", lat: -37.8225, lng: 144.9690,
   },
   {
     e: "📽️", cat: "Culture & arts", n: "ACMI — Australian Centre for the Moving Image",
     d: "The Story of the Moving Image permanent gallery is free. Federation Square. Films, games, TV and digital culture from the last 100+ years.",
-    t: "Always free (permanent)", col: "melb",
+    t: "Always free (permanent)", col: "melb", lat: -37.8180, lng: 144.9692,
   },
   {
     e: "📚", cat: "Culture & arts", n: "State Library Victoria",
     d: "Free entry, free WiFi (fastest indoor WiFi in Melbourne), free exhibitions. Dome to Catacombs history walking tours almost daily — book online. Near Melbourne Central station.",
-    t: "Always free", col: "melb",
+    t: "Always free", col: "melb", lat: -37.8099, lng: 144.9640,
   },
   {
     e: "🏛️", cat: "Culture & arts", n: "Shrine of Remembrance",
     d: "Free entry, including the balcony with panoramic Melbourne views. The Undercroft and galleries are free. Tours available.",
-    t: "Always free", col: "melb",
+    t: "Always free", col: "melb", lat: -37.8304, lng: 144.9736,
   },
   {
     e: "🎵", cat: "Culture & arts", n: "Australian Music Vault",
     d: "At Arts Centre Melbourne. Free interactive exhibition covering 60+ years of Australian music — from Melbourne bands to contemporary pop.",
-    t: "Always free", col: "melb",
+    t: "Always free", col: "melb", lat: -37.8212, lng: 144.9683,
   },
   {
     e: "🖼️", cat: "Culture & arts", n: "City Gallery at Melbourne Town Hall",
     d: "Free rotating exhibitions celebrating Melbourne stories, history and culture. Open during business hours.",
-    t: "Always free", col: "melb",
+    t: "Always free", col: "melb", lat: -37.8136, lng: 144.9665,
   },
 ];
 
@@ -83,17 +83,17 @@ export const MELB_OUTDOORS: Experience[] = [
   {
     e: "🌺", cat: "Markets & outdoors", n: "Royal Botanic Gardens",
     d: "36 hectares of free gardens along the Yarra. Free guided walks available. Picnic-friendly. Near Domain Rd tram stop.",
-    t: "Always free", col: "melb",
+    t: "Always free", col: "melb", lat: -37.8304, lng: 144.9798,
   },
   {
     e: "🎨", cat: "Markets & outdoors", n: "Hosier Lane & street art laneways",
     d: "Melbourne's famous laneway art — Hosier Lane, Rutledge Lane, AC/DC Lane and more. Self-guided, always free, ever-changing.",
-    t: "Always free", col: "melb",
+    t: "Always free", col: "melb", lat: -37.8180, lng: 144.9686,
   },
   {
     e: "🛒", cat: "Markets & outdoors", n: "Queen Victoria Market",
     d: "Free to wander. Sample-friendly stallholders in the Dairy Hall and deli sheds. Night Markets (Summer and Winter) have free entry and live music.",
-    t: "Open Tue–Sun", col: "melb",
+    t: "Open Tue–Sun", col: "melb", lat: -37.8072, lng: 144.9568,
   },
   {
     e: "📶", cat: "Markets & outdoors", n: "VicFreeWiFi — 500+ hotspots",

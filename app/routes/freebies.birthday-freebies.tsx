@@ -1,12 +1,29 @@
-"use client";
 import { useState, useEffect } from "react";
-import { useSearchParams, Link } from "react-router";
-import type { MetaFunction } from "react-router";
+import { useSearchParams, Link, useLoaderData } from "react-router";
+import type { MetaFunction, LoaderFunctionArgs } from "react-router";
 import { FreebieCard } from "~/components/FreebieCard";
 import { FilterBar, type FilterType } from "~/components/FilterBar";
 import { TipBox } from "~/components/TipBox";
 import { BDAY_FOOD } from "~/data/birthday-food";
 import { BDAY_BEAUTY } from "~/data/birthday-beauty";
+import { verifyUser } from "~/lib/auth.server";
+import { getSupabase } from "~/lib/supabase.server";
+
+export async function loader({ request, context }: LoaderFunctionArgs) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const env = (context as any)?.cloudflare?.env as Env;
+  const user = await verifyUser(request, env);
+  if (!user) return { daysUntilBirthday: null };
+  const supabase = getSupabase(env);
+  const { data: p } = await supabase.from("user_profiles").select("dob").eq("id", user.id).single();
+  if (!p?.dob) return { daysUntilBirthday: null };
+  const now = new Date(new Date().toLocaleString("en-AU", { timeZone: "Australia/Melbourne" }));
+  const birthMonth = new Date(p.dob + "T00:00:00").getMonth();
+  const nextBday = new Date(now.getFullYear(), birthMonth, 1);
+  if (nextBday <= now) nextBday.setFullYear(nextBday.getFullYear() + 1);
+  const days = Math.ceil((nextBday.getTime() - now.getTime()) / 86400000);
+  return { daysUntilBirthday: days < 365 ? days : null };
+}
 
 export const meta: MetaFunction = () => [
   { title: "Birthday Freebies Melbourne 2026 — 15+ Verified Offers | Luckee" },
@@ -17,6 +34,7 @@ export const meta: MetaFunction = () => [
 ];
 
 export default function BirthdayFreebies() {
+  const { daysUntilBirthday } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
   const paramFilter = searchParams.get("filter");
   const [filter, setFilter] = useState<FilterType>(
@@ -58,7 +76,7 @@ export default function BirthdayFreebies() {
         <>
           <div className="ssh food">🍔 Food & Drink</div>
           <div className="ga">
-            {foodItems.map(f => <FreebieCard key={f.n} freebie={f} />)}
+            {foodItems.map(f => <FreebieCard key={f.n} freebie={f} daysUntilBirthday={daysUntilBirthday} />)}
           </div>
         </>
       )}
@@ -67,7 +85,7 @@ export default function BirthdayFreebies() {
         <>
           <div className="ssh bty" style={{ marginTop: showFood ? 40 : 0 }}>💄 Beauty & Retail</div>
           <div className="ga">
-            {beautyItems.map(f => <FreebieCard key={f.n} freebie={f} />)}
+            {beautyItems.map(f => <FreebieCard key={f.n} freebie={f} daysUntilBirthday={daysUntilBirthday} />)}
           </div>
         </>
       )}

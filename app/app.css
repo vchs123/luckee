@@ -1,4 +1,5 @@
 @import "tailwindcss" source(".");
+@import "leaflet/dist/leaflet.css";
 
 /* ── design tokens ── */
 :root {
@@ -721,3 +722,135 @@ img { max-width: 100%; }
   .dlx-item { position: static; transform: none !important; }
   .dlx-float { animation: none; }
 }
+
+/* ── pts toast (deal click feedback) ── */
+.pts-toast {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: var(--pink);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 999px;
+  pointer-events: none;
+  animation: toastIn 0.2s ease, toastOut 0.3s ease 2.2s forwards;
+  z-index: 10;
+}
+@keyframes toastIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes toastOut { to { opacity: 0; transform: translateY(-6px); } }
+
+/* ── dinner waitlist count ── */
+.dinner-count {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--pink);
+  background: var(--pm);
+  border-radius: var(--rp);
+  padding: 4px 12px;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+/* ── vanilla-tilt: smooth transition on mouse-leave ── */
+.fc, .xc, .dl-row { transition: transform 0.15s ease, box-shadow 0.15s ease; transform-style: preserve-3d; }
+
+/* ── luckboard toggle (on cards) ── */
+.lb-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 1.5px solid var(--cb); background: transparent;
+  font-size: 13px; cursor: pointer; flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  color: var(--t3);
+}
+.lb-toggle.lb-want { background: #fff7ed; border-color: #f59e0b; color: #f59e0b; }
+.lb-toggle.lb-done { background: #f0fdf4; border-color: #16a34a; color: #16a34a; }
+.lb-toggle.lb-skip { background: #f9f9f9; border-color: #d1c4d8; color: #a08bb8; }
+.lb-toggle:hover { border-color: var(--pink); color: var(--pink); }
+
+/* ── fc-ft: row with toggle ── */
+.fc-ft { display: flex; align-items: center; gap: 10px; }
+
+/* ── xc-foot: tag + toggle row ── */
+.xc-foot { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+
+/* ── dl-row-actions: cta + toggle ── */
+.dl-row-actions { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+
+/* ── luckboard page ── */
+.lb-stats { display: flex; gap: 24px; margin: 24px 0 32px; flex-wrap: wrap; }
+.lb-stat { display: flex; flex-direction: column; background: var(--card); border-radius: var(--rs); border: 1px solid var(--cb); padding: 16px 24px; min-width: 100px; text-align: center; }
+.lb-stat-n { font-family: 'Fraunces', serif; font-size: 36px; font-weight: 700; color: var(--t1); line-height: 1; }
+.lb-stat-l { font-size: 12px; color: var(--t3); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+.lb-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+.lb-filter-btn { padding: 6px 14px; border-radius: 999px; border: 1.5px solid var(--cb); background: transparent; font-size: 13px; font-weight: 600; color: var(--t2); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.15s; }
+.lb-filter-btn.active, .lb-filter-btn:hover { background: var(--pink); border-color: var(--pink); color: #fff; }
+.lb-filter-ct { background: rgba(255,255,255,0.3); border-radius: 999px; padding: 1px 7px; font-size: 11px; }
+.lb-filter-btn:not(.active) .lb-filter-ct { background: var(--pm); color: var(--pink); }
+
+.lb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+.lb-card { background: var(--card); border-radius: var(--rs); border: 1.5px solid var(--cb); padding: 16px; display: flex; flex-direction: column; gap: 6px; transition: border-color 0.15s; }
+.lb-card.lb-want { border-color: #f59e0b; }
+.lb-card.lb-done { border-color: #16a34a; }
+.lb-card.lb-skip { opacity: 0.55; }
+
+.lb-card-top { display: flex; justify-content: space-between; align-items: center; }
+.lb-type-badge { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--t3); background: var(--pm); border-radius: var(--rp); padding: 2px 8px; }
+.lb-name { font-weight: 800; font-size: 14px; color: var(--t1); margin-top: 4px; }
+.lb-sub { font-size: 12px; color: var(--t2); }
+.lb-status-label { font-size: 11px; font-weight: 700; color: var(--t3); margin-top: 4px; }
+.lb-card.lb-want .lb-status-label { color: #f59e0b; }
+.lb-card.lb-done .lb-status-label { color: #16a34a; }
+.lb-empty { font-size: 14px; color: var(--t3); padding: 40px 0; text-align: center; }
+
+/* ── Referral ledger (profile page) ── */
+.ref-ledger { margin-top: 24px; }
+.ref-ledger-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.ref-ledger-hd h4 { font-size: 14px; font-weight: 800; color: var(--t1); margin: 0; }
+.ref-pts-earned { font-size: 13px; font-weight: 700; color: #16a34a; background: #f0fdf4; border-radius: var(--rp); padding: 3px 10px; }
+.ref-empty { font-size: 13px; color: var(--t3); text-align: center; padding: 20px 0; }
+.ref-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ref-table th { text-align: left; font-weight: 700; color: var(--t2); padding: 6px 8px; border-bottom: 1.5px solid var(--cb); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+.ref-table td { padding: 8px 8px; border-bottom: 1px solid var(--cb); color: var(--t1); }
+.ref-table tr:last-child td { border-bottom: none; }
+.ref-date { color: var(--t2) !important; }
+.ref-done { color: #16a34a; font-weight: 700; }
+.ref-pending { color: var(--t3); font-size: 12px; }
+
+/* ── Admin god mode additions ── */
+.admin-ref-chain { }
+.admin-ref-section { }
+.admin-ref-label { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--t3); margin: 0 0 6px; }
+.admin-ref-user { font-size: 13px; color: var(--t1); }
+.admin-streak { font-size: 14px; color: var(--t1); margin: 0 0 12px; }
+.admin-login-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.admin-login-dot { font-size: 11px; background: var(--pm); color: var(--pink); border-radius: 6px; padding: 3px 7px; font-weight: 700; }
+
+.lb-admin-badge { font-size: 11px; font-weight: 700; border-radius: var(--rp); padding: 2px 8px; }
+.lb-admin-want { background: #fef3c7; color: #92400e; }
+.lb-admin-done { background: #dcfce7; color: #166534; }
+.lb-admin-skip { background: #f1f5f9; color: #64748b; }
+.lb-admin-unexplored { background: var(--pm); color: var(--t2); }
+
+/* ── Birthday countdown on freebie cards ── */
+.fc-bday-cd { display: flex; gap: 6px; align-items: flex-start; font-size: 12px; color: var(--pink); font-weight: 700; margin-top: 4px; }
+
+/* ── Free Melbourne map ── */
+.melb-view-toggle { display: flex; gap: 8px; margin: 24px 0 16px; }
+.melb-vbtn { background: var(--pm); border: none; border-radius: var(--rp); padding: 8px 20px; font-size: 13px; font-weight: 700; color: var(--t2); cursor: pointer; font-family: inherit; transition: background 0.15s, color 0.15s; }
+.melb-vbtn.active { background: var(--melb); color: #fff; }
+.melb-map-wrap { border-radius: var(--r); overflow: hidden; border: 1.5px solid var(--cb); margin-bottom: 32px; }
+.melb-map { height: 460px; width: 100%; }
+.melb-map-loading { height: 460px; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--t3); }
+.melb-marker { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; font-size: 22px; background: #fff; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.22); border: 2.5px solid var(--melb); }
+
+/* ── Sound toggle ── */
+.sound-pref { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-top: 1px solid var(--cb); margin-top: 8px; }
+.sound-pref-label { font-size: 13px; font-weight: 700; color: var(--t2); }
+.sound-toggle { width: 42px; height: 24px; border-radius: 12px; border: none; background: var(--cb); cursor: pointer; position: relative; transition: background 0.2s; padding: 0; }
+.sound-toggle.on { background: var(--pink); }
+.sound-knob { display: block; width: 18px; height: 18px; background: #fff; border-radius: 50%; position: absolute; top: 3px; left: 3px; transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+.sound-toggle.on .sound-knob { left: 21px; }

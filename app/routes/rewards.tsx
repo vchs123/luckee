@@ -6,14 +6,24 @@ import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
 import { verifyUser } from "~/lib/auth.server";
 import { getSupabase } from "~/lib/supabase.server";
+import { melbToday } from "~/lib/melbDate";
+import { playChime } from "~/lib/sound";
 
 export const meta: MetaFunction = () => [
   { title: "Rewards — Earn Points & Win Prizes | Luckee" },
   { name: "description", content: "Spin the wheel, answer trivia, earn points and enter the monthly draw. Every 100 points = 1 entry." },
 ];
 
-function todayDate() {
-  return new Date().toISOString().slice(0, 10);
+function computeStreak(dates: string[]): number {
+  if (!dates.length) return 0;
+  let streak = 1;
+  for (let i = 0; i < dates.length - 1; i++) {
+    const a = new Date(dates[i]).getTime();
+    const b = new Date(dates[i + 1]).getTime();
+    if ((a - b) / 86400000 === 1) streak++;
+    else break;
+  }
+  return streak;
 }
 
 function seedShuffle<T>(arr: T[], seed: number): T[] {
@@ -35,16 +45,19 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   if (user.email === "luckee.app@gmail.com") return redirect("/admin");
 
   const supabase = getSupabase(env);
-  const today = todayDate();
+  const today = melbToday();
 
-  const [profileRes, ledgerRes, spinRes, triviaRes, proofRes, qsRes] = await Promise.all([
+  const [profileRes, ledgerRes, spinRes, triviaRes, proofRes, qsRes, loginsRes] = await Promise.all([
     supabase.from("user_profiles").select("*").eq("id", user.id).single(),
     supabase.from("points_ledger").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(100),
     supabase.from("daily_spins").select("*").eq("user_id", user.id).eq("spin_date", today).maybeSingle(),
     supabase.from("daily_trivia_attempts").select("*").eq("user_id", user.id).eq("trivia_date", today).maybeSingle(),
     supabase.from("proof_submissions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
     supabase.from("trivia_questions").select("*").eq("active", true),
+    supabase.from("daily_logins").select("login_date").eq("user_id", user.id).order("login_date", { ascending: false }).limit(400),
   ]);
+
+  const streak = computeStreak((loginsRes.data ?? []).map(l => l.login_date as string));
 
   // Award daily login points (once per day)
   const loginCheckRes = await supabase
@@ -88,6 +101,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     triviaScore: triviaRes.data?.score ?? null,
     proofSubmissions: proofRes.data ?? [],
     triviaQuestions: dailyQuestions,
+    streak,
   };
 }
 
@@ -180,6 +194,7 @@ function SpinWheel({ hasSpunToday, initialPtsWon }: { hasSpunToday: boolean; ini
         setShowResult(true);
         setSpinning(false);
         setRotation(finalAngle % 360);
+        playChime();
         revalidator.revalidate();
       }, 4200);
     }
@@ -591,7 +606,7 @@ export default function Rewards() {
     );
   }
 
-  const { profile, ledger, hasSpunToday, spinPointsWon, triviaCompleted, triviaScore, proofSubmissions, triviaQuestions } = data;
+  const { profile, ledger, hasSpunToday, spinPointsWon, triviaCompleted, triviaScore, proofSubmissions, triviaQuestions, streak } = data;
 
   const [filterAction, setFilterAction] = useState("all");
   const [filterPeriod, setFilterPeriod] = useState("all");
@@ -630,6 +645,11 @@ export default function Rewards() {
             <div className="rewards-stat">
               <span className="rewards-stat-n">{profile.monthly_entries ?? 0}</span>
               <span className="rewards-stat-l">draw entries</span>
+            </div>
+            <div className="rewards-stat-div" />
+            <div className="rewards-stat">
+              <span className="rewards-stat-n">{streak} 🔥</span>
+              <span className="rewards-stat-l">day streak</span>
             </div>
           </div>
           <p className="rewards-hero-sub">Every 100 pts = 1 monthly lucky draw entry</p>

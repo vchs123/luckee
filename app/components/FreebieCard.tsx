@@ -1,7 +1,11 @@
 import type { Freebie } from "~/data/types";
+import { useTilt } from "~/hooks/useTilt";
+import { LuckboardToggle } from "~/components/LuckboardToggle";
+import { slugify } from "~/lib/slugify";
 
 interface Props {
   freebie: Freebie;
+  daysUntilBirthday?: number | null;
 }
 
 const CAT_LABEL: Record<string, string> = {
@@ -10,9 +14,10 @@ const CAT_LABEL: Record<string, string> = {
   sgn: "Sign-up bonus",
 };
 
-export function FreebieCard({ freebie: f }: Props) {
+export function FreebieCard({ freebie: f, daysUntilBirthday }: Props) {
+  const ref = useTilt<HTMLDivElement>();
   return (
-    <div className={`fc ${f.cat}`}>
+    <div ref={ref} className={`fc ${f.cat}`}>
       <div className="fc-stripe" />
       <div className="fc-b">
         <div className="fc-top">
@@ -34,9 +39,16 @@ export function FreebieCard({ freebie: f }: Props) {
           <p className="fc-d"><span>📱</span><span>{f.m}</span></p>
           <p className="fc-d"><span>📅</span><span>{f.t}</span></p>
           {f.c && <p className="fc-dc"><span>⚠</span><span>{f.c}</span></p>}
+          {daysUntilBirthday != null && daysUntilBirthday > 0 && (
+            <p className="fc-bday-cd">
+              <span>🎂</span>
+              <span>{daysUntilBirthday === 0 ? "It's your birthday month!" : `Birthday month in ${daysUntilBirthday} day${daysUntilBirthday === 1 ? "" : "s"}`}</span>
+            </p>
+          )}
         </div>
         <div className="fc-ft">
           <span className="fc-ver">✓ Verified Jul 2026</span>
+          <LuckboardToggle itemType="freebie" itemSlug={slugify(f.n)} />
           <a href={f.link} target="_blank" rel="noopener noreferrer" className="fc-cta">
             Get freebie <span className="arrow">→</span>
           </a>

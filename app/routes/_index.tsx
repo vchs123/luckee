@@ -6,6 +6,7 @@ import { Footer } from "~/components/Footer";
 import { FreebieCard } from "~/components/FreebieCard";
 import { ExperienceCard } from "~/components/ExperienceCard";
 import { DealExplosion } from "~/components/DealExplosion";
+import { Particles } from "~/components/Particles";
 import { BDAY_FOOD } from "~/data/birthday-food";
 import { BDAY_BEAUTY } from "~/data/birthday-beauty";
 import { MELB_TRANSPORT, MELB_CULTURE } from "~/data/free-melbourne";
@@ -79,8 +80,9 @@ export default function Home() {
     <>
       <Nav />
       <div ref={heroRef}>
-        <div className="hero">
-          <div className="wrap">
+        <div className="hero" style={{ position: "relative", overflow: "hidden" }}>
+          <Particles />
+          <div className="wrap" style={{ position: "relative", zIndex: 1 }}>
             <div className="hero-badge">✦ Melbourne's freebie hub</div>
             <h1 className="hero-h">Score Melbourne's best <span className="ac">freebies</span> every day</h1>
             <p className="hero-p">Birthday perks, loyalty sign-ups, free galleries and community dinners — curated for Melbourne locals.</p>
