@@ -117,6 +117,12 @@ export default function Luckboard() {
           <p className="eyebrow">⭐ Personal tracker</p>
           <h1 className="sec-h">Luckboard</h1>
           <p className="sec-p">Track every freebie, experience and deal on Luckee. Mark what you want to try, what you've done, and what's not for you.</p>
+          <div className="lb-howto">
+            <span>Click <strong>○</strong> on any card to track it:</span>
+            <span className="lb-howto-state lb-howto-want">★ Want to try</span>
+            <span className="lb-howto-state lb-howto-done">✓ Done it</span>
+            <span className="lb-howto-state lb-howto-skip">✕ Not for me</span>
+          </div>
         </div>
 
         <div className="lb-stats">

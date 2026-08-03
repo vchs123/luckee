@@ -4,6 +4,10 @@ import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
 import { requireAdmin } from "~/lib/auth.server";
 import { getSupabase } from "~/lib/supabase.server";
 
+const PROOF_TO_DEAL_SLUG: Record<string, string> = {
+  revolut_signup: "rvl",
+};
+
 export async function loader({ request, context, params }: LoaderFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const env = (context as any)?.cloudflare?.env as Env;
@@ -92,6 +96,15 @@ export async function action({ request, context, params }: ActionFunctionArgs) {
         total_points: newPts, monthly_entries: Math.floor(newPts / 100),
       }).eq("id", sub.user_id),
     ]);
+
+    // Auto-mark luckboard done if this proof corresponds to a deal
+    const dealSlug = PROOF_TO_DEAL_SLUG[sub.action];
+    if (dealSlug) {
+      await supabase.from("luckboard").upsert(
+        { user_id: sub.user_id, item_type: "deal", item_slug: dealSlug, status: "done", updated_at: new Date().toISOString() },
+        { onConflict: "user_id,item_type,item_slug" },
+      );
+    }
 
     // If referral deal signup, award 150pts to referrer
     if (sub.action === "referral_signup" && profile?.referred_by) {
