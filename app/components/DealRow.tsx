@@ -3,7 +3,6 @@ import { useFetcher } from "react-router";
 import type { Deal } from "~/data/types";
 import { BLOSSOM_TIERS } from "~/data/deals";
 import { useAuth } from "~/hooks/useAuth";
-import { useTilt } from "~/hooks/useTilt";
 import { LuckboardToggle } from "~/components/LuckboardToggle";
 
 const LOGO_MAP: Record<string, string> = {
@@ -17,7 +16,6 @@ const LOGO_MAP: Record<string, string> = {
 export function DealRow({ deal: d }: { deal: Deal }) {
   const { user } = useAuth();
   const fetcher = useFetcher<{ ok: boolean; pts: number }>();
-  const tiltRef = useTilt<HTMLDivElement>();
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
@@ -46,7 +44,7 @@ export function DealRow({ deal: d }: { deal: Deal }) {
   }
 
   return (
-    <div ref={tiltRef} id={d.cls} className={`dl-row ${d.cls}`} style={{ position: "relative" }}>
+    <div id={d.cls} className={`dl-row ${d.cls}`} style={{ position: "relative" }}>
       {toast && <div className="pts-toast">{toast}</div>}
       <div className="dl-row-left">
         <img src={LOGO_MAP[d.cls]} alt={d.n} className="dl-row-logo" width={80} height={80} />

@@ -1,5 +1,4 @@
 import type { Freebie } from "~/data/types";
-import { useTilt } from "~/hooks/useTilt";
 import { LuckboardToggle } from "~/components/LuckboardToggle";
 import { slugify } from "~/lib/slugify";
 
@@ -15,9 +14,8 @@ const CAT_LABEL: Record<string, string> = {
 };
 
 export function FreebieCard({ freebie: f, daysUntilBirthday }: Props) {
-  const ref = useTilt<HTMLDivElement>();
   return (
-    <div ref={ref} className={`fc ${f.cat}`}>
+    <div className={`fc ${f.cat}`}>
       <div className="fc-stripe" />
       <div className="fc-b">
         <div className="fc-top">

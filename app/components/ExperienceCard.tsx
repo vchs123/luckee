@@ -1,13 +1,11 @@
 import type { Experience } from "~/data/types";
-import { useTilt } from "~/hooks/useTilt";
 import { LuckboardToggle } from "~/components/LuckboardToggle";
 import { slugify } from "~/lib/slugify";
 
 export function ExperienceCard({ x }: { x: Experience }) {
-  const ref = useTilt<HTMLDivElement>();
   const isAmber = x.col === "amber";
   return (
-    <div ref={ref} className="xc">
+    <div className="xc">
       <span className="xc-ico">{x.e}</span>
       <div>
         <p className="xc-cat">{x.cat}</p>
