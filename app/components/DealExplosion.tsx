@@ -27,6 +27,8 @@ export function DealExplosion() {
 
     const items = Array.from(el.querySelectorAll<HTMLElement>(".dlx-item"));
 
+    if (window.matchMedia("(max-width: 640px)").matches) return;
+
     if (prefersReducedMotion()) {
       items.forEach((item, i) => { item.style.transform = `translateX(${SPREAD_X[i]}px)`; });
       return;
