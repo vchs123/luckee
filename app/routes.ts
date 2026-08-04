@@ -34,6 +34,7 @@ export default [
     route("admin/trivia/:id", "routes/admin.trivia.$id.tsx"),
     route("admin/proof", "routes/admin.proof.tsx"),
     route("admin/proof/:id", "routes/admin.proof.$id.tsx"),
+    route("admin/redemptions", "routes/admin.redemptions.tsx"),
   ]),
 
   // API
@@ -45,6 +46,8 @@ export default [
   route("api/proof/upload-url", "routes/api.proof.upload-url.tsx"),
   route("api/track-click", "routes/api.track-click.tsx"),
   route("api/luckboard", "routes/api.luckboard.tsx"),
+  route("api/gachapon", "routes/api.gachapon.tsx"),
+  route("api/redeem", "routes/api.redeem.tsx"),
 
   route("sitemap.xml", "routes/sitemap.xml.tsx"),
   route("robots.txt", "routes/robots.txt.tsx"),

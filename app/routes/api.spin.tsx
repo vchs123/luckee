@@ -1,6 +1,7 @@
 import type { ActionFunctionArgs } from "react-router";
 import { requireAuth } from "~/lib/auth.server";
 import { getSupabase } from "~/lib/supabase.server";
+import { awardPoints } from "~/lib/points.server";
 import { melbToday } from "~/lib/melbDate";
 
 const SEGMENTS = [
@@ -45,28 +46,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   const { pts, segIndex } = weightedRandom();
 
-  const { data: profile } = await supabase
-    .from("user_profiles")
-    .select("total_points, monthly_entries")
-    .eq("id", user.id)
-    .single();
-
-  const currentPts = profile?.total_points ?? 0;
-  const newPts = currentPts + pts;
-
-  await Promise.all([
-    supabase.from("daily_spins").insert({ user_id: user.id, spin_date: today, points_won: pts }),
-    supabase.from("points_ledger").insert({
-      user_id: user.id,
-      action: "daily_spin",
-      points: pts,
-      description: `Daily spin — won ${pts} pts`,
-    }),
-    supabase.from("user_profiles").update({
-      total_points: newPts,
-      monthly_entries: Math.floor(newPts / 100),
-    }).eq("id", user.id),
-  ]);
+  await supabase.from("daily_spins").insert({ user_id: user.id, spin_date: today, points_won: pts });
+  await awardPoints(supabase, user.id, "daily_spin", pts, `Daily spin — won ${pts} pts`);
 
   return Response.json({ pts, segIndex });
 }

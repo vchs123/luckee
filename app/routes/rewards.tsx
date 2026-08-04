@@ -4,10 +4,15 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import type { MetaFunction, LoaderFunctionArgs } from "react-router";
 import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
+import { GachaponMachine } from "~/components/GachaponMachine";
 import { verifyUser } from "~/lib/auth.server";
 import { getSupabase } from "~/lib/supabase.server";
+import { awardPoints } from "~/lib/points.server";
 import { melbToday } from "~/lib/melbDate";
 import { playChime } from "~/lib/sound";
+import { PULL_COST, PRIZES, type PrizeType } from "~/lib/gachapon";
+
+const RECEIPT_MILESTONE = 30;
 
 export const meta: MetaFunction = () => [
   { title: "Rewards — Earn Points & Win Prizes | Luckee" },
@@ -47,14 +52,17 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const supabase = getSupabase(env);
   const today = melbToday();
 
-  const [profileRes, ledgerRes, spinRes, triviaRes, proofRes, qsRes, loginsRes] = await Promise.all([
+  const [profileRes, ledgerRes, spinRes, triviaRes, proofRes, qsRes, loginsRes, pullsRes, redemptionsRes, receiptCountRes] = await Promise.all([
     supabase.from("user_profiles").select("*").eq("id", user.id).single(),
     supabase.from("points_ledger").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(100),
     supabase.from("daily_spins").select("*").eq("user_id", user.id).eq("spin_date", today).maybeSingle(),
     supabase.from("daily_trivia_attempts").select("*").eq("user_id", user.id).eq("trivia_date", today).maybeSingle(),
-    supabase.from("proof_submissions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
+    supabase.from("proof_submissions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20),
     supabase.from("trivia_questions").select("*").eq("active", true),
     supabase.from("daily_logins").select("login_date").eq("user_id", user.id).order("login_date", { ascending: false }).limit(400),
+    supabase.from("gachapon_pulls").select("prize_type").eq("user_id", user.id),
+    supabase.from("gachapon_redemptions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+    supabase.from("proof_submissions").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("action", "receipt").eq("status", "approved"),
   ]);
 
   const streak = computeStreak((loginsRes.data ?? []).map(l => l.login_date as string));
@@ -66,18 +74,9 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     .select()
     .maybeSingle();
   if (!loginCheckRes.error) {
-    // First login today — award 5pts
-    const currentPts = profileRes.data?.total_points ?? 0;
-    await Promise.all([
-      supabase.from("points_ledger").insert({
-        user_id: user.id, action: "daily_login", points: 5, description: "Daily login",
-      }),
-      supabase.from("user_profiles").update({
-        total_points: currentPts + 5,
-        monthly_entries: Math.floor((currentPts + 5) / 100),
-      }).eq("id", user.id),
-    ]);
-    if (profileRes.data) profileRes.data.total_points = currentPts + 5;
+    // First login today — award 5pts (respects any active double-points booster)
+    const newTotal = await awardPoints(supabase, user.id, "daily_login", 5, "Daily login");
+    if (profileRes.data) profileRes.data.total_points = newTotal;
   }
 
   // Seed 5 trivia questions by date
@@ -91,6 +90,19 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     category: q.category,
   }));
 
+  // Gachapon collection: available = pulled − units already spent on (non-cancelled) redemptions
+  const pulls = pullsRes.data ?? [];
+  const redemptions = redemptionsRes.data ?? [];
+  const pulledCount = (type: string) => pulls.filter(p => p.prize_type === type).length;
+  const spentUnits = (type: string) =>
+    redemptions.filter(r => r.prize_type === type && r.status !== "cancelled")
+      .reduce((sum, r) => sum + (r.units as number), 0);
+  const collection = {
+    food:  pulledCount("food")  - spentUnits("food"),
+    drink: pulledCount("drink") - spentUnits("drink"),
+    grand: pulledCount("grand") - spentUnits("grand"),
+  };
+
   return {
     user: { id: user.id, email: user.email! },
     profile: profileRes.data,
@@ -102,6 +114,10 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     proofSubmissions: proofRes.data ?? [],
     triviaQuestions: dailyQuestions,
     streak,
+    collection,
+    redemptions,
+    freePulls: profileRes.data?.free_pulls ?? 0,
+    receiptCount: receiptCountRes.count ?? 0,
   };
 }
 
@@ -413,6 +429,7 @@ const PROOF_ACTIONS = [
   { value: "revolut_signup",  label: "Revolut signup",              hint: "up to 500 pts" },
   { value: "dinner_attended", label: "Dinner attended",             hint: "25 pts" },
   { value: "referral_signup", label: "Referred a friend (deal)",    hint: "150 pts to referrer" },
+  { value: "receipt",         label: "Receipt",                     hint: "5 pts" },
   { value: "other",           label: "Other",                       hint: "" },
 ];
 
@@ -579,6 +596,209 @@ function ProofSection({ submissions, ledger }: { submissions: ProofSub[]; ledger
   );
 }
 
+// ── Receipts section (Earn tab) ─────────────────────────────────────────────────
+function ReceiptsSection({ receiptCount }: { receiptCount: number }) {
+  const revalidator = useRevalidator();
+  const [files, setFiles] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
+
+  const nextMilestone = (Math.floor(receiptCount / RECEIPT_MILESTONE) + 1) * RECEIPT_MILESTONE;
+  const towardNext = receiptCount % RECEIPT_MILESTONE;
+  const barPct = (towardNext / RECEIPT_MILESTONE) * 100;
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+    if (files.length === 0) { setError("Please select at least one receipt image."); return; }
+    setUploading(true);
+    try {
+      const urlRes = await fetch("/api/proof/upload-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ files: files.map(f => ({ name: f.name, type: f.type })) }),
+      });
+      const { uploads, error: urlError } = await urlRes.json() as { uploads: { signedUrl: string; path: string }[]; error?: string };
+      if (urlError) throw new Error(urlError);
+      await Promise.all(files.map((file, i) =>
+        fetch(uploads[i].signedUrl, { method: "PUT", body: file, headers: { "Content-Type": file.type } }),
+      ));
+      const submitRes = await fetch("/api/proof", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "receipt", description: "Receipt upload", filePaths: uploads.map(u => u.path) }),
+      });
+      const result = await submitRes.json() as { ok: boolean; error?: string };
+      if (!result.ok) throw new Error(result.error ?? "Submit failed");
+      setFiles([]);
+      setDone(true);
+      revalidator.revalidate();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div>
+      <div className="receipts-meter">
+        <div className="receipts-meter-top">
+          <span className="receipts-meter-n">{receiptCount} receipts approved</span>
+          <span className="receipts-meter-next">{RECEIPT_MILESTONE - towardNext} more → +50 bonus 🎉</span>
+        </div>
+        <div className="receipts-bar"><div className="receipts-bar-fill" style={{ width: `${barPct}%` }} /></div>
+        <p className="gacha-col-sub" style={{ marginTop: 6 }}>Next milestone at {nextMilestone} receipts</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="proof-form wf">
+        <p className="wf-sub">Upload receipts to earn 5 pts each (after admin review), plus a 50 pt bonus every 30th receipt.</p>
+        {error && <div className="wf-error">{error}</div>}
+        {done && !error && <div style={{ marginBottom: 10, padding: "10px 14px", background: "var(--sb)", border: "1.5px solid #86efac", borderRadius: "var(--rs)", color: "#15803d", fontSize: 13, fontWeight: 600 }}>Uploaded! Points land once approved.</div>}
+        <div className="fg">
+          <label className="fl">Receipt images (up to 6)</label>
+          <input
+            type="file" accept="image/*" multiple className="fi"
+            onChange={(e) => {
+              const picked = Array.from(e.target.files ?? []);
+              setFiles(prev => [...prev, ...picked].slice(0, 6));
+              setDone(false);
+              e.target.value = "";
+            }}
+          />
+          {files.length > 0 && (
+            <div className="proof-preview-grid">
+              {files.map((f, i) => (
+                <div key={i} className="proof-preview-item">
+                  <img src={URL.createObjectURL(f)} alt={f.name} />
+                  <button type="button" className="proof-preview-del" onClick={() => setFiles(prev => prev.filter((_, idx) => idx !== i))}>✕</button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <button className="wf-btn" type="submit" disabled={uploading}>
+          {uploading ? "Uploading…" : "Upload receipts"}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+// ── Gachapon collection + redemption (Play Gachapon tab) ─────────────────────────
+type Redemption = {
+  id: string; prize_type: string; units: number; status: string;
+  dietary_requirements?: string | null; notes?: string | null; arranged_for?: string | null; created_at: string;
+};
+
+function RedemptionSection({
+  collection,
+  redemptions,
+}: {
+  collection: { food: number; drink: number; grand: number };
+  redemptions: Redemption[];
+}) {
+  const revalidator = useRevalidator();
+  const [redeemType, setRedeemType] = useState<PrizeType | null>(null);
+  const [dietary, setDietary] = useState("");
+  const [notes, setNotes] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const COLLECTIBLES: PrizeType[] = ["food", "drink", "grand"];
+
+  const submitRedeem = async () => {
+    if (!redeemType) return;
+    setError(null);
+    if (!dietary.trim()) { setError("Please note any dietary requirements (or write 'none')."); return; }
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/redeem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prizeType: redeemType, dietary, notes }),
+      });
+      const result = await res.json() as { ok: boolean; error?: string };
+      if (!result.ok) throw new Error(result.error ?? "Failed to redeem");
+      setRedeemType(null); setDietary(""); setNotes("");
+      revalidator.revalidate();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to redeem.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div>
+      <div className="gacha-collection">
+        {COLLECTIBLES.map((type) => {
+          const have = collection[type as keyof typeof collection];
+          const need = PRIZES[type].threshold;
+          const ready = have >= need;
+          return (
+            <div key={type} className="gacha-col-card">
+              <div className="gacha-col-icon">{PRIZES[type].icon}</div>
+              <p className="gacha-col-name">{PRIZES[type].label}</p>
+              <p className="gacha-col-count">{have} / {need}</p>
+              <div className="gacha-col-bar">
+                <div className="gacha-col-bar-fill" style={{ width: `${Math.min(100, (have / need) * 100)}%` }} />
+              </div>
+              <p className="gacha-col-sub">{ready ? "Ready to redeem!" : `${need - have} more to go`}</p>
+              <button className="btn-pink gacha-redeem-btn" disabled={!ready} onClick={() => { setRedeemType(type); setError(null); }}>
+                Redeem
+              </button>
+            </div>
+          );
+        })}
+      </div>
+
+      {redeemType && (
+        <div className="proof-form wf" style={{ marginTop: 18 }}>
+          <p className="wf-sub">
+            Redeeming <strong>{PRIZES[redeemType].label}</strong>. This surprise gift is picked up in person —
+            the organiser will arrange a date &amp; time to meet you in front of Daniel's Donuts at Southern Cross Station.
+          </p>
+          {error && <div className="wf-error">{error}</div>}
+          <div className="fg">
+            <label className="fl">Dietary requirements <span style={{ color: "var(--pink)" }}>*</span></label>
+            <input className="fi" type="text" value={dietary} onChange={e => setDietary(e.target.value)} placeholder="e.g. vegetarian, nut allergy, or 'none'" />
+          </div>
+          <div className="fg">
+            <label className="fl">Notes <span style={{ color: "var(--t3)", fontWeight: 400 }}>(optional)</span></label>
+            <input className="fi" type="text" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Preferred days/times to meet…" />
+          </div>
+          <div style={{ display: "flex", gap: 10 }}>
+            <button className="wf-btn" type="button" onClick={submitRedeem} disabled={submitting} style={{ flex: 1 }}>
+              {submitting ? "Submitting…" : "Submit redemption"}
+            </button>
+            <button type="button" onClick={() => setRedeemType(null)} style={{ padding: "8px 16px", fontSize: 13, background: "var(--pm)", color: "var(--pink)", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700 }}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {redemptions.length > 0 && (
+        <div className="gacha-redemptions">
+          <h3 style={{ fontSize: 15, fontWeight: 800, color: "var(--t1)" }}>Your redemptions</h3>
+          {redemptions.map((r) => (
+            <div key={r.id} className="gacha-redemption-row">
+              <div>
+                <p style={{ fontWeight: 800, color: "var(--t1)", fontSize: 14 }}>{PRIZES[r.prize_type as PrizeType]?.icon} {PRIZES[r.prize_type as PrizeType]?.label}</p>
+                <p className="gacha-redemption-meta">Dietary: {r.dietary_requirements || "—"}</p>
+                {r.arranged_for && <p className="gacha-redemption-arranged">📍 Pickup: {r.arranged_for}</p>}
+              </div>
+              <span className={`proof-badge ${r.status === "collected" ? "approved" : r.status === "cancelled" ? "rejected" : "pending"}`}>{r.status}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 const ACTION_ICONS: Record<string, string> = {
   daily_login: "🌅",
@@ -590,6 +810,10 @@ const ACTION_ICONS: Record<string, string> = {
   referral_deal: "💳",
   proof_approved: "✓",
   admin_bonus: "⭐",
+  receipt: "🧾",
+  receipt_milestone: "🎉",
+  gachapon_pull: "🎰",
+  gachapon_points: "⭐",
 };
 
 export default function Rewards() {
@@ -606,10 +830,14 @@ export default function Rewards() {
     );
   }
 
-  const { profile, ledger, hasSpunToday, spinPointsWon, triviaCompleted, triviaScore, proofSubmissions, triviaQuestions, streak } = data;
+  const { profile, ledger, hasSpunToday, spinPointsWon, triviaCompleted, triviaScore, proofSubmissions, triviaQuestions, streak, collection, redemptions, freePulls, receiptCount } = data;
 
+  const [tab, setTab] = useState<"earn" | "gachapon" | "activity">("earn");
   const [filterAction, setFilterAction] = useState("all");
   const [filterPeriod, setFilterPeriod] = useState("all");
+
+  const balance = profile.total_points ?? 0;
+  const pullsAvailable = Math.floor(balance / PULL_COST) + freePulls;
 
   const filteredLedger = ledger.filter((entry) => {
     if (filterAction !== "all") {
@@ -638,13 +866,13 @@ export default function Rewards() {
           <p className="eyebrow" style={{ color: "rgba(255,255,255,0.7)" }}>⭐ Your rewards</p>
           <div className="rewards-hero-stats">
             <div className="rewards-stat">
-              <span className="rewards-stat-n">{profile.total_points ?? 0}</span>
+              <span className="rewards-stat-n">{balance}</span>
               <span className="rewards-stat-l">total points</span>
             </div>
             <div className="rewards-stat-div" />
             <div className="rewards-stat">
-              <span className="rewards-stat-n">{profile.monthly_entries ?? 0}</span>
-              <span className="rewards-stat-l">draw entries</span>
+              <span className="rewards-stat-n">{pullsAvailable} 🎰</span>
+              <span className="rewards-stat-l">pulls available</span>
             </div>
             <div className="rewards-stat-div" />
             <div className="rewards-stat">
@@ -652,101 +880,137 @@ export default function Rewards() {
               <span className="rewards-stat-l">day streak</span>
             </div>
           </div>
-          <p className="rewards-hero-sub">Every 100 pts = 1 monthly lucky draw entry</p>
+          <p className="rewards-hero-sub">{PULL_COST} pts = 1 gachapon pull</p>
         </div>
       </div>
 
       <div className="wrap rewards-wrap">
+        <div className="profile-tabs">
+          <button className={`profile-tab${tab === "earn" ? " active" : ""}`} onClick={() => setTab("earn")}>Earn</button>
+          <button className={`profile-tab${tab === "gachapon" ? " active" : ""}`} onClick={() => setTab("gachapon")}>Play Gachapon</button>
+          <button className={`profile-tab${tab === "activity" ? " active" : ""}`} onClick={() => setTab("activity")}>Activity</button>
+        </div>
 
-        {/* Spin Wheel */}
-        <section className="rewards-sec">
-          <h2 className="rewards-sec-h">🎡 Daily spin</h2>
-          <SpinWheel hasSpunToday={hasSpunToday} initialPtsWon={spinPointsWon} />
-        </section>
+        {tab === "earn" && (
+          <>
+            <section className="rewards-sec">
+              <h2 className="rewards-sec-h">🎡 Daily spin</h2>
+              <SpinWheel hasSpunToday={hasSpunToday} initialPtsWon={spinPointsWon} />
+            </section>
 
-        {/* Trivia */}
-        <section className="rewards-sec">
-          <h2 className="rewards-sec-h">🧠 Daily trivia</h2>
-          <p className="rewards-sec-sub">5 questions · 20 seconds each · 3/5 correct = 5 pts · 4/5 = 10 pts · 5/5 = 25 pts</p>
-          <TriviaSection questions={triviaQuestions} completed={triviaCompleted} initialScore={triviaScore} />
-        </section>
+            <section className="rewards-sec">
+              <h2 className="rewards-sec-h">🧠 Daily trivia</h2>
+              <p className="rewards-sec-sub">5 questions · 20 seconds each · 3/5 correct = 5 pts · 4/5 = 10 pts · 5/5 = 25 pts</p>
+              <TriviaSection questions={triviaQuestions} completed={triviaCompleted} initialScore={triviaScore} />
+            </section>
 
-        {/* Points ledger */}
-        <section className="rewards-sec">
-          <h2 className="rewards-sec-h">📋 Points ledger</h2>
-          {ledger.length === 0 ? (
-            <p className="rewards-empty">No points earned yet. Spin the wheel or complete trivia to get started!</p>
-          ) : (
-            <>
-              <div className="ledger-filters">
-                <select className="fs" value={filterAction} onChange={e => setFilterAction(e.target.value)}>
-                  <option value="all">All activities</option>
-                  <option value="daily_login">Login</option>
-                  <option value="daily_spin">Spin</option>
-                  <option value="trivia">Trivia</option>
-                  <option value="referral">Referral</option>
-                  <option value="proof_approved">Proof approved</option>
-                  <option value="admin_bonus">Bonus</option>
-                </select>
-                <select className="fs" value={filterPeriod} onChange={e => setFilterPeriod(e.target.value)}>
-                  <option value="all">All time</option>
-                  <option value="today">Today</option>
-                  <option value="week">Last 7 days</option>
-                  <option value="month">Last 30 days</option>
-                </select>
+            <section className="rewards-sec">
+              <h2 className="rewards-sec-h">🧾 Upload receipts</h2>
+              <p className="rewards-sec-sub">5 pts per approved receipt, plus a 50 pt bonus every 30th.</p>
+              <ReceiptsSection receiptCount={receiptCount} />
+            </section>
+
+            <section className="rewards-sec">
+              <h2 className="rewards-sec-h">How to earn</h2>
+              <div className="earn-grid">
+                {[
+                  ["Daily login", "5 pts"],
+                  ["Daily spin", "10–500 pts"],
+                  ["Trivia 3/5 correct", "5 pts"],
+                  ["Trivia 4/5 correct", "10 pts"],
+                  ["Trivia 5/5 correct", "25 pts"],
+                  ["Upload a receipt", "5 pts (+50 every 30)"],
+                  ["Complete profile", "100 pts (once)"],
+                  ["Dinner waitlist (logged in)", "10 pts"],
+                  ["Dinner attended (proof)", "25 pts"],
+                  ["Refer a friend (account)", "100 pts"],
+                  ["Refer a friend (deal signup)", "150 pts (proof)"],
+                  ["Birthday bonus", "50 pts (annual)"],
+                ].map(([action, pts]) => (
+                  <div key={action} className="earn-row">
+                    <span>{action}</span>
+                    <span className="earn-pts">{pts}</span>
+                  </div>
+                ))}
               </div>
-              {filteredLedger.length === 0 ? (
-                <p className="rewards-empty">No entries match this filter.</p>
+            </section>
+          </>
+        )}
+
+        {tab === "gachapon" && (
+          <>
+            <section className="rewards-sec">
+              <h2 className="rewards-sec-h">🎰 Play Gachapon</h2>
+              <p className="rewards-sec-sub">Spend {PULL_COST} pts for a surprise capsule. Win points, boosters, or collect 5 of a kind to redeem a real gift.</p>
+              <GachaponMachine balance={balance} freePulls={freePulls} />
+            </section>
+
+            <section className="rewards-sec">
+              <h2 className="rewards-sec-h">🎁 Your collection</h2>
+              <p className="rewards-sec-sub">Collect 5 food or 5 drink capsules (or 1 grand prize) to arrange a pickup at Southern Cross Station, in front of Daniel's Donuts.</p>
+              <RedemptionSection collection={collection} redemptions={redemptions as Redemption[]} />
+            </section>
+          </>
+        )}
+
+        {tab === "activity" && (
+          <>
+            <section className="rewards-sec">
+              <h2 className="rewards-sec-h">📋 Points ledger</h2>
+              {ledger.length === 0 ? (
+                <p className="rewards-empty">No points earned yet. Spin the wheel or complete trivia to get started!</p>
               ) : (
-                <div className="ledger">
-                  {filteredLedger.map((entry) => (
-                    <div key={entry.id} className="ledger-row">
-                      <span className="ledger-ico">{ACTION_ICONS[entry.action as string] ?? "⭐"}</span>
-                      <div className="ledger-info">
-                        <p className="ledger-desc">{entry.description ?? entry.action}</p>
-                        <p className="ledger-ref">#{(entry.id as string).slice(0, 8).toUpperCase()}</p>
-                        <p className="ledger-date">{new Date(entry.created_at as string).toLocaleString("en-AU", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" })}</p>
-                      </div>
-                      <span className="ledger-pts">+{entry.points}</span>
+                <>
+                  <div className="ledger-filters">
+                    <select className="fs" value={filterAction} onChange={e => setFilterAction(e.target.value)}>
+                      <option value="all">All activities</option>
+                      <option value="daily_login">Login</option>
+                      <option value="daily_spin">Spin</option>
+                      <option value="trivia">Trivia</option>
+                      <option value="receipt">Receipts</option>
+                      <option value="gachapon_pull">Gachapon pulls</option>
+                      <option value="referral">Referral</option>
+                      <option value="proof_approved">Proof approved</option>
+                      <option value="admin_bonus">Bonus</option>
+                    </select>
+                    <select className="fs" value={filterPeriod} onChange={e => setFilterPeriod(e.target.value)}>
+                      <option value="all">All time</option>
+                      <option value="today">Today</option>
+                      <option value="week">Last 7 days</option>
+                      <option value="month">Last 30 days</option>
+                    </select>
+                  </div>
+                  {filteredLedger.length === 0 ? (
+                    <p className="rewards-empty">No entries match this filter.</p>
+                  ) : (
+                    <div className="ledger">
+                      {filteredLedger.map((entry) => {
+                        const pts = entry.points as number;
+                        return (
+                          <div key={entry.id} className="ledger-row">
+                            <span className="ledger-ico">{ACTION_ICONS[entry.action as string] ?? "⭐"}</span>
+                            <div className="ledger-info">
+                              <p className="ledger-desc">{entry.description ?? entry.action}</p>
+                              <p className="ledger-ref">#{(entry.id as string).slice(0, 8).toUpperCase()}</p>
+                              <p className="ledger-date">{new Date(entry.created_at as string).toLocaleString("en-AU", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" })}</p>
+                            </div>
+                            <span className={`ledger-pts${pts < 0 ? " neg" : ""}`}>{pts < 0 ? `−${Math.abs(pts)}` : `+${pts}`}</span>
+                          </div>
+                        );
+                      })}
                     </div>
-                  ))}
-                </div>
+                  )}
+                </>
               )}
-            </>
-          )}
-        </section>
+            </section>
 
-        {/* Proof uploads */}
-        <section className="rewards-sec">
-          <h2 className="rewards-sec-h">📸 Proof submissions</h2>
-          <p className="rewards-sec-sub">Submit screenshots to earn points for actions that need verification.</p>
-          <ProofSection submissions={proofSubmissions} ledger={ledger} />
-        </section>
-
-        {/* How to earn */}
-        <section className="rewards-sec">
-          <h2 className="rewards-sec-h">How to earn</h2>
-          <div className="earn-grid">
-            {[
-              ["Daily login", "5 pts"],
-              ["Daily spin", "10–500 pts"],
-              ["Trivia 3/5 correct", "5 pts"],
-              ["Trivia 4/5 correct", "10 pts"],
-              ["Trivia 5/5 correct", "25 pts"],
-              ["Complete profile", "100 pts (once)"],
-              ["Dinner waitlist (logged in)", "10 pts"],
-              ["Dinner attended (proof)", "25 pts"],
-              ["Refer a friend (account)", "100 pts"],
-              ["Refer a friend (deal signup)", "150 pts (proof)"],
-              ["Birthday bonus", "50 pts (annual)"],
-            ].map(([action, pts]) => (
-              <div key={action} className="earn-row">
-                <span>{action}</span>
-                <span className="earn-pts">{pts}</span>
-              </div>
-            ))}
-          </div>
-        </section>
+            <section className="rewards-sec">
+              <h2 className="rewards-sec-h">📸 Proof submissions</h2>
+              <p className="rewards-sec-sub">Submit screenshots to earn points for actions that need verification.</p>
+              <ProofSection submissions={proofSubmissions} ledger={ledger} />
+            </section>
+          </>
+        )}
 
       </div>
       <Footer />

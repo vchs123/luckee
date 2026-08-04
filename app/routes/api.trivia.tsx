@@ -1,6 +1,7 @@
 import type { ActionFunctionArgs } from "react-router";
 import { requireAuth } from "~/lib/auth.server";
 import { getSupabase } from "~/lib/supabase.server";
+import { awardPoints } from "~/lib/points.server";
 
 export async function action({ request, context }: ActionFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -31,28 +32,12 @@ export async function action({ request, context }: ActionFunctionArgs) {
     .maybeSingle();
   if (existing) return Response.json({ ok: true, pts: 0 });
 
-  const { data: profile } = await supabase
-    .from("user_profiles")
-    .select("total_points")
-    .eq("id", user.id)
-    .single();
-  const currentPts = profile?.total_points ?? 0;
-
   await supabase.from("daily_trivia_attempts").insert({
     user_id: user.id, trivia_date: today, score, completed: true,
   });
 
   if (pts > 0) {
-    const newPts = currentPts + pts;
-    await Promise.all([
-      supabase.from("points_ledger").insert({
-        user_id: user.id, action: "trivia",
-        points: pts, description: `Trivia — ${score}/5 correct`,
-      }),
-      supabase.from("user_profiles").update({
-        total_points: newPts, monthly_entries: Math.floor(newPts / 100),
-      }).eq("id", user.id),
-    ]);
+    await awardPoints(supabase, user.id, "trivia", pts, `Trivia — ${score}/5 correct`);
   }
   return Response.json({ ok: true, pts });
 }

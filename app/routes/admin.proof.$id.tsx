@@ -3,10 +3,15 @@ import { redirect } from "react-router";
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
 import { requireAdmin } from "~/lib/auth.server";
 import { getSupabase } from "~/lib/supabase.server";
+import { awardPoints } from "~/lib/points.server";
 
 const PROOF_TO_DEAL_SLUG: Record<string, string> = {
   revolut_signup: "rvl",
 };
+
+const RECEIPT_POINTS = 5;
+const RECEIPT_MILESTONE_EVERY = 30;
+const RECEIPT_MILESTONE_BONUS = 50;
 
 export async function loader({ request, context, params }: LoaderFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -61,9 +66,6 @@ export async function action({ request, context, params }: ActionFunctionArgs) {
   }
 
   if (intent === "approve") {
-    const pts = parseInt(form.get("pts") as string);
-    if (!pts || pts < 1) return { error: "Enter points to award (min 1)." };
-
     // Load submission to get user_id and action
     const { data: sub } = await supabase
       .from("proof_submissions")
@@ -72,30 +74,52 @@ export async function action({ request, context, params }: ActionFunctionArgs) {
       .single();
     if (!sub) return { error: "Submission not found." };
 
+    const isReceipt = sub.action === "receipt";
+    let pts: number;
+    if (isReceipt) {
+      pts = RECEIPT_POINTS;
+    } else {
+      pts = parseInt(form.get("pts") as string);
+      if (!pts || pts < 1) return { error: "Enter points to award (min 1)." };
+    }
+
     const { data: profile } = await supabase
       .from("user_profiles")
-      .select("total_points, referred_by")
+      .select("referred_by")
       .eq("id", sub.user_id)
       .single();
-    const currentPts = profile?.total_points ?? 0;
-    const newPts = currentPts + pts;
 
-    await Promise.all([
-      supabase.from("proof_submissions").update({
-        status: "approved",
-        points_awarded: pts,
-        admin_note: adminNote,
-        reviewed_at: new Date().toISOString(),
-        reviewed_by: "admin",
-      }).eq("id", params.id),
-      supabase.from("points_ledger").insert({
-        user_id: sub.user_id, action: "proof_approved",
-        points: pts, description: `Proof approved: ${sub.action}`, awarded_by: "admin",
-      }),
-      supabase.from("user_profiles").update({
-        total_points: newPts, monthly_entries: Math.floor(newPts / 100),
-      }).eq("id", sub.user_id),
-    ]);
+    await supabase.from("proof_submissions").update({
+      status: "approved",
+      points_awarded: pts,
+      admin_note: adminNote,
+      reviewed_at: new Date().toISOString(),
+      reviewed_by: "admin",
+    }).eq("id", params.id);
+
+    await awardPoints(
+      supabase, sub.user_id,
+      isReceipt ? "receipt" : "proof_approved",
+      pts,
+      isReceipt ? "Receipt approved" : `Proof approved: ${sub.action}`,
+      { awardedBy: "admin" },
+    );
+
+    // Receipt milestone — every 30th approved receipt earns a bonus
+    if (isReceipt) {
+      const { count } = await supabase
+        .from("proof_submissions")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", sub.user_id)
+        .eq("action", "receipt")
+        .eq("status", "approved");
+      if (count && count % RECEIPT_MILESTONE_EVERY === 0) {
+        await awardPoints(
+          supabase, sub.user_id, "receipt_milestone", RECEIPT_MILESTONE_BONUS,
+          `Receipt milestone — ${count} receipts!`, { awardedBy: "system" },
+        );
+      }
+    }
 
     // Auto-mark luckboard done if this proof corresponds to a deal
     const dealSlug = PROOF_TO_DEAL_SLUG[sub.action];
@@ -108,18 +132,10 @@ export async function action({ request, context, params }: ActionFunctionArgs) {
 
     // If referral deal signup, award 150pts to referrer
     if (sub.action === "referral_signup" && profile?.referred_by) {
-      const { data: refProfile } = await supabase
-        .from("user_profiles").select("total_points").eq("id", profile.referred_by).single();
-      const refPts = (refProfile?.total_points ?? 0) + 150;
-      await Promise.all([
-        supabase.from("points_ledger").insert({
-          user_id: profile.referred_by, action: "referral_deal",
-          points: 150, description: "Your referral completed a deal signup", awarded_by: "system",
-        }),
-        supabase.from("user_profiles").update({
-          total_points: refPts, monthly_entries: Math.floor(refPts / 100),
-        }).eq("id", profile.referred_by),
-      ]);
+      await awardPoints(
+        supabase, profile.referred_by, "referral_deal", 150,
+        "Your referral completed a deal signup", { awardedBy: "system" },
+      );
     }
 
     return redirect("/admin/proof");
@@ -179,7 +195,11 @@ export default function AdminProofReview() {
             <Form method="post" id="approve-form">
               <input type="hidden" name="intent" value="approve" />
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <input className="fi" type="number" name="pts" min={1} max={500} placeholder="pts" style={{ width: 80 }} required />
+                {s.action === "receipt" ? (
+                  <span style={{ fontSize: 13, color: "var(--t2)", fontWeight: 600 }}>Awards 5 pts (+50 every 30th receipt)</span>
+                ) : (
+                  <input className="fi" type="number" name="pts" min={1} max={500} placeholder="pts" style={{ width: 80 }} required />
+                )}
                 <button className="btn-pink" type="submit" disabled={submitting} style={{ fontSize: 13, padding: "8px 16px" }}>
                   ✓ Approve
                 </button>

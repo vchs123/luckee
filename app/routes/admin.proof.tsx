@@ -33,6 +33,7 @@ const ACTION_LABELS: Record<string, string> = {
   revolut_signup: "Revolut signup",
   dinner_attended: "Dinner attended",
   referral_signup: "Referred friend (deal)",
+  receipt: "Receipt",
   other: "Other",
 };
 
