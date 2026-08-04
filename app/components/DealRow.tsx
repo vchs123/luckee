@@ -11,6 +11,7 @@ const LOGO_MAP: Record<string, string> = {
   krs: "/kris-plus-logo.png",
   mac: "/macadam-logo.png",
   rvl: "/revolut-logo.jpg",
+  eat: "/eatclub-logo.svg",
 };
 
 export function DealRow({ deal: d }: { deal: Deal }) {
@@ -48,7 +49,7 @@ export function DealRow({ deal: d }: { deal: Deal }) {
       {toast && <div className="pts-toast">{toast}</div>}
       <div className="dl-row-left">
         {LOGO_MAP[d.cls] ? (
-          <img src={LOGO_MAP[d.cls]} alt={d.n} className="dl-row-logo" width={80} height={80} />
+          <img src={LOGO_MAP[d.cls]} alt={d.n} className={`dl-row-logo${d.cls === "eat" ? " dl-logo-wide" : ""}`} width={80} height={80} />
         ) : (
           <div className="dl-row-logo dl-logo-emoji" aria-hidden="true">{d.e}</div>
         )}

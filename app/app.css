@@ -368,6 +368,8 @@ img { max-width: 100%; }
 
 /* Emoji logo tile — used when a deal has no image logo */
 .dl-logo-emoji { display: flex; align-items: center; justify-content: center; background: #fff; font-size: 46px; line-height: 1; }
+/* Wide wordmark logos (e.g. EatClub) — anchor left so the brand icon fills the square tile */
+.dl-logo-wide { object-position: left center; }
 
 /* ── teasers ── */
 .tsr { background: var(--card); border: 1px solid var(--cb); border-radius: var(--r); padding: 28px 32px; box-shadow: var(--cs); display: flex; align-items: center; justify-content: space-between; gap: 24px; transition: all 0.2s; }

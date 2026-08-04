@@ -9,6 +9,7 @@ const LOGO_MAP: Record<string, string> = {
   krs: "/kris-plus-logo.png",
   mac: "/macadam-logo.png",
   rvl: "/revolut-logo.jpg",
+  eat: "/eatclub-logo.svg",
 };
 
 const SPREAD_X = [-475, -285, -95, 95, 285, 475];
@@ -73,7 +74,7 @@ export function DealExplosion() {
             >
               <div className="dlx-float" style={{ animationDuration: `${FLOAT_DURATION[i]}s` }}>
                 {LOGO_MAP[d.cls] ? (
-                  <img src={LOGO_MAP[d.cls]} alt={d.n} className="dlx-logo" width={90} height={90} />
+                  <img src={LOGO_MAP[d.cls]} alt={d.n} className={`dlx-logo${d.cls === "eat" ? " dl-logo-wide" : ""}`} width={90} height={90} />
                 ) : (
                   <div className="dlx-logo dl-logo-emoji" aria-hidden="true">{d.e}</div>
                 )}
