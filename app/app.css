@@ -54,33 +54,37 @@ body {
   overflow-x: hidden;
 }
 
+/* Near sparkles — larger, sharp, pink glow */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpath d='M20 10L22 17L29 19L22 21L20 28L18 21L11 19L18 17Z' fill='%23e91e8c' fill-opacity='0.32'/%3E%3Cpath d='M90 58L91.5 63L96 64.5L91.5 66L90 71L88.5 66L84 64.5L88.5 63Z' fill='%23a855f7' fill-opacity='0.24'/%3E%3Cpath d='M54 90L55 93.5L58.5 94.5L55 95.5L54 99L53 95.5L49.5 94.5L53 93.5Z' fill='%23e91e8c' fill-opacity='0.18'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='130' height='130'%3E%3Cpath d='M22,11 L24.2,17.8 L31,20 L24.2,22.2 L22,29 L19.8,22.2 L13,20 L19.8,17.8Z' fill='%23e91e8c' fill-opacity='0.45'/%3E%3Cpath d='M95,62 L97.2,68.8 L104,71 L97.2,73.2 L95,80 L92.8,73.2 L86,71 L92.8,68.8Z' fill='%23a855f7' fill-opacity='0.38'/%3E%3Cpath d='M58,96 L60.2,102.8 L67,105 L60.2,107.2 L58,114 L55.8,107.2 L49,105 L55.8,102.8Z' fill='%23e91e8c' fill-opacity='0.3'/%3E%3C/svg%3E");
   pointer-events: none;
   z-index: 0;
+  filter: drop-shadow(0 0 5px rgba(233,30,140,0.65)) drop-shadow(0 0 12px rgba(233,30,140,0.25));
   animation: bgSparkleA 5s ease-in-out infinite alternate;
 }
 
+/* Far sparkles — smaller, slightly blurred, purple glow, dimmer */
 body::after {
   content: '';
   position: fixed;
   inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cpath d='M68 16L69.5 21.5L75 23L69.5 24.5L68 30L66.5 24.5L61 23L66.5 21.5Z' fill='%23a855f7' fill-opacity='0.22'/%3E%3Cpath d='M17 60L18.5 66L24 67.5L18.5 69L17 75L15.5 69L10 67.5L15.5 66Z' fill='%23e91e8c' fill-opacity='0.26'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cpath d='M70,16 L71.3,19.7 L75,21 L71.3,22.3 L70,26 L68.7,22.3 L65,21 L68.7,19.7Z' fill='%23a855f7' fill-opacity='0.28'/%3E%3Cpath d='M18,62 L19.3,65.7 L23,67 L19.3,68.3 L18,72 L16.7,68.3 L13,67 L16.7,65.7Z' fill='%23e91e8c' fill-opacity='0.22'/%3E%3Cpath d='M50,38 L51.3,41.7 L55,43 L51.3,44.3 L50,48 L48.7,44.3 L45,43 L48.7,41.7Z' fill='%23a855f7' fill-opacity='0.18'/%3E%3C/svg%3E");
   pointer-events: none;
   z-index: 0;
+  filter: blur(0.7px) drop-shadow(0 0 3px rgba(168,85,247,0.5));
   animation: bgSparkleB 3.8s ease-in-out 1.2s infinite alternate-reverse;
 }
 
 @keyframes bgSparkleA {
-  0%   { opacity: 0.2; }
-  100% { opacity: 0.95; }
+  0%   { opacity: 0.15; }
+  100% { opacity: 1; }
 }
 @keyframes bgSparkleB {
-  0%   { opacity: 0.1; }
-  100% { opacity: 0.85; }
+  0%   { opacity: 0.08; }
+  100% { opacity: 0.9; }
 }
 
 a { color: inherit; text-decoration: none; }
