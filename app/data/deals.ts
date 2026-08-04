@@ -70,4 +70,13 @@ export const DEALS: Deal[] = [
     cta: "Join Macadam →",
     link: "https://macadam.app/i/re65k8?v=3",
   },
+  {
+    cls: "eat", e: "🍽️", n: "EatClub", sub: "Restaurant deals app · Australia",
+    reward: "Up to 50% off dining", rl: "Referral invite",
+    desc: "An app for booking discounted meals at restaurants across Australia — up to 50% off dine-in and takeaway at partner venues. Sign up through my invite to start saving on eating out.",
+    code: null,
+    tags: ["🇦🇺 Australia", "🍽️ Dining", "💸 Up to 50% off"],
+    cta: "Get EatClub deals →",
+    link: "https://links.eatclub.com.au/KRcLRkvdb3b",
+  },
 ];

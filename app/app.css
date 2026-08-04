@@ -34,6 +34,8 @@
   --mcb: #f0fbff;
   --rvl: #1a56db;
   --rvb: #eff6ff;
+  --eat: #ef4444;
+  --eab: #fef2f2;
   --warn: #d97706;
   --wb: #fffbeb;
   --r: 20px;
@@ -273,6 +275,7 @@ img { max-width: 100%; }
 .dc.krs .dc-cta, .dl-row.krs .dc-cta { background: var(--krs); }
 .dc.mac .dc-cta, .dl-row.mac .dc-cta { background: var(--mac); }
 .dc.rvl .dc-cta, .dl-row.rvl .dc-cta { background: var(--rvl); }
+.dc.eat .dc-cta, .dl-row.eat .dc-cta { background: var(--eat); }
 .dc-cta:hover { filter: brightness(0.88); transform: translateY(-1px); }
 
 /* ── button shine sweep ── */
@@ -350,6 +353,7 @@ img { max-width: 100%; }
 .dl-row.krs .dl-row-left { background: linear-gradient(160deg, #ea580c, #f97316); }
 .dl-row.mac .dl-row-left { background: linear-gradient(160deg, #0891b2, #06b6d4); }
 .dl-row.rvl .dl-row-left { background: linear-gradient(160deg, #1a56db, #3b82f6); }
+.dl-row.eat .dl-row-left { background: linear-gradient(160deg, #ef4444, #f97316); }
 .dl-row-logo { width: 80px; height: 80px; border-radius: 18px; object-fit: cover; box-shadow: 0 4px 16px rgba(0,0,0,0.18); }
 .dl-row-name { font-size: 18px; font-weight: 800; color: white; }
 .dl-row-sub { font-size: 11px; color: rgba(255,255,255,0.72); }
@@ -360,6 +364,10 @@ img { max-width: 100%; }
 .dl-row.krs .dl-row-rw { background: var(--krb); }
 .dl-row.mac .dl-row-rw { background: var(--mcb); }
 .dl-row.rvl .dl-row-rw { background: var(--rvb); }
+.dl-row.eat .dl-row-rw { background: var(--eab); }
+
+/* Emoji logo tile — used when a deal has no image logo */
+.dl-logo-emoji { display: flex; align-items: center; justify-content: center; background: #fff; font-size: 46px; line-height: 1; }
 
 /* ── teasers ── */
 .tsr { background: var(--card); border: 1px solid var(--cb); border-radius: var(--r); padding: 28px 32px; box-shadow: var(--cs); display: flex; align-items: center; justify-content: space-between; gap: 24px; transition: all 0.2s; }

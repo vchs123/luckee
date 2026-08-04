@@ -11,8 +11,8 @@ const LOGO_MAP: Record<string, string> = {
   rvl: "/revolut-logo.jpg",
 };
 
-const SPREAD_X = [-380, -190, 0, 190, 380];
-const FLOAT_DURATION = [2.8, 3.2, 2.6, 3.4, 3.0];
+const SPREAD_X = [-475, -285, -95, 95, 285, 475];
+const FLOAT_DURATION = [2.8, 3.2, 2.6, 3.4, 3.0, 2.9];
 
 function easeInOut(t: number) {
   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
@@ -72,7 +72,11 @@ export function DealExplosion() {
               className="dlx-item"
             >
               <div className="dlx-float" style={{ animationDuration: `${FLOAT_DURATION[i]}s` }}>
-                <img src={LOGO_MAP[d.cls]} alt={d.n} className="dlx-logo" width={90} height={90} />
+                {LOGO_MAP[d.cls] ? (
+                  <img src={LOGO_MAP[d.cls]} alt={d.n} className="dlx-logo" width={90} height={90} />
+                ) : (
+                  <div className="dlx-logo dl-logo-emoji" aria-hidden="true">{d.e}</div>
+                )}
                 <div className="dlx-label">
                   <p className="dlx-name">{d.n}</p>
                   <span className="dlx-bonus">{d.reward}</span>

@@ -47,7 +47,11 @@ export function DealRow({ deal: d }: { deal: Deal }) {
     <div id={d.cls} className={`dl-row ${d.cls}`} style={{ position: "relative" }}>
       {toast && <div className="pts-toast">{toast}</div>}
       <div className="dl-row-left">
-        <img src={LOGO_MAP[d.cls]} alt={d.n} className="dl-row-logo" width={80} height={80} />
+        {LOGO_MAP[d.cls] ? (
+          <img src={LOGO_MAP[d.cls]} alt={d.n} className="dl-row-logo" width={80} height={80} />
+        ) : (
+          <div className="dl-row-logo dl-logo-emoji" aria-hidden="true">{d.e}</div>
+        )}
         <p className="dl-row-name">{d.n}</p>
         <p className="dl-row-sub">{d.sub}</p>
       </div>
