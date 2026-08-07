@@ -144,8 +144,8 @@ export default function Home() {
 
           <div className="tsr">
             <div className="tsr-txt">
-              <h3>Next Teochew table — Melbourne</h3>
-              <p>Language-matched community dinners with 2–6 new people. Non-profit, cost-neutral. Fill out a profile and I'll match you.</p>
+              <h3>Community Dinners <span className="tsr-soon">(Coming Soon)</span></h3>
+              <p>Language-matched community dinners with 2–6 new people. Non-profit, cost-neutral. Fill out a profile and I'll match you when the first tables open.</p>
             </div>
             <Link to="/dinners" className="tsr-cta">Join the waitlist →</Link>
           </div>

@@ -6,6 +6,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useRevalidator,
 } from "react-router";
 import { useEffect } from "react";
 import type { LoaderFunctionArgs } from "react-router";
@@ -95,6 +96,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const updateAvailable = useVersionCheck();
+  const revalidator = useRevalidator();
 
   useEffect(() => {
     import("gsap").then(({ gsap }) => {
@@ -103,6 +105,20 @@ export default function App() {
       });
     });
   }, []);
+
+  // Refresh loader data (points balance, booster, etc.) when the user returns to
+  // the tab — so admin-awarded points and other server-side changes show up.
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === "visible") revalidator.revalidate();
+    };
+    window.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
+    return () => {
+      window.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
+    };
+  }, [revalidator]);
 
   return (
     <>

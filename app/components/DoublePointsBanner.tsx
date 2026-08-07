@@ -28,13 +28,21 @@ export function DoublePointsBanner() {
     return () => clearInterval(id);
   }, [active]);
 
+  // Reserve space + push the sticky nav down while the fixed banner is shown.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.body.classList.toggle("dp-active", active);
+    return () => document.body.classList.remove("dp-active");
+  }, [active]);
+
   if (!active) return null;
 
   return (
     <div className="dp-banner" role="status">
       <span className="dp-banner-icon">⚡</span>
       <span className="dp-banner-text">
-        <strong>Double points active!</strong> Everything you earn counts twice.
+        <strong>Double points active!</strong>{" "}
+        <span className="dp-banner-detail">Everything you earn counts twice.</span>
       </span>
       <span className="dp-banner-timer">{format(untilMs - now)} left</span>
     </div>

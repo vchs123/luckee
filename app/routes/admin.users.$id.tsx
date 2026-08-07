@@ -3,6 +3,7 @@ import { redirect } from "react-router";
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
 import { requireAdmin } from "~/lib/auth.server";
 import { getSupabase } from "~/lib/supabase.server";
+import { awardPoints } from "~/lib/points.server";
 
 export async function loader({ request, context, params }: LoaderFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -75,23 +76,8 @@ export async function action({ request, context, params }: ActionFunctionArgs) {
     return { error: "Points must be 1–10000 and reason is required." };
   }
 
-  const { data: profile } = await supabase
-    .from("user_profiles")
-    .select("total_points")
-    .eq("id", id)
-    .single();
-  const currentPts = profile?.total_points ?? 0;
-  const newPts = currentPts + pts;
-
-  await Promise.all([
-    supabase.from("points_ledger").insert({
-      user_id: id, action: "admin_bonus", points: pts,
-      description: reason, awarded_by: "admin",
-    }),
-    supabase.from("user_profiles").update({
-      total_points: newPts, monthly_entries: Math.floor(newPts / 100),
-    }).eq("id", id),
-  ]);
+  // Single source of truth for balance updates (admin bonus isn't doubled).
+  await awardPoints(supabase, id!, "admin_bonus", pts, reason, { doubleEligible: false, awardedBy: "admin" });
 
   return redirect(`/admin/users/${id}`);
 }
