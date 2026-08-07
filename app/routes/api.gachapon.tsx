@@ -2,7 +2,10 @@ import type { ActionFunctionArgs } from "react-router";
 import { requireAuth } from "~/lib/auth.server";
 import { getSupabase } from "~/lib/supabase.server";
 import { awardPoints } from "~/lib/points.server";
+import { melbToday } from "~/lib/melbDate";
 import { PULL_COST, PRIZE_WEIGHTS, type PrizeType } from "~/lib/gachapon";
+
+const DAILY_PULL_LIMIT = 8;
 
 function rollPrize(): PrizeType {
   const rand = Math.random() * 100;
@@ -26,6 +29,23 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const env = (context as any)?.cloudflare?.env as Env;
   const user = await requireAuth(request, env);
   const supabase = getSupabase(env);
+
+  // Daily cap — count today's pulls in Melbourne time (DST-safe).
+  const today = melbToday();
+  const { data: recentPulls } = await supabase
+    .from("gachapon_pulls")
+    .select("created_at")
+    .eq("user_id", user.id)
+    .gte("created_at", new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString());
+  const pullsToday = (recentPulls ?? []).filter(
+    (p) => new Date(p.created_at as string).toLocaleDateString("en-CA", { timeZone: "Australia/Melbourne" }) === today,
+  ).length;
+  if (pullsToday >= DAILY_PULL_LIMIT) {
+    return Response.json(
+      { ok: false, error: `You've used all ${DAILY_PULL_LIMIT} pulls for today. Come back tomorrow!`, limitReached: true },
+      { status: 429 },
+    );
+  }
 
   const { data: profile } = await supabase
     .from("user_profiles")

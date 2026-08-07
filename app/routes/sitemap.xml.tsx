@@ -12,11 +12,14 @@ const STATIC_ROUTES = [
   { url: "/rewards", priority: "0.6", changefreq: "monthly" },
   { url: "/about", priority: "0.5", changefreq: "monthly" },
   { url: "/blog", priority: "0.7", changefreq: "weekly" },
+  { url: "/privacy", priority: "0.3", changefreq: "yearly" },
+  { url: "/terms", priority: "0.3", changefreq: "yearly" },
+  { url: "/copyright", priority: "0.3", changefreq: "yearly" },
+  { url: "/partner", priority: "0.4", changefreq: "yearly" },
 ];
 
-const BASE = "https://luckee-app.pages.dev";
-
-export async function loader({ context }: LoaderFunctionArgs) {
+export async function loader({ request, context }: LoaderFunctionArgs) {
+  const BASE = new URL(request.url).origin;
   let blogRoutes: { url: string; priority: string; changefreq: string }[] = [];
 
   try {

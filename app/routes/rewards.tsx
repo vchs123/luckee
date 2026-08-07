@@ -60,7 +60,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     supabase.from("proof_submissions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20),
     supabase.from("trivia_questions").select("*").eq("active", true),
     supabase.from("daily_logins").select("login_date").eq("user_id", user.id).order("login_date", { ascending: false }).limit(400),
-    supabase.from("gachapon_pulls").select("prize_type").eq("user_id", user.id),
+    supabase.from("gachapon_pulls").select("prize_type, created_at").eq("user_id", user.id),
     supabase.from("gachapon_redemptions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
     supabase.from("proof_submissions").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("action", "receipt").eq("status", "approved"),
   ]);
@@ -102,6 +102,9 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     drink: pulledCount("drink") - spentUnits("drink"),
     grand: pulledCount("grand") - spentUnits("grand"),
   };
+  const pullsToday = pulls.filter(
+    (p) => new Date(p.created_at as string).toLocaleDateString("en-CA", { timeZone: "Australia/Melbourne" }) === today,
+  ).length;
 
   return {
     user: { id: user.id, email: user.email! },
@@ -118,6 +121,8 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     redemptions,
     freePulls: profileRes.data?.free_pulls ?? 0,
     receiptCount: receiptCountRes.count ?? 0,
+    pullsToday,
+    dailyPullLimit: 8,
   };
 }
 
@@ -866,7 +871,7 @@ export default function Rewards() {
     );
   }
 
-  const { profile, ledger, hasSpunToday, spinPointsWon, triviaCompleted, triviaScore, proofSubmissions, triviaQuestions, streak, collection, redemptions, freePulls, receiptCount } = data;
+  const { profile, ledger, hasSpunToday, spinPointsWon, triviaCompleted, triviaScore, proofSubmissions, triviaQuestions, streak, collection, redemptions, freePulls, receiptCount, pullsToday, dailyPullLimit } = data;
 
   const [tab, setTab] = useState<"earn" | "gachapon" | "activity">("earn");
   const [filterAction, setFilterAction] = useState("all");
@@ -977,8 +982,8 @@ export default function Rewards() {
           <>
             <section className="rewards-sec">
               <h2 className="rewards-sec-h">🎰 Play Gachapon</h2>
-              <p className="rewards-sec-sub">Spend {PULL_COST} pts for a surprise capsule. Win points, boosters, or collect 5 of a kind to redeem a real gift.</p>
-              <GachaponMachine balance={balance} freePulls={freePulls} />
+              <p className="rewards-sec-sub">Spend {PULL_COST} pts for a surprise capsule. Win points, boosters, or collect 5 of a kind to redeem a real gift. Up to {dailyPullLimit} pulls per day.</p>
+              <GachaponMachine balance={balance} freePulls={freePulls} pullsToday={pullsToday} dailyLimit={dailyPullLimit} />
             </section>
 
             <section className="rewards-sec">

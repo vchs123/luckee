@@ -20,7 +20,7 @@ function resultMessage(prize: PrizeType, pointsWon: number | null | undefined): 
   }
 }
 
-export function GachaponMachine({ balance, freePulls }: { balance: number; freePulls: number }) {
+export function GachaponMachine({ balance, freePulls, pullsToday, dailyLimit }: { balance: number; freePulls: number; pullsToday: number; dailyLimit: number }) {
   const fetcher = useFetcher<PullResult>();
   const revalidator = useRevalidator();
   const [phase, setPhase] = useState<"idle" | "cranking" | "result">("idle");
@@ -28,7 +28,9 @@ export function GachaponMachine({ balance, freePulls }: { balance: number; freeP
   const [error, setError] = useState<string | null>(null);
   const busyRef = useRef(false);
 
-  const canPull = freePulls > 0 || balance >= PULL_COST;
+  const pullsLeft = Math.max(0, dailyLimit - pullsToday);
+  const limitReached = pullsLeft <= 0;
+  const canPull = !limitReached && (freePulls > 0 || balance >= PULL_COST);
   const needed = PULL_COST - balance;
 
   const handlePull = () => {
@@ -127,15 +129,18 @@ export function GachaponMachine({ balance, freePulls }: { balance: number; freeP
           >
             {phase === "cranking"
               ? "Cranking…"
-              : freePulls > 0
-                ? `Free pull! (${freePulls} left)`
-                : `Grab a capsule · −${PULL_COST} pts`}
+              : limitReached
+                ? "Daily limit reached"
+                : freePulls > 0
+                  ? `Free pull! (${freePulls} left)`
+                  : `Grab a capsule · −${PULL_COST} pts`}
           </button>
-          {!canPull && (
+          {limitReached ? (
+            <p className="gacha-hint">You've used all {dailyLimit} pulls today. Come back tomorrow!</p>
+          ) : !canPull ? (
             <p className="gacha-hint">You need {needed} more points for a pull.</p>
-          )}
-          {freePulls === 0 && canPull && (
-            <p className="gacha-hint">Balance: {balance} pts · {Math.floor(balance / PULL_COST)} pull{Math.floor(balance / PULL_COST) === 1 ? "" : "s"} available</p>
+          ) : (
+            <p className="gacha-hint">{pullsLeft} of {dailyLimit} pulls left today{freePulls === 0 ? ` · ${balance} pts` : ""}</p>
           )}
         </div>
       )}
