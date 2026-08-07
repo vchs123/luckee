@@ -34,10 +34,10 @@ export default function About() {
         </div>
         <div className="dv" />
         <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-          <Link to="/about#privacy" className="btn-ghost">Privacy Policy</Link>
-          <Link to="/about#terms" className="btn-ghost">Terms & Conditions</Link>
-          <Link to="/about#copyright" className="btn-ghost">Copyright Policy</Link>
-          <Link to="/about#partner" className="btn-ghost">Partner With Us</Link>
+          <Link to="/privacy" className="btn-ghost">Privacy Policy</Link>
+          <Link to="/terms" className="btn-ghost">Terms & Conditions</Link>
+          <Link to="/copyright" className="btn-ghost">Copyright Policy</Link>
+          <Link to="/partner" className="btn-ghost">Partner With Us</Link>
         </div>
       </div>
       <Footer />

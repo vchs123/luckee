@@ -27,10 +27,10 @@ export function Footer() {
             </div>
             <div className="ft-col">
               <h4>Legal</h4>
-              <Link to="/about#privacy">Privacy Policy</Link>
-              <Link to="/about#terms">Terms & Conditions</Link>
-              <Link to="/about#copyright">Copyright Policy</Link>
-              <Link to="/about#partner">Partner With Us</Link>
+              <Link to="/privacy">Privacy Policy</Link>
+              <Link to="/terms">Terms & Conditions</Link>
+              <Link to="/copyright">Copyright Policy</Link>
+              <Link to="/partner">Partner With Us</Link>
             </div>
           </div>
         </div>

@@ -921,10 +921,10 @@ export default function Rewards() {
       </div>
 
       <div className="wrap rewards-wrap">
-        <div className="profile-tabs">
-          <button className={`profile-tab${tab === "earn" ? " active" : ""}`} onClick={() => setTab("earn")}>Earn</button>
-          <button className={`profile-tab${tab === "gachapon" ? " active" : ""}`} onClick={() => setTab("gachapon")}>Play Gachapon</button>
-          <button className={`profile-tab${tab === "activity" ? " active" : ""}`} onClick={() => setTab("activity")}>Activity</button>
+        <div className="rw-tabs">
+          <button className={`rw-tab${tab === "earn" ? " active" : ""}`} onClick={() => setTab("earn")}>🎯 Earn</button>
+          <button className={`rw-tab${tab === "gachapon" ? " active" : ""}`} onClick={() => setTab("gachapon")}>🎰 Play Gachapon</button>
+          <button className={`rw-tab${tab === "activity" ? " active" : ""}`} onClick={() => setTab("activity")}>📋 Activity</button>
         </div>
 
         {tab === "earn" && (

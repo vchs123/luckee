@@ -14,6 +14,10 @@ export default [
   route("rewards", "routes/rewards.tsx"),
   route("search", "routes/search.tsx"),
   route("about", "routes/about.tsx"),
+  route("privacy", "routes/privacy.tsx"),
+  route("terms", "routes/terms.tsx"),
+  route("copyright", "routes/copyright.tsx"),
+  route("partner", "routes/partner.tsx"),
   route("blog", "routes/blog._index.tsx"),
   route("blog/:slug", "routes/blog.$slug.tsx"),
 
