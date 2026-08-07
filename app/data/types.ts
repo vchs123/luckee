@@ -9,6 +9,7 @@ export interface Freebie {
   ns: boolean;
   link: string;
   cat: "food" | "bty" | "sgn";
+  verified: boolean;
 }
 
 export interface Experience {

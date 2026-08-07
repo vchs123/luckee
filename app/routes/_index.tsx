@@ -114,11 +114,15 @@ export default function Home() {
             <p className="eyebrow">⭐ Top picks</p>
             <h2 className="sec-h">Today's best freebies</h2>
           </div>
+          <p className="sec-p">Hand-checked favourites. Browse the full list — every offer is tagged <strong>✓ Verified by Luckee</strong> or flagged as community-listed so you know what's been confirmed.</p>
           <div className="g3">
             {TOP_PICKS.map((f, i) => (
               <FreebieCard key={f.n} freebie={{ ...f, cat: i < 2 ? "food" : "bty" }} />
             ))}
           </div>
+          <Link to="/freebies/birthday-freebies" className="btn-pink" style={{ display: "inline-block", marginTop: 20 }}>
+            Browse all birthday freebies <span className="arrow">→</span>
+          </Link>
 
           <div className="dv" />
 
@@ -154,17 +158,24 @@ export default function Home() {
 
           <div className="sec-hd">
             <p className="eyebrow">🎰 Rewards</p>
-            <h2 className="sec-h">Earn points, win prizes</h2>
+            <h2 className="sec-h">Sign up. Play daily. Win real prizes.</h2>
           </div>
-          <p className="sec-p">Every deal click, dinner and daily login earns points toward the monthly lucky draw.</p>
+          <p className="sec-p">Create a free account and every login, spin, quiz and receipt earns points. Spend them on the gachapon machine for surprise food, drinks and prizes — collect a set and pick it up in Melbourne.</p>
           <div className="ecs">
-            <div className="ec"><div className="ec-ico">⭐</div><h4>Earn points</h4><p>Click deals, attend dinners, play trivia, log in daily</p><span className="ec-pts">Up to 200 pts per action</span></div>
-            <div className="ec"><div className="ec-ico">🎡</div><h4>Spin to win</h4><p>One free spin per day. Bonus spins for deal sign-ups</p><span className="ec-pts">Coming with launch</span></div>
-            <div className="ec"><div className="ec-ico">🎁</div><h4>Monthly draw</h4><p>100 points = 1 entry. Winner announced each month</p><span className="ec-pts">Sponsored prizes</span></div>
+            <div className="ec"><div className="ec-ico">🎡</div><h4>Daily spin</h4><p>One free spin every day on the prize wheel</p><span className="ec-pts">10–500 pts</span></div>
+            <div className="ec"><div className="ec-ico">🧠</div><h4>Daily trivia</h4><p>Five quick questions, timed. Beat the clock</p><span className="ec-pts">Up to 25 pts</span></div>
+            <div className="ec"><div className="ec-ico">🧾</div><h4>Upload receipts</h4><p>Snap a receipt to earn — with milestone bonuses</p><span className="ec-pts">5 pts each · +50 every 30</span></div>
+            <div className="ec"><div className="ec-ico">🎰</div><h4>Play Gachapon</h4><p>Spend points on a capsule — food, drinks, boosters &amp; a rare grand prize</p><span className="ec-pts">150 pts = 1 pull</span></div>
           </div>
-          <Link to="/rewards" className="btn-ghost" style={{ display: "inline-block", marginTop: 20 }}>
-            How Rewards work →
-          </Link>
+          <p className="sec-p" style={{ marginTop: 16 }}>Plus a daily login streak, trackable wishlist (Luckboard), and points for referring friends.</p>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 12 }}>
+            <Link to="/login" className="btn-pink" style={{ display: "inline-block" }}>
+              Sign up &amp; start earning <span className="arrow">→</span>
+            </Link>
+            <Link to="/rewards" className="btn-ghost" style={{ display: "inline-block" }}>
+              How Rewards work →
+            </Link>
+          </div>
         </div>
       </div>
       <Footer />

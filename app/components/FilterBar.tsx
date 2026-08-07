@@ -36,7 +36,7 @@ export function FilterBar({ active, onChange }: Props) {
   return (
     <div className="fb-wrap">
       <span className="fb-lbl">Filter:</span>
-      {btn("all", "All (15+)")}
+      {btn("all", "All")}
       {btn("food", "🍔 Food & Drink")}
       {btn("beauty", "💄 Beauty & Retail")}
       {btn("nospend", "✓ No min spend only")}

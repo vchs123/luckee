@@ -9,9 +9,9 @@ export const meta: MetaFunction = () => [
 ];
 
 const HUBS = [
-  { cls: "food", em: "🍔", name: "Birthday Food & Drink", count: "9 verified offers", to: "/freebies/birthday-freebies?filter=food" },
-  { cls: "bty",  em: "💄", name: "Birthday Beauty & Retail", count: "6 verified offers", to: "/freebies/birthday-freebies?filter=beauty" },
-  { cls: "sgn",  em: "🎁", name: "Sign-up Freebies", count: "One-time bonuses", to: "/freebies/sign-up-freebies" },
+  { cls: "food", em: "🍔", name: "Birthday Food & Drink", count: "21 offers · 9 verified", to: "/freebies/birthday-freebies?filter=food" },
+  { cls: "bty",  em: "💄", name: "Birthday Beauty & Retail", count: "13 offers · 6 verified", to: "/freebies/birthday-freebies?filter=beauty" },
+  { cls: "sgn",  em: "🎁", name: "Sign-up Freebies", count: "9 one-time bonuses", to: "/freebies/sign-up-freebies" },
   { cls: "melb", em: "🌿", name: "Free Melbourne", count: "20+ ongoing perks", to: "/freebies/free-melbourne" },
   { cls: "evnt", em: "🎉", name: "Events Calendar", count: "Annual free events", to: "/freebies/events-calendar" },
 ];
@@ -22,7 +22,7 @@ export default function FreebiesHub() {
       <div className="sec-hd">
         <p className="eyebrow">🎀 Browse by type</p>
         <h1 className="sec-h">Freebies</h1>
-        <p className="sec-p">Birthday perks, one-time sign-up bonuses, free Melbourne experiences and upcoming events — all verified and regularly updated.</p>
+        <p className="sec-p">Birthday perks, one-time sign-up bonuses, free Melbourne experiences and upcoming events. Each offer is tagged <strong>✓ Verified by Luckee</strong> or flagged community-listed, and the list is regularly updated.</p>
       </div>
       <div className="hub">
         {HUBS.map(h => (

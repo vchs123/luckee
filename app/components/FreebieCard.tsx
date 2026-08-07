@@ -45,7 +45,9 @@ export function FreebieCard({ freebie: f, daysUntilBirthday }: Props) {
           )}
         </div>
         <div className="fc-ft">
-          <span className="fc-ver">✓ Verified Jul 2026</span>
+          {f.verified
+            ? <span className="fc-ver">✓ Verified by Luckee</span>
+            : <span className="fc-ver fc-unver">Community · unverified</span>}
           <LuckboardToggle itemType="freebie" itemSlug={slugify(f.n)} />
           <a href={f.link} target="_blank" rel="noopener noreferrer" className="fc-cta">
             Get freebie <span className="arrow">→</span>

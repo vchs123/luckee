@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { MetaFunction } from "react-router";
 import { Link } from "react-router";
 import { FreebieCard } from "~/components/FreebieCard";
@@ -11,6 +12,9 @@ export const meta: MetaFunction = () => [
 ];
 
 export default function SignUpFreebies() {
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const items = verifiedOnly ? SIGNUP_FREEBIES.filter(f => f.verified) : SIGNUP_FREEBIES;
+
   return (
     <div className="wrap">
       <div className="sec-hd">
@@ -21,8 +25,13 @@ export default function SignUpFreebies() {
         <h1 className="sec-h">Sign-up Freebies</h1>
         <p className="sec-p">Join once and get the bonus — no birthday required. These are one-time welcome perks from loyalty programs worth signing up for regardless.</p>
       </div>
+      <div className="vtog-wrap">
+        <span className="vtog-lbl">Show:</span>
+        <button className={`vtog${!verifiedOnly ? " on" : ""}`} onClick={() => setVerifiedOnly(false)}>All</button>
+        <button className={`vtog${verifiedOnly ? " on" : ""}`} onClick={() => setVerifiedOnly(true)}>✓ Verified by Luckee only</button>
+      </div>
       <div className="ga">
-        {SIGNUP_FREEBIES.map(f => <FreebieCard key={f.n} freebie={f} />)}
+        {items.map(f => <FreebieCard key={f.n} freebie={f} />)}
       </div>
     </div>
   );

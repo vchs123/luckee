@@ -48,10 +48,17 @@ export default function BirthdayFreebies() {
     else setFilter("all");
   }, [paramFilter]);
 
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+
   const showFood = filter === "all" || filter === "food" || filter === "nospend";
   const showBeauty = filter === "all" || filter === "beauty" || filter === "nospend";
-  const foodItems = filter === "nospend" ? BDAY_FOOD.filter(f => f.ns) : BDAY_FOOD;
-  const beautyItems = filter === "nospend" ? BDAY_BEAUTY.filter(f => f.ns) : BDAY_BEAUTY;
+  const applyFilters = (items: typeof BDAY_FOOD) => {
+    let out = filter === "nospend" ? items.filter(f => f.ns) : items;
+    if (verifiedOnly) out = out.filter(f => f.verified);
+    return out;
+  };
+  const foodItems = applyFilters(BDAY_FOOD);
+  const beautyItems = applyFilters(BDAY_BEAUTY);
 
   return (
     <div className="wrap">
@@ -61,10 +68,16 @@ export default function BirthdayFreebies() {
         </p>
         <p className="eyebrow">🎂 Birthday guide</p>
         <h1 className="sec-h">Birthday Freebies Melbourne</h1>
-        <p className="sec-p wide">The complete guide, verified July 2026. 15+ offers across food, beauty and retail — with honest notes on which ones actually require a minimum spend.</p>
+        <p className="sec-p wide">The complete guide across food, beauty and retail — with honest notes on which ones require a minimum spend. Offers we've personally confirmed are tagged <strong>✓ Verified by Luckee</strong>; the rest are community-listed and pending a check. Use the toggle to show verified only.</p>
       </div>
 
       <FilterBar active={filter} onChange={setFilter} />
+
+      <div className="vtog-wrap">
+        <span className="vtog-lbl">Show:</span>
+        <button className={`vtog${!verifiedOnly ? " on" : ""}`} onClick={() => setVerifiedOnly(false)}>All</button>
+        <button className={`vtog${verifiedOnly ? " on" : ""}`} onClick={() => setVerifiedOnly(true)}>✓ Verified by Luckee only</button>
+      </div>
 
       <TipBox icon="💡">
         Sign up 3–4 weeks before your birthday. Most programs email your voucher on the{" "}
@@ -72,7 +85,7 @@ export default function BirthdayFreebies() {
         <strong style={{ color: "var(--warn)" }}>Min spend</strong> require a purchase to unlock the freebie.
       </TipBox>
 
-      {showFood && (
+      {showFood && foodItems.length > 0 && (
         <>
           <div className="ssh food">🍔 Food & Drink</div>
           <div className="ga">
@@ -81,9 +94,9 @@ export default function BirthdayFreebies() {
         </>
       )}
 
-      {showBeauty && (
+      {showBeauty && beautyItems.length > 0 && (
         <>
-          <div className="ssh bty" style={{ marginTop: showFood ? 40 : 0 }}>💄 Beauty & Retail</div>
+          <div className="ssh bty" style={{ marginTop: showFood && foodItems.length > 0 ? 40 : 0 }}>💄 Beauty & Retail</div>
           <div className="ga">
             {beautyItems.map(f => <FreebieCard key={f.n} freebie={f} daysUntilBirthday={daysUntilBirthday} />)}
           </div>
