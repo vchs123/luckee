@@ -1,6 +1,7 @@
 import type { ActionFunctionArgs } from "react-router";
 import { requireAuth } from "~/lib/auth.server";
 import { getSupabase } from "~/lib/supabase.server";
+import { awardPoints } from "~/lib/points.server";
 
 const ALLOWED_ACTIONS = ["dinner_waitlist", "referral_account", "referral_deal", "deal_click"] as const;
 const POINTS_MAP: Record<string, number> = {
@@ -35,27 +36,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const pts = POINTS_MAP[actionName];
   const recipientId = targetUserId ?? user.id;
 
-  const { data: profile } = await supabase
-    .from("user_profiles")
-    .select("total_points")
-    .eq("id", recipientId)
-    .single();
-
-  const currentPts = profile?.total_points ?? 0;
-  const newPts = currentPts + pts;
-
-  await Promise.all([
-    supabase.from("points_ledger").insert({
-      user_id: recipientId,
-      action: actionName,
-      points: pts,
-      description: description ?? actionName,
-    }),
-    supabase.from("user_profiles").update({
-      total_points: newPts,
-      monthly_entries: Math.floor(newPts / 100),
-    }).eq("id", recipientId),
-  ]);
+  // Routes through awardPoints so an active double-points booster is applied.
+  await awardPoints(supabase, recipientId, actionName, pts, description ?? actionName);
 
   return Response.json({ ok: true, pts });
 }

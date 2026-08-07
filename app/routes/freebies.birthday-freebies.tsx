@@ -13,16 +13,16 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const env = (context as any)?.cloudflare?.env as Env;
   const user = await verifyUser(request, env);
-  if (!user) return { daysUntilBirthday: null };
+  if (!user) return { daysUntilBirthday: null, loggedIn: false, hasDob: false };
   const supabase = getSupabase(env);
   const { data: p } = await supabase.from("user_profiles").select("dob").eq("id", user.id).single();
-  if (!p?.dob) return { daysUntilBirthday: null };
+  if (!p?.dob) return { daysUntilBirthday: null, loggedIn: true, hasDob: false };
   const now = new Date(new Date().toLocaleString("en-AU", { timeZone: "Australia/Melbourne" }));
   const birthMonth = new Date(p.dob + "T00:00:00").getMonth();
   const nextBday = new Date(now.getFullYear(), birthMonth, 1);
   if (nextBday <= now) nextBday.setFullYear(nextBday.getFullYear() + 1);
   const days = Math.ceil((nextBday.getTime() - now.getTime()) / 86400000);
-  return { daysUntilBirthday: days < 365 ? days : null };
+  return { daysUntilBirthday: days < 365 ? days : null, loggedIn: true, hasDob: true };
 }
 
 export const meta: MetaFunction = () => [
@@ -34,7 +34,7 @@ export const meta: MetaFunction = () => [
 ];
 
 export default function BirthdayFreebies() {
-  const { daysUntilBirthday } = useLoaderData<typeof loader>();
+  const { daysUntilBirthday, loggedIn, hasDob } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
   const paramFilter = searchParams.get("filter");
   const [filter, setFilter] = useState<FilterType>(
@@ -78,6 +78,17 @@ export default function BirthdayFreebies() {
         <button className={`vtog${!verifiedOnly ? " on" : ""}`} onClick={() => setVerifiedOnly(false)}>All</button>
         <button className={`vtog${verifiedOnly ? " on" : ""}`} onClick={() => setVerifiedOnly(true)}>✓ Verified by Luckee only</button>
       </div>
+
+      {!loggedIn && (
+        <TipBox icon="🎂">
+          <strong>Get a birthday countdown.</strong> <Link to="/login" style={{ color: "var(--pink)", fontWeight: 700, textDecoration: "underline" }}>Create a free account</Link> and add your birthday to see exactly how many days until your birthday month — plus track which freebies you've claimed.
+        </TipBox>
+      )}
+      {loggedIn && !hasDob && (
+        <TipBox icon="🎂">
+          <strong>Add your birthday</strong> in your <Link to="/profile" style={{ color: "var(--pink)", fontWeight: 700, textDecoration: "underline" }}>profile</Link> to unlock your personal countdown on every offer below.
+        </TipBox>
+      )}
 
       <TipBox icon="💡">
         Sign up 3–4 weeks before your birthday. Most programs email your voucher on the{" "}

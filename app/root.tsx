@@ -11,6 +11,7 @@ import { useEffect } from "react";
 import type { LoaderFunctionArgs } from "react-router";
 import type { Route } from "./+types/root";
 import { useVersionCheck } from "~/hooks/useVersionCheck";
+import { DoublePointsBanner } from "~/components/DoublePointsBanner";
 import { verifyUser, refreshAndGetUser } from "~/lib/auth.server";
 import { getSupabase } from "~/lib/supabase.server";
 import "./app.css";
@@ -39,16 +40,16 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     }
   }
 
-  let profile: { username: string; totalPoints: number } | null = null;
+  let profile: { username: string; totalPoints: number; doublePointsUntil: string | null } | null = null;
   let luckboard: Record<string, string> = {};
   if (user) {
     try {
       const supabase = getSupabase(env);
       const [profileRes, lbRes] = await Promise.all([
-        supabase.from("user_profiles").select("username, total_points").eq("id", user.id).single(),
+        supabase.from("user_profiles").select("username, total_points, double_points_until").eq("id", user.id).single(),
         supabase.from("luckboard").select("item_type, item_slug, status").eq("user_id", user.id),
       ]);
-      if (profileRes.data) profile = { username: profileRes.data.username, totalPoints: profileRes.data.total_points };
+      if (profileRes.data) profile = { username: profileRes.data.username, totalPoints: profileRes.data.total_points, doublePointsUntil: profileRes.data.double_points_until ?? null };
       if (lbRes.data) lbRes.data.forEach(r => { luckboard[`${r.item_type}:${r.item_slug}`] = r.status as string; });
     } catch { /* non-fatal */ }
   }
@@ -111,6 +112,7 @@ export default function App() {
           <button onClick={() => window.location.reload()}>refresh to see the latest</button>
         </div>
       )}
+      <DoublePointsBanner />
       <Outlet />
     </>
   );

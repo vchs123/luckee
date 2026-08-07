@@ -303,6 +303,8 @@ function TriviaSection({
   const [score, setScore] = useState(initialScore ?? 0);
   const [ptsEarned, setPtsEarned] = useState(0);
   const [revealed, setRevealed] = useState(false);
+  const [phase, setPhase] = useState<"intro" | "countdown" | "playing">("intro");
+  const [countdown, setCountdown] = useState(3);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const advance = useCallback(() => {
@@ -325,8 +327,20 @@ function TriviaSection({
     }
   }, [qIdx, answers, questions, fetcher, revalidator]);
 
+  // 3..2..1 countdown before the first question
   useEffect(() => {
-    if (done || questions.length === 0) return;
+    if (phase !== "countdown") return;
+    if (countdown <= 0) {
+      setPhase("playing");
+      setTimeLeft(20);
+      return;
+    }
+    const t = setTimeout(() => setCountdown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [phase, countdown]);
+
+  useEffect(() => {
+    if (phase !== "playing" || done || questions.length === 0) return;
     timerRef.current = setInterval(() => {
       setTimeLeft((t) => {
         if (t <= 1) {
@@ -340,7 +354,7 @@ function TriviaSection({
       });
     }, 1000);
     return () => clearInterval(timerRef.current!);
-  }, [qIdx, done, advance, questions.length]);
+  }, [qIdx, done, advance, questions.length, phase]);
 
   const handleAnswer = (optIdx: number) => {
     if (revealed || answers[qIdx] !== null) return;
@@ -369,6 +383,28 @@ function TriviaSection({
         <p className="trivia-done-msg">{msg}</p>
         {ptsEarned > 0 && <p className="trivia-done-pts">+{ptsEarned} pts added to your balance</p>}
         {ptsEarned === 0 && <p className="trivia-done-pts">Get 3+ correct tomorrow to earn points</p>}
+      </div>
+    );
+  }
+
+  if (phase === "intro") {
+    return (
+      <div className="trivia-card trivia-intro">
+        <div className="trivia-intro-icon">🧠</div>
+        <p className="trivia-intro-title">Ready to play?</p>
+        <p className="trivia-intro-sub">{questions.length} questions · 20 seconds each. The clock starts as soon as each question appears.</p>
+        <button className="btn-pink trivia-start-btn" onClick={() => { setCountdown(3); setPhase("countdown"); }}>
+          Start trivia
+        </button>
+      </div>
+    );
+  }
+
+  if (phase === "countdown") {
+    return (
+      <div className="trivia-card trivia-intro">
+        <p className="trivia-intro-sub">Get ready…</p>
+        <div className="trivia-countdown" key={countdown}>{countdown === 0 ? "Go!" : countdown}</div>
       </div>
     );
   }

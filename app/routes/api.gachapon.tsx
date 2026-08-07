@@ -63,8 +63,16 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 
   // Roll the prize.
-  const prize = rollPrize();
+  let prize = rollPrize();
   let pointsWon: number | null = null;
+
+  // Only one double-points booster at a time (also caps it to ~once/day since it
+  // lasts 24h). If one is already active, downgrade the win to a bonus-points prize.
+  const boosterActive = profile?.double_points_until
+    && new Date(profile.double_points_until as string).getTime() > Date.now();
+  if (prize === "double_points" && boosterActive) {
+    prize = "points";
+  }
 
   if (prize === "points") {
     pointsWon = rollPointsPrize();
