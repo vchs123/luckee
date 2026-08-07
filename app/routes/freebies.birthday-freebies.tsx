@@ -98,7 +98,7 @@ export default function BirthdayFreebies() {
 
       {showFood && foodItems.length > 0 && (
         <>
-          <div className="ssh food">🍔 Food & Drink</div>
+          <div className="ssh food">🍔 Food & Drink <span className="ssh-count">{foodItems.length} offers</span></div>
           <div className="ga">
             {foodItems.map(f => <FreebieCard key={f.n} freebie={f} daysUntilBirthday={daysUntilBirthday} />)}
           </div>
@@ -107,7 +107,7 @@ export default function BirthdayFreebies() {
 
       {showBeauty && beautyItems.length > 0 && (
         <>
-          <div className="ssh bty" style={{ marginTop: showFood && foodItems.length > 0 ? 40 : 0 }}>💄 Beauty & Retail</div>
+          <div className="ssh bty" style={{ marginTop: showFood && foodItems.length > 0 ? 40 : 0 }}>💄 Beauty & Retail <span className="ssh-count">{beautyItems.length} offers</span></div>
           <div className="ga">
             {beautyItems.map(f => <FreebieCard key={f.n} freebie={f} daysUntilBirthday={daysUntilBirthday} />)}
           </div>

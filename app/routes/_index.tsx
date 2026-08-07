@@ -29,16 +29,8 @@ export default function Home() {
   const heroRef = useRef<HTMLDivElement>(null);
 
   function handleSearchSubmit() {
-    if (query.length < 2) return;
-    const lq = query.toLowerCase();
-    const allFreebies = [...BDAY_FOOD, ...BDAY_BEAUTY];
-    const match = allFreebies.find(f =>
-      f.n.toLowerCase().includes(lq) ||
-      f.r.toLowerCase().includes(lq) ||
-      f.pg.toLowerCase().includes(lq)
-    );
-    const filter = match?.cat === "bty" ? "?filter=beauty" : match ? "?filter=food" : "";
-    navigate(`/freebies/birthday-freebies${filter}`);
+    if (query.trim().length < 2) return;
+    navigate(`/search?q=${encodeURIComponent(query.trim())}`);
   }
 
   // GSAP hero entrance + section reveals
@@ -109,7 +101,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="wrap">
+        <div className="wrap center-sections">
           <div className="sec-hd">
             <p className="eyebrow">⭐ Top picks</p>
             <h2 className="sec-h">Today's best freebies</h2>
@@ -120,9 +112,11 @@ export default function Home() {
               <FreebieCard key={f.n} freebie={{ ...f, cat: i < 2 ? "food" : "bty" }} />
             ))}
           </div>
-          <Link to="/freebies/birthday-freebies" className="btn-pink" style={{ display: "inline-block", marginTop: 20 }}>
-            Browse all birthday freebies <span className="arrow">→</span>
-          </Link>
+          <div className="home-cta">
+            <Link to="/freebies/birthday-freebies" className="btn-pink" style={{ display: "inline-block", marginTop: 20 }}>
+              Browse all birthday freebies <span className="arrow">→</span>
+            </Link>
+          </div>
 
           <div className="dv" />
 
@@ -134,16 +128,18 @@ export default function Home() {
           <div className="g4">
             {MELB_SAMPLE.map(x => <ExperienceCard key={x.n} x={x} />)}
           </div>
-          <Link to="/freebies/free-melbourne" className="btn-pink" style={{ display: "inline-block", marginTop: 20 }}>
-            Explore all free experiences <span className="arrow">→</span>
-          </Link>
+          <div className="home-cta">
+            <Link to="/freebies/free-melbourne" className="btn-pink" style={{ display: "inline-block", marginTop: 20 }}>
+              Explore all free experiences <span className="arrow">→</span>
+            </Link>
+          </div>
 
           <div className="dv" />
         </div>
 
         <DealExplosion />
 
-        <div className="wrap">
+        <div className="wrap center-sections">
           <div className="dv" />
 
           <div className="tsr">
@@ -168,7 +164,7 @@ export default function Home() {
             <div className="ec"><div className="ec-ico">🎰</div><h4>Play Gachapon</h4><p>Spend points on a capsule — food, drinks, boosters &amp; a rare grand prize</p><span className="ec-pts">150 pts = 1 pull</span></div>
           </div>
           <p className="sec-p" style={{ marginTop: 16 }}>Plus a daily login streak, trackable wishlist (Luckboard), and points for referring friends.</p>
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 12 }}>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 12, justifyContent: "center" }}>
             <Link to="/login" className="btn-pink" style={{ display: "inline-block" }}>
               Sign up &amp; start earning <span className="arrow">→</span>
             </Link>

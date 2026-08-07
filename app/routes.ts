@@ -12,6 +12,7 @@ export default [
   route("deals", "routes/deals.tsx"),
   route("dinners", "routes/dinners.tsx"),
   route("rewards", "routes/rewards.tsx"),
+  route("search", "routes/search.tsx"),
   route("about", "routes/about.tsx"),
   route("blog", "routes/blog._index.tsx"),
   route("blog/:slug", "routes/blog.$slug.tsx"),
