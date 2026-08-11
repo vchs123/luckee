@@ -12,7 +12,7 @@ const LOGO_MAP: Record<string, string> = {
   eat: "/eatclub-logo.svg",
 };
 
-const SPREAD_X = [-475, -285, -95, 95, 285, 475];
+const SPREAD_X = [-375, -225, -75, 75, 225, 375];
 const FLOAT_DURATION = [2.8, 3.2, 2.6, 3.4, 3.0, 2.9];
 
 function easeInOut(t: number) {
