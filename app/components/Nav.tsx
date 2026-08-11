@@ -39,7 +39,6 @@ export function Nav() {
 
   return (
     <>
-      <div className="disco">🔗 Some links on this site are affiliate links — I earn a small commission if you sign up, at no cost to you. All recommendations are genuine.</div>
       <nav className="nav" ref={navRef}>
         <div className="nav-i">
           <Link to="/" className="nav-logo">Luckee</Link>
