@@ -7,8 +7,12 @@ import {
   Scripts,
   ScrollRestoration,
   useRevalidator,
+  useLocation,
+  useOutlet,
 } from "react-router";
 import { useEffect } from "react";
+import { LazyMotion, domMax, MotionConfig, AnimatePresence, m } from "framer-motion";
+import { EASE, DUR } from "~/lib/motion";
 import type { LoaderFunctionArgs } from "react-router";
 import type { Route } from "./+types/root";
 import { useVersionCheck } from "~/hooks/useVersionCheck";
@@ -97,14 +101,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   const updateAvailable = useVersionCheck();
   const revalidator = useRevalidator();
-
-  useEffect(() => {
-    import("gsap").then(({ gsap }) => {
-      import("gsap/ScrollTrigger").then(({ ScrollTrigger }) => {
-        gsap.registerPlugin(ScrollTrigger);
-      });
-    });
-  }, []);
+  const location = useLocation();
+  const outlet = useOutlet();
 
   // Refresh loader data (points balance, booster, etc.) when the user returns to
   // the tab — so admin-awarded points and other server-side changes show up.
@@ -121,16 +119,29 @@ export default function App() {
   }, [revalidator]);
 
   return (
-    <>
-      {updateAvailable && (
-        <div className="version-banner">
-          Luckee has been updated —{" "}
-          <button onClick={() => window.location.reload()}>refresh to see the latest</button>
-        </div>
-      )}
-      <DoublePointsBanner />
-      <Outlet />
-    </>
+    <LazyMotion features={domMax} strict>
+      <MotionConfig reducedMotion="user">
+        {updateAvailable && (
+          <div className="version-banner">
+            Luckee has been updated —{" "}
+            <button onClick={() => window.location.reload()}>refresh to see the latest</button>
+          </div>
+        )}
+        <DoublePointsBanner />
+        {/* Page transition: opacity-only (transform-free) so the sticky nav isn't broken. */}
+        <AnimatePresence mode="wait" initial={false}>
+          <m.div
+            key={location.pathname}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: DUR.base, ease: EASE }}
+          >
+            {outlet}
+          </m.div>
+        </AnimatePresence>
+      </MotionConfig>
+    </LazyMotion>
   );
 }
 

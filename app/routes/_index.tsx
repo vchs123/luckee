@@ -7,10 +7,13 @@ import { FreebieCard } from "~/components/FreebieCard";
 import { ExperienceCard } from "~/components/ExperienceCard";
 import { DealExplosion } from "~/components/DealExplosion";
 import { Particles } from "~/components/Particles";
+import { m } from "framer-motion";
 import { BDAY_FOOD } from "~/data/birthday-food";
 import { BDAY_BEAUTY } from "~/data/birthday-beauty";
 import { MELB_TRANSPORT, MELB_CULTURE } from "~/data/free-melbourne";
 import { prefersReducedMotion } from "~/lib/reducedMotion";
+import { initScrollReveals } from "~/lib/scrollReveal";
+import { fadeUp, staggerContainer } from "~/lib/motion";
 
 export const meta: MetaFunction = () => [
   { title: "Luckee — Melbourne Freebies, Deals & Community Dinners" },
@@ -33,39 +36,10 @@ export default function Home() {
     navigate(`/search?q=${encodeURIComponent(query.trim())}`);
   }
 
-  // GSAP hero entrance + section reveals
+  // Framer Motion scroll reveals for section headers (hero animates via variants below).
   useEffect(() => {
-    if (prefersReducedMotion()) return;
-    let ctx: { revert: () => void } | null = null;
-    import("gsap").then(({ gsap }) => {
-      import("gsap/ScrollTrigger").then(({ ScrollTrigger }) => {
-        gsap.registerPlugin(ScrollTrigger);
-        ctx = gsap.context(() => {
-          // Hero entrance sequence
-          const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-          tl.from(".hero-badge", { y: -20, opacity: 0, duration: 0.4, ease: "power2.out" })
-            .from(".hero-h", { y: 30, opacity: 0, duration: 0.6 }, "-=0.1")
-            .from(".hero-p", { y: 20, opacity: 0, duration: 0.5 }, "-=0.2")
-            .from(".search", { y: 16, opacity: 0, duration: 0.4 }, "-=0.15")
-            .from(".hcat", { y: 12, opacity: 0, duration: 0.35, stagger: 0.04, immediateRender: false }, "-=0.1");
-
-          // Section header reveals
-          document.querySelectorAll(".sec-hd").forEach((el) => {
-            gsap.from(el.querySelector(".eyebrow"), {
-              x: -30, opacity: 0, duration: 0.6, ease: "power3.out",
-              immediateRender: false,
-              scrollTrigger: { trigger: el, start: "top 85%" },
-            });
-            gsap.from(el.querySelector(".sec-h"), {
-              x: 30, opacity: 0, duration: 0.6, delay: 0.08, ease: "power3.out",
-              immediateRender: false,
-              scrollTrigger: { trigger: el, start: "top 85%" },
-            });
-          });
-        }, heroRef);
-      });
-    });
-    return () => ctx?.revert();
+    if (prefersReducedMotion() || !heroRef.current) return;
+    return initScrollReveals(heroRef.current);
   }, []);
 
   return (
@@ -74,11 +48,12 @@ export default function Home() {
       <div ref={heroRef}>
         <div className="hero" style={{ position: "relative", overflow: "hidden" }}>
           <Particles />
-          <div className="wrap" style={{ position: "relative", zIndex: 1 }}>
-            <div className="hero-badge">✦ Melbourne's freebie hub</div>
-            <h1 className="hero-h">Score Melbourne's best <span className="ac">freebies</span> every day</h1>
-            <p className="hero-p">Birthday perks, loyalty sign-ups, free galleries and community dinners — curated for Melbourne locals.</p>
-            <form className="search" onSubmit={e => { e.preventDefault(); handleSearchSubmit(); }}>
+          <m.div className="wrap" style={{ position: "relative", zIndex: 1 }}
+            variants={staggerContainer(0.08)} initial="hidden" animate="show">
+            <m.div className="hero-badge" variants={fadeUp}>✦ Melbourne's freebie hub</m.div>
+            <m.h1 className="hero-h" variants={fadeUp}>Score Melbourne's best <span className="ac">freebies</span> every day</m.h1>
+            <m.p className="hero-p" variants={fadeUp}>Birthday perks, loyalty sign-ups, free galleries and community dinners — curated for Melbourne locals.</m.p>
+            <m.form className="search" variants={fadeUp} onSubmit={e => { e.preventDefault(); handleSearchSubmit(); }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
               </svg>
@@ -89,16 +64,16 @@ export default function Home() {
                 onChange={e => setQuery(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && handleSearchSubmit()}
               />
-            </form>
-            <div className="hcats">
+            </m.form>
+            <m.div className="hcats" variants={fadeUp}>
               <Link to="/freebies/birthday-freebies" className="hcat">🎂 Birthday</Link>
               <Link to="/freebies/free-melbourne" className="hcat">🎨 Experiences</Link>
               <Link to="/freebies/birthday-freebies?filter=beauty" className="hcat">💄 Beauty</Link>
               <Link to="/freebies/birthday-freebies?filter=food" className="hcat">🍔 Food</Link>
               <Link to="/freebies/events-calendar" className="hcat">🎉 Events</Link>
               <Link to="/freebies/sign-up-freebies" className="hcat">💸 Sign-up bonuses</Link>
-            </div>
-          </div>
+            </m.div>
+          </m.div>
         </div>
 
         <div className="wrap center-sections">
@@ -107,11 +82,13 @@ export default function Home() {
             <h2 className="sec-h">Today's best freebies</h2>
           </div>
           <p className="sec-p">Hand-checked favourites. Browse the full list — every offer is tagged <strong>✓ Verified by Luckee</strong> or flagged as community-listed so you know what's been confirmed.</p>
-          <div className="g3">
+          <m.div className="g3" variants={staggerContainer(0.08)} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }}>
             {TOP_PICKS.map((f, i) => (
-              <FreebieCard key={f.n} freebie={{ ...f, cat: i < 2 ? "food" : "bty" }} />
+              <m.div key={f.n} variants={fadeUp} style={{ display: "grid" }}>
+                <FreebieCard freebie={{ ...f, cat: i < 2 ? "food" : "bty" }} />
+              </m.div>
             ))}
-          </div>
+          </m.div>
           <div className="home-cta">
             <Link to="/freebies/birthday-freebies" className="btn-pink" style={{ display: "inline-block", marginTop: 20 }}>
               Browse all birthday freebies <span className="arrow">→</span>

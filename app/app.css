@@ -624,9 +624,11 @@ body.dp-active .nav { top: 38px; }
 
 /* pill tab bar */
 .rw-tabs { display: flex; justify-content: center; gap: 8px; margin-bottom: 28px; flex-wrap: wrap; }
-.rw-tab { padding: 9px 20px; border-radius: var(--rp); font-size: 14px; font-weight: 700; color: var(--t2); background: white; border: 1.5px solid var(--cb); cursor: pointer; font-family: inherit; transition: color 0.15s, border-color 0.15s, background 0.15s; }
+.rw-tab { position: relative; overflow: hidden; padding: 9px 20px; border-radius: var(--rp); font-size: 14px; font-weight: 700; color: var(--t2); background: white; border: 1.5px solid var(--cb); cursor: pointer; font-family: inherit; transition: color 0.15s, border-color 0.15s; }
 .rw-tab:hover { border-color: var(--pink); color: var(--pink); }
-.rw-tab.active { background: var(--pink); border-color: var(--pink); color: #fff; box-shadow: 0 4px 14px rgba(233,30,140,0.28); }
+.rw-tab.active { border-color: var(--pink); color: #fff; }
+.rw-tab-pill { position: absolute; inset: 0; background: var(--pink); border-radius: var(--rp); box-shadow: 0 4px 14px rgba(233,30,140,0.28); z-index: 0; }
+.rw-tab-label { position: relative; z-index: 1; }
 
 .rewards-sec { margin-bottom: 22px; background: var(--card); border: 1px solid var(--cb); border-radius: var(--r); padding: 30px 26px; box-shadow: var(--cs); }
 .rewards-sec-h { font-family: 'Fraunces', serif; font-style: italic; font-size: 24px; color: var(--t1); margin-bottom: 8px; text-align: center; }

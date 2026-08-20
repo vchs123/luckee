@@ -25,7 +25,7 @@ export default function FreeMelbourne() {
 
   useEffect(() => {
     if (prefersReducedMotion() || !rootRef.current) return;
-    initScrollReveals(rootRef.current);
+    return initScrollReveals(rootRef.current);
   }, [view]);
 
   return (

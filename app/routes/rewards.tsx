@@ -10,6 +10,7 @@ import { getSupabase } from "~/lib/supabase.server";
 import { awardPoints } from "~/lib/points.server";
 import { melbToday } from "~/lib/melbDate";
 import { playChime } from "~/lib/sound";
+import { m } from "framer-motion";
 import { PULL_COST, PRIZES, type PrizeType } from "~/lib/gachapon";
 
 const RECEIPT_MILESTONE = 30;
@@ -927,9 +928,12 @@ export default function Rewards() {
 
       <div className="wrap rewards-wrap">
         <div className="rw-tabs">
-          <button className={`rw-tab${tab === "earn" ? " active" : ""}`} onClick={() => setTab("earn")}>🎯 Earn</button>
-          <button className={`rw-tab${tab === "gachapon" ? " active" : ""}`} onClick={() => setTab("gachapon")}>🎰 Play Gachapon</button>
-          <button className={`rw-tab${tab === "activity" ? " active" : ""}`} onClick={() => setTab("activity")}>📋 Activity</button>
+          {([["earn", "🎯 Earn"], ["gachapon", "🎰 Play Gachapon"], ["activity", "📋 Activity"]] as const).map(([id, label]) => (
+            <button key={id} className={`rw-tab${tab === id ? " active" : ""}`} onClick={() => setTab(id)}>
+              {tab === id && <m.span layoutId="rw-tab-pill" className="rw-tab-pill" transition={{ type: "spring", stiffness: 380, damping: 30 }} />}
+              <span className="rw-tab-label">{label}</span>
+            </button>
+          ))}
         </div>
 
         {tab === "earn" && (

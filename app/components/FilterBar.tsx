@@ -1,5 +1,5 @@
 "use client";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 
 export type FilterType = "all" | "food" | "beauty" | "nospend";
 
@@ -17,7 +17,7 @@ export function FilterBar({ active, onChange }: Props) {
       style={{ position: "relative", overflow: "hidden" }}
     >
       {active === id && (
-        <motion.span
+        <m.span
           layoutId="filter-pill-bg"
           className="filter-active-bg"
           style={{

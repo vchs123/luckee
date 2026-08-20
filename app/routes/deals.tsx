@@ -18,11 +18,8 @@ export default function Deals() {
   const rootRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (prefersReducedMotion() || !rootRef.current) return;
-    let cleanup: (() => void) | undefined;
-    initScrollReveals(rootRef.current).then(() => {
-      cleanup = undefined;
-    });
-    return () => { cleanup?.(); };
+    const cleanup = initScrollReveals(rootRef.current);
+    return cleanup;
   }, []);
 
   return (
