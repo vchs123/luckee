@@ -649,6 +649,15 @@ body.dp-active .nav { top: 38px; }
 .streak-day-lbl { font-size: 11px; font-weight: 800; color: var(--t3); text-transform: uppercase; }
 .streak-day.today .streak-day-lbl { color: var(--pink); }
 .streak-nudge { text-align: center; font-size: 13px; color: var(--t2); margin-top: 2px; }
+@media (max-width: 480px) {
+  .streak-card { padding: 18px 14px; }
+  .streak-days { gap: 5px; flex-wrap: nowrap; margin: 14px 0 10px; }
+  .streak-day { width: 100%; max-width: 40px; gap: 4px; padding: 7px 0; }
+  .streak-day-ico { font-size: 15px; }
+  .streak-day-lbl { font-size: 10px; }
+  .streak-flame { font-size: 34px; }
+  .streak-n { font-size: 22px; }
+}
 
 /* ── spin wheel ── */
 .spin-section { position: relative; }
