@@ -20,16 +20,40 @@ export const meta: MetaFunction = () => [
   { name: "description", content: "Spin the wheel, answer trivia, earn points and enter the monthly draw. Every 100 points = 1 entry." },
 ];
 
-function computeStreak(dates: string[]): number {
-  if (!dates.length) return 0;
-  let streak = 1;
-  for (let i = 0; i < dates.length - 1; i++) {
-    const a = new Date(dates[i]).getTime();
-    const b = new Date(dates[i + 1]).getTime();
-    if ((a - b) / 86400000 === 1) streak++;
-    else break;
+type StreakDay = { label: string; active: boolean; isToday: boolean };
+
+function computeStreakData(dates: string[], today: string): { current: number; best: number; last7: StreakDay[] } {
+  const set = new Set(dates);
+  set.add(today); // today counts — the daily login is awarded when this page loads
+  const dayNum = (d: string) => Math.floor(Date.parse(d + "T00:00:00Z") / 86400000);
+  const strOf = (n: number) => new Date(n * 86400000).toISOString().slice(0, 10);
+
+  // Current streak: consecutive days ending today.
+  let current = 0;
+  for (let n = dayNum(today); set.has(strOf(n)); n--) current++;
+
+  // Best streak across all active days.
+  const nums = [...set].map(dayNum).sort((a, b) => a - b);
+  let best = 0, run = 0, prev: number | null = null;
+  for (const t of nums) {
+    run = prev !== null && t - prev === 1 ? run + 1 : 1;
+    best = Math.max(best, run);
+    prev = t;
   }
-  return streak;
+
+  // Last 7 days, oldest → newest.
+  const todayNum = dayNum(today);
+  const last7: StreakDay[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const dn = todayNum - i;
+    last7.push({
+      label: new Date(dn * 86400000).toLocaleDateString("en-AU", { weekday: "narrow", timeZone: "UTC" }),
+      active: set.has(strOf(dn)),
+      isToday: i === 0,
+    });
+  }
+
+  return { current, best, last7 };
 }
 
 function seedShuffle<T>(arr: T[], seed: number): T[] {
@@ -66,7 +90,8 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     supabase.from("proof_submissions").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("action", "receipt").eq("status", "approved"),
   ]);
 
-  const streak = computeStreak((loginsRes.data ?? []).map(l => l.login_date as string));
+  const streakData = computeStreakData((loginsRes.data ?? []).map(l => l.login_date as string), today);
+  const streak = streakData.current;
 
   // Award daily login points (once per day)
   const loginCheckRes = await supabase
@@ -118,6 +143,8 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     proofSubmissions: proofRes.data ?? [],
     triviaQuestions: dailyQuestions,
     streak,
+    bestStreak: streakData.best,
+    last7: streakData.last7,
     collection,
     redemptions,
     freePulls: profileRes.data?.free_pulls ?? 0,
@@ -842,6 +869,30 @@ function RedemptionSection({
   );
 }
 
+// ── Streak card (Earn tab) ──────────────────────────────────────────────────────
+function StreakCard({ streak, best, last7 }: { streak: number; best: number; last7: StreakDay[] }) {
+  return (
+    <div className="streak-card">
+      <div className="streak-head">
+        <span className="streak-flame">🔥</span>
+        <div>
+          <p className="streak-n">{streak}-day streak</p>
+          <p className="streak-best">Best: {best} day{best === 1 ? "" : "s"}</p>
+        </div>
+      </div>
+      <div className="streak-days">
+        {last7.map((d, i) => (
+          <div key={i} className={`streak-day${d.active ? " on" : ""}${d.isToday ? " today" : ""}`}>
+            <span className="streak-day-ico">{d.active ? "🔥" : "○"}</span>
+            <span className="streak-day-lbl">{d.label}</span>
+          </div>
+        ))}
+      </div>
+      <p className="streak-nudge">You've logged in today — come back tomorrow to keep the flame alive!</p>
+    </div>
+  );
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 const ACTION_ICONS: Record<string, string> = {
   daily_login: "🌅",
@@ -873,7 +924,7 @@ export default function Rewards() {
     );
   }
 
-  const { profile, ledger, hasSpunToday, spinPointsWon, triviaCompleted, triviaScore, proofSubmissions, triviaQuestions, streak, collection, redemptions, freePulls, receiptCount, pullsToday, dailyPullLimit } = data;
+  const { profile, ledger, hasSpunToday, spinPointsWon, triviaCompleted, triviaScore, proofSubmissions, triviaQuestions, streak, bestStreak, last7, collection, redemptions, freePulls, receiptCount, pullsToday, dailyPullLimit } = data;
 
   const [tab, setTab] = useState<"earn" | "gachapon" | "activity">("earn");
   const [filterAction, setFilterAction] = useState("all");
@@ -939,6 +990,8 @@ export default function Rewards() {
 
         {tab === "earn" && (
           <>
+            <StreakCard streak={streak} best={bestStreak} last7={last7} />
+
             <section className="rewards-sec">
               <h2 className="rewards-sec-h">🎡 Daily spin</h2>
               <SpinWheel hasSpunToday={hasSpunToday} initialPtsWon={spinPointsWon} />

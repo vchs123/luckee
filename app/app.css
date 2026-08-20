@@ -635,6 +635,21 @@ body.dp-active .nav { top: 38px; }
 .rewards-sec-sub { font-size: 13px; color: var(--t2); margin-bottom: 20px; text-align: center; max-width: 560px; margin-left: auto; margin-right: auto; }
 .rewards-empty { font-size: 14px; color: var(--t3); padding: 20px; background: #faf8fc; border-radius: var(--rs); border: 1px dashed var(--cb); }
 
+/* streak card */
+.streak-card { max-width: 560px; margin: 0 auto 22px; background: linear-gradient(135deg, #fff5f9, #fbf2ff); border: 1px solid var(--cb); border-radius: var(--r); padding: 22px 24px; box-shadow: var(--cs); }
+.streak-head { display: flex; align-items: center; justify-content: center; gap: 14px; }
+.streak-flame { font-size: 40px; line-height: 1; }
+.streak-n { font-family: 'Fraunces', serif; font-style: italic; font-size: 26px; font-weight: 700; color: var(--t1); line-height: 1.1; }
+.streak-best { font-size: 13px; color: var(--t2); }
+.streak-days { display: flex; justify-content: center; gap: 8px; margin: 18px 0 12px; flex-wrap: wrap; }
+.streak-day { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 42px; padding: 9px 0; border-radius: 12px; background: #fff; border: 1.5px solid var(--cb); }
+.streak-day.on { background: var(--pl); border-color: rgba(233,30,140,0.28); }
+.streak-day.today { border-color: var(--pink); box-shadow: 0 0 0 2px rgba(233,30,140,0.18); }
+.streak-day-ico { font-size: 18px; line-height: 1; color: var(--t3); }
+.streak-day-lbl { font-size: 11px; font-weight: 800; color: var(--t3); text-transform: uppercase; }
+.streak-day.today .streak-day-lbl { color: var(--pink); }
+.streak-nudge { text-align: center; font-size: 13px; color: var(--t2); margin-top: 2px; }
+
 /* ── spin wheel ── */
 .spin-section { position: relative; }
 .spin-wrap { display: flex; gap: 48px; align-items: center; justify-content: center; }
