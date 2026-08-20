@@ -246,15 +246,15 @@ function SpinWheel({ hasSpunToday, initialPtsWon }: { hasSpunToday: boolean; ini
             {SEGMENTS.map((s, i) => {
               const mid = segMid(i);
               const rad = ((mid - 90) * Math.PI) / 180;
-              const r = 91; // label radius from wheel centre (280px wheel → 140px radius → 65%)
-              const x = 140 + r * Math.cos(rad);
-              const y = 140 + r * Math.sin(rad);
-              const fontSize = 11;
+              // Position as a percentage of the wheel so labels scale with any wheel size.
+              const rPct = 32.5; // 91px radius on a 280px wheel = 32.5% from centre
+              const x = 50 + rPct * Math.cos(rad);
+              const y = 50 + rPct * Math.sin(rad);
               return (
                 <div
                   key={s.pts}
                   className="spin-label"
-                  style={{ left: x, top: y, transform: `translate(-50%,-50%) rotate(${mid}deg)`, fontSize }}
+                  style={{ left: `${x}%`, top: `${y}%`, transform: `translate(-50%,-50%) rotate(${mid}deg)`, fontSize: 11 }}
                 >
                   {s.pts}
                 </div>
