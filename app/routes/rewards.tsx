@@ -128,15 +128,16 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 }
 
 // ── Spin wheel config ──────────────────────────────────────────────────────────
+// Cohesive modern palette — a pink→purple→blue→teal gradient with a warm jackpot accent.
 const SEGMENTS = [
-  { pts: 10,  pct: 12.5, color: "#fbbf24" },
-  { pts: 15,  pct: 12.5, color: "#e91e8c" },
-  { pts: 20,  pct: 12.5, color: "#7c3aed" },
-  { pts: 25,  pct: 12.5, color: "#0d9488" },
-  { pts: 50,  pct: 12.5, color: "#f97316" },
-  { pts: 100, pct: 12.5, color: "#16a34a" },
-  { pts: 200, pct: 12.5, color: "#3b82f6" },
-  { pts: 500, pct: 12.5, color: "#dc2626" },
+  { pts: 10,  pct: 12.5, color: "#f472b6" },
+  { pts: 15,  pct: 12.5, color: "#e879f9" },
+  { pts: 20,  pct: 12.5, color: "#c084fc" },
+  { pts: 25,  pct: 12.5, color: "#a78bfa" },
+  { pts: 50,  pct: 12.5, color: "#818cf8" },
+  { pts: 100, pct: 12.5, color: "#60a5fa" },
+  { pts: 200, pct: 12.5, color: "#2dd4bf" },
+  { pts: 500, pct: 12.5, color: "#fbbf24" },
 ];
 
 // Cumulative degrees for each segment boundary
@@ -684,7 +685,7 @@ function ReceiptsSection({ receiptCount }: { receiptCount: number }) {
   };
 
   return (
-    <div>
+    <div className="receipts-section">
       <div className="receipts-meter">
         <div className="receipts-meter-top">
           <span className="receipts-meter-n">{receiptCount} receipts approved</span>
