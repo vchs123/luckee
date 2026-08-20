@@ -21,8 +21,8 @@ export interface PrizeMeta {
 }
 
 export const PRIZES: Record<PrizeType, PrizeMeta> = {
-  food:          { icon: "🍔", label: "Free food",          color: "#f97316", threshold: 5 },
-  drink:         { icon: "🥤", label: "Free drink",         color: "#0d9488", threshold: 5 },
+  food:          { icon: "🍔", label: "Free food",          color: "#f97316", threshold: 10 },
+  drink:         { icon: "🥤", label: "Free drink",         color: "#0d9488", threshold: 10 },
   points:        { icon: "⭐", label: "Bonus points",       color: "#fbbf24", threshold: 0 },
   double_points: { icon: "⚡", label: "Double-points day",  color: "#7c3aed", threshold: 0 },
   bonus_ticket:  { icon: "🎟️", label: "Free pull",          color: "#e91e8c", threshold: 0 },
@@ -35,11 +35,11 @@ export const COLLECTIBLE_TYPES: PrizeType[] = ["food", "drink", "grand"];
 
 // Weighted roll table — weights are percentages summing to 100.
 export const PRIZE_WEIGHTS: { type: PrizeType; weight: number }[] = [
-  { type: "food",          weight: 28 },
-  { type: "drink",         weight: 28 },
-  { type: "points",        weight: 25 },
-  { type: "double_points", weight: 8 },
-  { type: "bonus_ticket",  weight: 6 },
-  { type: "better_luck",   weight: 4 },
+  { type: "points",        weight: 30 },
+  { type: "food",          weight: 20 },
+  { type: "drink",         weight: 20 },
+  { type: "bonus_ticket",  weight: 15 },
+  { type: "better_luck",   weight: 8 },
+  { type: "double_points", weight: 6 },
   { type: "grand",         weight: 1 },
 ];
