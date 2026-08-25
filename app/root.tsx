@@ -10,7 +10,7 @@ import {
   useLocation,
   useOutlet,
 } from "react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { LazyMotion, domMax, MotionConfig, m } from "framer-motion";
 import { EASE, DUR } from "~/lib/motion";
 import type { LoaderFunctionArgs } from "react-router";
@@ -162,16 +162,24 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
       error.status === 404
         ? "The requested page could not be found."
         : error.statusText || details;
-  } else if (error && error instanceof Error) {
+  }
+
+  // Visitors get the friendly page; append ?debug to any URL to see the real
+  // message and stack. Resolved after mount so the server and the first client
+  // render agree (DEV is a build-time constant, so it's safe to seed with).
+  const [showDetail, setShowDetail] = useState(import.meta.env.DEV);
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).has("debug")) setShowDetail(true);
+  }, []);
+
+  if (showDetail && !isRouteErrorResponse(error) && error instanceof Error) {
     details = error.message;
     stack = error.stack;
   }
 
-  // Production used to swallow the real error entirely, which made anything
-  // that reached this boundary undiagnosable from the browser.
   useEffect(() => {
-    console.error("[Luckee] route error boundary:", error);
-  }, [error]);
+    if (showDetail) console.error("[Luckee] route error boundary:", error);
+  }, [showDetail, error]);
 
   return (
     <div className="wrap" style={{ paddingTop: 80 }}>
