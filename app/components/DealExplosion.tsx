@@ -12,8 +12,11 @@ const LOGO_MAP: Record<string, string> = {
   eat: "/eatclub-logo.svg",
 };
 
-const SPREAD_X = [-375, -225, -75, 75, 225, 375];
-const FLOAT_DURATION = [2.8, 3.2, 2.6, 3.4, 3.0, 2.9];
+// Claude Pro is on /deals only — keeping the homepage row lighter.
+const HOME_DEALS = DEALS.filter(d => d.cls !== "cld");
+
+const SPREAD_X = [-300, -150, 0, 150, 300];
+const FLOAT_DURATION = [3.2, 2.6, 3.4, 3.0, 2.9];
 
 function easeInOut(t: number) {
   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
@@ -66,7 +69,7 @@ export function DealExplosion() {
           <p className="sec-p">Products I recommend. Sign up through my links and you'll usually get a bonus — so do I.</p>
         </div>
         <div className="dlx-stage">
-          {DEALS.map((d, i) => (
+          {HOME_DEALS.map((d, i) => (
             <Link
               key={d.cls}
               to={`/deals#${d.cls}`}
