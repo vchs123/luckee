@@ -16,7 +16,7 @@ const RECEIPT_MILESTONE_BONUS = 50;
 export async function loader({ request, context, params }: LoaderFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const env = (context as any)?.cloudflare?.env as Env;
-  await requireAdmin(request, env);
+  requireAdmin(context);
   const supabase = getSupabase(env);
 
   const { data: submission } = await supabase
@@ -49,7 +49,7 @@ export async function loader({ request, context, params }: LoaderFunctionArgs) {
 export async function action({ request, context, params }: ActionFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const env = (context as any)?.cloudflare?.env as Env;
-  await requireAdmin(request, env);
+  requireAdmin(context);
   const supabase = getSupabase(env);
   const form = await request.formData();
   const intent = form.get("intent") as string;

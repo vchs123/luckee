@@ -6,7 +6,7 @@ import { getSupabase } from "~/lib/supabase.server";
 export async function loader({ request, context }: LoaderFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const env = (context as any)?.cloudflare?.env as Env;
-  await requireAdmin(request, env);
+  requireAdmin(context);
   const supabase = getSupabase(env);
 
   const url = new URL(request.url);

@@ -1,4 +1,6 @@
 import { redirect } from "react-router";
+import type { RouterContextProvider } from "react-router";
+import { userContext } from "~/lib/auth.context";
 import type { User } from "@supabase/supabase-js";
 import { getSupabase, getSupabaseAnon } from "~/lib/supabase.server";
 
@@ -102,16 +104,22 @@ export async function refreshAndGetUser(
   }
 }
 
-export async function requireAuth(request: Request, env: Env): Promise<User> {
-  const user = await verifyUser(request, env);
-  if (user) return user;
-  const refreshed = await refreshAndGetUser(request, env);
-  if (refreshed) return refreshed.user;
-  throw redirect("/login");
+/**
+ * The user resolved by the root middleware, or a redirect to /login.
+ *
+ * This deliberately does NOT refresh. The middleware in `app/root.tsx` performs
+ * exactly one refresh per request and persists the rotated cookies. Refreshing
+ * here too would replay a refresh token Supabase has already consumed, which it
+ * treats as theft and answers by revoking the whole session family.
+ */
+export function requireAuth(context: Readonly<RouterContextProvider>): User {
+  const user = context.get(userContext);
+  if (!user) throw redirect("/login");
+  return user;
 }
 
-export async function requireAdmin(request: Request, env: Env): Promise<User> {
-  const user = await requireAuth(request, env);
+export function requireAdmin(context: Readonly<RouterContextProvider>): User {
+  const user = requireAuth(context);
   if (user.email !== "luckee.app@gmail.com") {
     throw new Response("Forbidden", { status: 403 });
   }

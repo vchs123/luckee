@@ -6,13 +6,13 @@ import { FilterBar, type FilterType } from "~/components/FilterBar";
 import { TipBox } from "~/components/TipBox";
 import { BDAY_FOOD } from "~/data/birthday-food";
 import { BDAY_BEAUTY } from "~/data/birthday-beauty";
-import { verifyUser } from "~/lib/auth.server";
+import { userContext } from "~/lib/auth.context";
 import { getSupabase } from "~/lib/supabase.server";
 
-export async function loader({ request, context }: LoaderFunctionArgs) {
+export async function loader({ context }: LoaderFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const env = (context as any)?.cloudflare?.env as Env;
-  const user = await verifyUser(request, env);
+  const user = context.get(userContext);
   if (!user) return { daysUntilBirthday: null, loggedIn: false, hasDob: false };
   const supabase = getSupabase(env);
   const { data: p } = await supabase.from("user_profiles").select("dob").eq("id", user.id).single();

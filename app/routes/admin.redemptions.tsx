@@ -7,7 +7,7 @@ import { PRIZES, type PrizeType } from "~/lib/gachapon";
 export async function loader({ request, context }: LoaderFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const env = (context as any)?.cloudflare?.env as Env;
-  await requireAdmin(request, env);
+  requireAdmin(context);
   const supabase = getSupabase(env);
 
   const url = new URL(request.url);
@@ -33,7 +33,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 export async function action({ request, context }: ActionFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const env = (context as any)?.cloudflare?.env as Env;
-  await requireAdmin(request, env);
+  requireAdmin(context);
   const supabase = getSupabase(env);
 
   const form = await request.formData();

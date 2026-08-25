@@ -6,7 +6,7 @@ import { awardPoints } from "~/lib/points.server";
 export async function action({ request, context }: ActionFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const env = (context as any)?.cloudflare?.env as Env;
-  const user = await requireAuth(request, env);
+  const user = requireAuth(context);
   const supabase = getSupabase(env);
   const today = new Date().toISOString().slice(0, 10);
 

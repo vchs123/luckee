@@ -5,7 +5,7 @@ import type { MetaFunction, LoaderFunctionArgs } from "react-router";
 import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
 import { GachaponMachine } from "~/components/GachaponMachine";
-import { verifyUser } from "~/lib/auth.server";
+import { requireAuth } from "~/lib/auth.server";
 import { getSupabase } from "~/lib/supabase.server";
 import { awardPoints } from "~/lib/points.server";
 import { melbToday } from "~/lib/melbDate";
@@ -67,11 +67,10 @@ function seedShuffle<T>(arr: T[], seed: number): T[] {
   return a;
 }
 
-export async function loader({ request, context }: LoaderFunctionArgs) {
+export async function loader({ context }: LoaderFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const env = (context as any)?.cloudflare?.env as Env;
-  const user = await verifyUser(request, env);
-  if (!user) return redirect("/login");
+  const user = requireAuth(context);
   if (user.email === "luckee.app@gmail.com") return redirect("/admin");
 
   const supabase = getSupabase(env);

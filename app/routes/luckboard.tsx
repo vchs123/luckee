@@ -59,7 +59,7 @@ const ALL_ITEMS = [...ALL_FREEBIES, ...ALL_EXPERIENCES, ...ALL_DEALS];
 export async function loader({ request, context }: LoaderFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const env = (context as any)?.cloudflare?.env as Env;
-  const user = await requireAuth(request, env);
+  const user = requireAuth(context);
   if (user.email === "luckee.app@gmail.com") return redirect("/admin");
 
   const supabase = getSupabase(env);

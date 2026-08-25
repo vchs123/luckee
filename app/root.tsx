@@ -1,5 +1,4 @@
 import {
-  data,
   isRouteErrorResponse,
   Links,
   Meta,
@@ -13,12 +12,13 @@ import {
 import { useEffect, useState } from "react";
 import { LazyMotion, domMax, MotionConfig, m } from "framer-motion";
 import { EASE, DUR } from "~/lib/motion";
-import type { LoaderFunctionArgs } from "react-router";
+import type { LoaderFunctionArgs, MiddlewareFunction } from "react-router";
 import type { Route } from "./+types/root";
 import { useVersionCheck } from "~/hooks/useVersionCheck";
 import { DoublePointsBanner } from "~/components/DoublePointsBanner";
 import { BottomNav } from "~/components/BottomNav";
 import { verifyUser, refreshAndGetUser } from "~/lib/auth.server";
+import { userContext } from "~/lib/auth.context";
 import { getSupabase } from "~/lib/supabase.server";
 import "./app.css";
 
@@ -31,20 +31,47 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
-export async function loader({ request, context }: LoaderFunctionArgs) {
+/**
+ * Resolve the session exactly once per request, and persist any rotated cookies
+ * onto whatever response comes back.
+ *
+ * Doing this in middleware rather than in the loader fixes three things:
+ *   - leaf loaders no longer each run their own refresh, so a rotated refresh
+ *     token is never replayed (Supabase revokes the session family for that);
+ *   - the rotated cookies survive a redirect thrown by a child loader, which
+ *     used to win the response and discard the root loader's Set-Cookie;
+ *   - routes can require auth without knowing how the session was obtained.
+ */
+export const middleware: MiddlewareFunction<Response>[] = [
+  async ({ request, context }, next) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const env = (context as any)?.cloudflare?.env as Env;
+
+    let user = await verifyUser(request, env);
+    let rotated: string[] | null = null;
+
+    if (!user) {
+      const refreshed = await refreshAndGetUser(request, env);
+      if (refreshed) {
+        user = refreshed.user;
+        rotated = refreshed.cookies;
+      }
+    }
+
+    context.set(userContext, user);
+
+    const response = await next();
+    if (rotated && response instanceof Response) {
+      rotated.forEach((c) => response.headers.append("Set-Cookie", c));
+    }
+    return response;
+  },
+];
+
+export async function loader({ context }: LoaderFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const env = (context as any)?.cloudflare?.env as Env;
-
-  let user = await verifyUser(request, env);
-  let extraCookies: string[] | null = null;
-
-  if (!user) {
-    const refreshed = await refreshAndGetUser(request, env);
-    if (refreshed) {
-      user = refreshed.user;
-      extraCookies = refreshed.cookies;
-    }
-  }
+  const user = context.get(userContext);
 
   let profile: { username: string; totalPoints: number; doublePointsUntil: string | null } | null = null;
   let luckboard: Record<string, string> = {};
@@ -60,19 +87,11 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     } catch { /* non-fatal */ }
   }
 
-  const payload = {
+  return {
     user: user ? { id: user.id, email: user.email! } : null,
     profile,
     luckboard,
   };
-
-  if (extraCookies) {
-    const headers = new Headers();
-    extraCookies.forEach((c) => headers.append("Set-Cookie", c));
-    return data(payload, { headers });
-  }
-
-  return payload;
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
