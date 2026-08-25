@@ -5,7 +5,6 @@ import { useAuth } from "~/hooks/useAuth";
 import { prefersReducedMotion } from "~/lib/reducedMotion";
 
 export function Nav() {
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
@@ -88,39 +87,8 @@ export function Nav() {
               <Link to="/login" className="btn-pink">Sign in</Link>
             )}
           </div>
-          <button className="hamburger" onClick={() => setMobileOpen(o => !o)} aria-label="Menu">
-            {mobileOpen ? "✕" : "☰"}
-          </button>
         </div>
       </nav>
-      <div className={`mobile-nav${mobileOpen ? " open" : ""}`}>
-        <Link to="/" onClick={() => setMobileOpen(false)}>Home</Link>
-        <Link to="/freebies/birthday-freebies" className="ind" onClick={() => setMobileOpen(false)}>🎂 Birthday Freebies</Link>
-        <Link to="/freebies/sign-up-freebies" className="ind" onClick={() => setMobileOpen(false)}>🎁 Sign-up Freebies</Link>
-        <Link to="/freebies/free-melbourne" className="ind" onClick={() => setMobileOpen(false)}>🌿 Free Melbourne</Link>
-        <Link to="/freebies/events-calendar" className="ind" onClick={() => setMobileOpen(false)}>🎉 Events Calendar</Link>
-        <Link to="/deals" onClick={() => setMobileOpen(false)}>Deals</Link>
-        <Link to="/dinners" onClick={() => setMobileOpen(false)}>Dinners</Link>
-        <Link to="/rewards" onClick={() => setMobileOpen(false)}>Rewards</Link>
-        <Link to="/about" onClick={() => setMobileOpen(false)}>About</Link>
-        {user ? (
-          <>
-            {isAdmin ? (
-              <Link to="/admin" onClick={() => setMobileOpen(false)}>Admin dashboard</Link>
-            ) : (
-              <>
-                <Link to="/profile" onClick={() => setMobileOpen(false)}>My profile {profile ? `· ${profile.totalPoints} pts` : ""}</Link>
-                <Link to="/luckboard" onClick={() => setMobileOpen(false)}>Luckboard</Link>
-              </>
-            )}
-            <Form method="post" action="/api/logout">
-              <button type="submit" className="ind"><span>🚪</span> Sign out</button>
-            </Form>
-          </>
-        ) : (
-          <Link to="/login" onClick={() => setMobileOpen(false)}>Sign in</Link>
-        )}
-      </div>
     </>
   );
 }

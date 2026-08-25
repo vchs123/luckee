@@ -21,6 +21,7 @@ const TOP = SVG_H - BAR_H;
 const SOCKET_W = 44;   // half-width of the socket at rest
 const DEPTH = 26;      // how far the socket dips at rest
 const R = 25;          // bubble radius
+const MAX_INNER = 560; // tabs stay grouped rather than stretching across a wide screen
 
 /**
  * Top edge of the bar with a socket melted into it around `cx`.
@@ -67,7 +68,10 @@ export function BottomNav() {
     return () => ro.disconnect();
   }, []);
 
-  const centre = (i: number) => (width / N) * (i + 0.5);
+  // Tabs are capped and centred, so the socket has to track that inner box.
+  const inner = Math.min(width, MAX_INNER);
+  const originX = (width - inner) / 2;
+  const centre = (i: number) => originX + (inner / N) * (i + 0.5);
 
   // Target follows the active tab instantly; the spring is what melts.
   const target = useMotionValue(0);
@@ -79,7 +83,7 @@ export function BottomNav() {
 
   // Distance still to travel, normalised — this is what drives the melt.
   const travel = useTransform<number, number>([cx, target], ([c, t]) =>
-    Math.min(Math.abs(c - t) / (width / N || 1), 1)
+    Math.min(Math.abs(c - t) / (inner / N || 1), 1)
   );
 
   // Off-tab pages flatten the socket out entirely.
