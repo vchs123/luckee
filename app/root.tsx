@@ -158,10 +158,16 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
       error.status === 404
         ? "The requested page could not be found."
         : error.statusText || details;
-  } else if (import.meta.env.DEV && error && error instanceof Error) {
+  } else if (error && error instanceof Error) {
     details = error.message;
     stack = error.stack;
   }
+
+  // Production used to swallow the real error entirely, which made anything
+  // that reached this boundary undiagnosable from the browser.
+  useEffect(() => {
+    console.error("[Luckee] route error boundary:", error);
+  }, [error]);
 
   return (
     <div className="wrap" style={{ paddingTop: 80 }}>
