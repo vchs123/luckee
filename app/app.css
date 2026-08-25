@@ -562,6 +562,14 @@ body.dp-active .nav { top: 38px; }
 .auth-sub { font-size: 14px; color: var(--t2); text-align: center; margin-bottom: 24px; }
 .auth-form { display: flex; flex-direction: column; gap: 0; }
 .auth-btn { width: 100%; margin-top: 8px; padding: 13px; font-size: 15px; }
+/* Google's guidelines require their own mark and a neutral button. */
+.auth-google { width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; border: 1.5px solid var(--cb); border-radius: var(--rp); background: #fff; color: #1f1f1f; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; transition: border-color 0.18s, box-shadow 0.18s; }
+.auth-google:hover { border-color: var(--t3); box-shadow: 0 2px 10px rgba(0,0,0,0.07); }
+.auth-google:disabled { opacity: 0.6; cursor: default; }
+.auth-google svg { flex-shrink: 0; }
+.auth-or { display: flex; align-items: center; gap: 12px; margin: 18px 0 6px; }
+.auth-or::before, .auth-or::after { content: ''; flex: 1; height: 1px; background: var(--cb); }
+.auth-or span { font-size: 12px; font-weight: 700; color: var(--t3); text-transform: uppercase; letter-spacing: 0.06em; }
 .auth-sent { text-align: center; padding: 16px 0; }
 .auth-sent-ico { font-size: 40px; margin-bottom: 12px; }
 .auth-sent h2 { font-size: 20px; color: var(--t1); margin-bottom: 8px; }

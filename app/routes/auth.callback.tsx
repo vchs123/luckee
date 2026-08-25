@@ -16,14 +16,20 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   try {
     // Restore the PKCE code verifier from cookie so exchangeCodeForSession works in stateless Workers
     const storage = CookieStorage.from(getCookie(request, "luckee_pkce"));
-    const supabase = getSupabaseAnonWithStorage(env, storage);
 
     let session = null;
     if (token_hash) {
+      // Magic links stay on the default (implicit) flow: they carry a token_hash
+      // and must work when opened in a different browser from the one that
+      // requested them, which a PKCE verifier cookie would prevent.
+      const supabase = getSupabaseAnonWithStorage(env, storage);
       const { data, error } = await supabase.auth.verifyOtp({ token_hash, type });
       if (error || !data.session) return redirect("/login?error=auth_failed");
       session = data.session;
     } else {
+      // OAuth comes back with ?code=. Declaring pkce here makes a missing verifier
+      // throw immediately rather than posting an empty one to Supabase.
+      const supabase = getSupabaseAnonWithStorage(env, storage, { flowType: "pkce" });
       const { data, error } = await supabase.auth.exchangeCodeForSession(code!);
       if (error || !data.session) return redirect("/login?error=auth_failed");
       session = data.session;
