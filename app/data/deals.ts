@@ -45,7 +45,7 @@ export const DEALS: Deal[] = [
   },
   {
     cls: "krs", e: "✈️", n: "Kris+", sub: "Singapore Airlines lifestyle app",
-    reward: "500 KrisPay miles on first $5 spend", rl: "Code: C506127",
+    reward: "Spend $5 get $5 in miles", rl: "Code: C506127",
     desc: "The lifestyle rewards app from Singapore Airlines. Earn KrisPay miles on everyday spending at 100+ partners — restaurants, retail, entertainment. Worth having if you fly SQ.",
     code: "C506127",
     tags: ["🇦🇺 Australia", "🌍 Global", "🎁 Miles & rewards"],

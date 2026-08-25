@@ -931,7 +931,6 @@ export default function Rewards() {
   const [filterPeriod, setFilterPeriod] = useState("all");
 
   const balance = profile.total_points ?? 0;
-  const pullsAvailable = Math.floor(balance / PULL_COST) + freePulls;
 
   const filteredLedger = ledger.filter((entry) => {
     if (filterAction !== "all") {
@@ -954,29 +953,6 @@ export default function Rewards() {
   return (
     <>
       <Nav />
-
-      <div className="rewards-hero">
-        <div className="wrap">
-          <p className="eyebrow" style={{ color: "rgba(255,255,255,0.7)" }}>⭐ Your rewards</p>
-          <div className="rewards-hero-stats">
-            <div className="rewards-stat">
-              <span className="rewards-stat-n">{balance}</span>
-              <span className="rewards-stat-l">total points</span>
-            </div>
-            <div className="rewards-stat-div" />
-            <div className="rewards-stat">
-              <span className="rewards-stat-n">{pullsAvailable} 🎰</span>
-              <span className="rewards-stat-l">pulls available</span>
-            </div>
-            <div className="rewards-stat-div" />
-            <div className="rewards-stat">
-              <span className="rewards-stat-n">{streak} 🔥</span>
-              <span className="rewards-stat-l">day streak</span>
-            </div>
-          </div>
-          <p className="rewards-hero-sub">{PULL_COST} pts = 1 gachapon pull</p>
-        </div>
-      </div>
 
       <div className="wrap rewards-wrap">
         <div className="rw-tabs">

@@ -17,6 +17,7 @@ import type { LoaderFunctionArgs } from "react-router";
 import type { Route } from "./+types/root";
 import { useVersionCheck } from "~/hooks/useVersionCheck";
 import { DoublePointsBanner } from "~/components/DoublePointsBanner";
+import { BottomNav } from "~/components/BottomNav";
 import { verifyUser, refreshAndGetUser } from "~/lib/auth.server";
 import { getSupabase } from "~/lib/supabase.server";
 import "./app.css";
@@ -140,6 +141,7 @@ export default function App() {
             {outlet}
           </m.div>
         </AnimatePresence>
+        <BottomNav />
       </MotionConfig>
     </LazyMotion>
   );
