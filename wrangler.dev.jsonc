@@ -1,0 +1,20 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	// Dev-only config. wrangler.jsonc is a *Pages* config: it carries
+	// "pages_build_output_dir" and therefore cannot declare "main" (wrangler rejects
+	// both keys together). In production that's fine — the build script bundles
+	// workers/app.ts to build/client/_worker.js and Pages picks it up by convention.
+	//
+	// But @cloudflare/vite-plugin needs "main" to run the SSR worker in dev, and a
+	// Pages config can never provide one. Without it nothing handled document
+	// requests, so every page route 404'd while Vite still served assets.
+	//
+	// vite.config.ts points the plugin here for `serve` only; `build` and
+	// `wrangler pages deploy` still use wrangler.jsonc, unchanged.
+	"name": "luckee-app",
+	"main": "workers/app.ts",
+	"compatibility_date": "2026-07-24",
+	"compatibility_flags": [
+		"nodejs_compat"
+	]
+}
