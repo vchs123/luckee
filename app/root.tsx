@@ -11,7 +11,7 @@ import {
   useOutlet,
 } from "react-router";
 import { useEffect } from "react";
-import { LazyMotion, domMax, MotionConfig, AnimatePresence, m } from "framer-motion";
+import { LazyMotion, domMax, MotionConfig, m } from "framer-motion";
 import { EASE, DUR } from "~/lib/motion";
 import type { LoaderFunctionArgs } from "react-router";
 import type { Route } from "./+types/root";
@@ -129,18 +129,22 @@ export default function App() {
           </div>
         )}
         <DoublePointsBanner />
-        {/* Page transition: opacity-only (transform-free) so the sticky nav isn't broken. */}
-        <AnimatePresence mode="wait" initial={false}>
-          <m.div
-            key={location.pathname}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: DUR.base, ease: EASE }}
-          >
-            {outlet}
-          </m.div>
-        </AnimatePresence>
+        {/* Page transition: fade the incoming route in. Opacity-only (transform-free)
+            so the sticky nav isn't broken.
+
+            Deliberately no AnimatePresence/exit animation. Keeping the outgoing route
+            mounted to animate it out left it re-rendering after the router had already
+            moved on, so its useLoaderData() returned undefined and any route that
+            destructures it threw (see dinners.tsx). Unmounting immediately avoids the
+            whole class of bug. */}
+        <m.div
+          key={location.pathname}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: DUR.base, ease: EASE }}
+        >
+          {outlet}
+        </m.div>
         <BottomNav />
       </MotionConfig>
     </LazyMotion>
