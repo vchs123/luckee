@@ -77,11 +77,21 @@ export function BottomNav() {
 
   // Target follows the active tab instantly; the spring is what melts.
   const target = useMotionValue(0);
-  useEffect(() => {
-    if (width > 0) target.set(centre(parked));
-  }, [parked, width, target]);
-
   const cx = useSpring(target, reduce ? { stiffness: 2000, damping: 100 } : { stiffness: 260, damping: 28, mass: 0.9 });
+
+  // Width is 0 until the ResizeObserver reports, so the very first placement has
+  // to jump rather than spring — otherwise the socket visibly slides in from the
+  // left edge on every page load. Later tab changes animate normally.
+  const placed = useRef(false);
+  useEffect(() => {
+    if (width <= 0) return;
+    const next = centre(parked);
+    target.set(next);
+    if (!placed.current) {
+      cx.jump(next);
+      placed.current = true;
+    }
+  }, [parked, width, target, cx]);
 
   // Distance still to travel, normalised — this is what drives the melt.
   const travel = useTransform<number, number>([cx, target], ([c, t]) =>
@@ -120,6 +130,7 @@ export function BottomNav() {
         <m.path className="bnav-edge" d={stroke} fill="none" />
       </svg>
 
+      {width > 0 && (
       <m.div
         className="bnav-bubble"
         style={{ x: bubbleX, y: bubbleY, scaleX: bubbleScaleX, scaleY: bubbleScaleY, opacity: presence }}
@@ -127,6 +138,7 @@ export function BottomNav() {
       >
         <span className="bnav-bubble-ico">{activeIcon}</span>
       </m.div>
+      )}
 
       <ul className="bnav-tabs">
         {TABS.map((t, i) => {
