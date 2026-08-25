@@ -886,7 +886,6 @@ body.dp-active .nav { top: 38px; }
 }
 @media (max-width: 640px) {
   .g3, .g4, .g2, .ga { grid-template-columns: 1fr; }
-  .bnav { display: block; }
   body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
   .nav-links { display: none; }
   .hamburger { display: block; }
@@ -1122,3 +1121,7 @@ body.dp-active .nav { top: 38px; }
 .bnav-tab.on { color: var(--pink); }
 .bnav-tab.on .bnav-ico { opacity: 0; }
 .bnav-tab.on .bnav-lbl { transform: translateY(4px); }
+
+@media (max-width: 640px) {
+  .bnav { display: block; }
+}
