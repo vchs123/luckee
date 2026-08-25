@@ -23,7 +23,7 @@ export default function AdminLayout() {
   return (
     <div className="admin-shell">
       <aside className="admin-side">
-        <Link to="/" className="admin-logo">🍀 Luckee</Link>
+        <Link to="/admin" className="admin-logo">🍀 Luckee</Link>
         <p className="admin-label">Admin</p>
         <nav className="admin-nav">
           {NAV_LINKS.map((l) => (

@@ -2,6 +2,7 @@ import { redirect } from "react-router";
 import type { LoaderFunctionArgs } from "react-router";
 import { getSupabaseAnonWithStorage, getSupabase } from "~/lib/supabase.server";
 import { authCookies, getCookie, CookieStorage } from "~/lib/auth.server";
+import { isAdminEmail } from "~/lib/admin";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -60,7 +61,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       }
     }
 
-    if (session.user.email === "luckee.app@gmail.com") return redirect("/admin", { headers });
+    if (isAdminEmail(session.user.email)) return redirect("/admin", { headers });
     return redirect(profile ? "/rewards" : "/profile/setup", { headers });
   } catch {
     return redirect("/login?error=auth_failed");

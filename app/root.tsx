@@ -1,5 +1,6 @@
 import {
   isRouteErrorResponse,
+  redirect,
   Links,
   Meta,
   Outlet,
@@ -19,6 +20,7 @@ import { DoublePointsBanner } from "~/components/DoublePointsBanner";
 import { BottomNav } from "~/components/BottomNav";
 import { verifyUser, refreshAndGetUser } from "~/lib/auth.server";
 import { userContext } from "~/lib/auth.context";
+import { isAdminEmail, isAdminAllowedPath } from "~/lib/admin";
 import { getSupabase } from "~/lib/supabase.server";
 import "./app.css";
 
@@ -59,6 +61,12 @@ export const middleware: MiddlewareFunction<Response>[] = [
     }
 
     context.set(userContext, user);
+
+    // The admin account only ever sees the dashboard. Done here rather than per
+    // route so a new public route can't accidentally become admin-visible.
+    if (isAdminEmail(user?.email) && !isAdminAllowedPath(new URL(request.url).pathname)) {
+      return redirect("/admin");
+    }
 
     const response = await next();
     if (rotated && response instanceof Response) {

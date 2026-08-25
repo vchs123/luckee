@@ -3,6 +3,7 @@ import type { RouterContextProvider } from "react-router";
 import { userContext } from "~/lib/auth.context";
 import type { User } from "@supabase/supabase-js";
 import { getSupabase, getSupabaseAnon } from "~/lib/supabase.server";
+import { isAdminEmail } from "~/lib/admin";
 
 // Custom storage adapter that persists PKCE code verifier across stateless Worker requests via a cookie.
 export class CookieStorage {
@@ -120,7 +121,7 @@ export function requireAuth(context: Readonly<RouterContextProvider>): User {
 
 export function requireAdmin(context: Readonly<RouterContextProvider>): User {
   const user = requireAuth(context);
-  if (user.email !== "luckee.app@gmail.com") {
+  if (!isAdminEmail(user.email)) {
     throw new Response("Forbidden", { status: 403 });
   }
   return user;

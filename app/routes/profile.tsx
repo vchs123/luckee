@@ -7,6 +7,7 @@ import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
 import { requireAuth } from "~/lib/auth.server";
 import { getSupabase } from "~/lib/supabase.server";
+import { isAdminEmail } from "~/lib/admin";
 
 export const meta: MetaFunction = () => [
   { title: "Your profile — Luckee" },
@@ -17,7 +18,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const env = (context as any)?.cloudflare?.env as Env;
   const user = requireAuth(context);
-  if (user.email === "luckee.app@gmail.com") return redirect("/admin");
+  if (isAdminEmail(user.email)) return redirect("/admin");
   const supabase = getSupabase(env);
 
   const { data: profile } = await supabase

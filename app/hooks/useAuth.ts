@@ -1,4 +1,5 @@
 import { useRouteLoaderData } from "react-router";
+import { isAdminEmail } from "~/lib/admin";
 import type { loader as rootLoader } from "~/root";
 
 export function useAuth() {
@@ -6,7 +7,7 @@ export function useAuth() {
   return {
     user: data?.user ?? null,
     profile: data?.profile ?? null,
-    isAdmin: data?.user?.email === "luckee.app@gmail.com",
+    isAdmin: isAdminEmail(data?.user?.email),
     luckboard: (data?.luckboard ?? {}) as Record<string, string>,
   };
 }

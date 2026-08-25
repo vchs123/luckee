@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { m, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { prefersReducedMotion } from "~/lib/reducedMotion";
+import { useAuth } from "~/hooks/useAuth";
 
 type Tab = { to: string; icon: string; label: string; match: (p: string) => boolean };
 
@@ -46,6 +47,7 @@ function topEdge(w: number, cx: number, depth: number, width: number) {
 
 export function BottomNav() {
   const { pathname } = useLocation();
+  const { isAdmin } = useAuth();
   const wrapRef = useRef<HTMLElement>(null);
   const [width, setWidth] = useState(0);
   const [reduce, setReduce] = useState(false);
@@ -107,6 +109,9 @@ export function BottomNav() {
   const bubbleScaleY = useTransform(travel, t => 1 - 0.14 * t);
 
   const activeIcon = useMemo(() => TABS[parked]?.icon ?? "", [parked]);
+
+  // The admin only sees the dashboard, which has its own sidebar nav.
+  if (isAdmin) return null;
 
   return (
     <nav className="bnav" ref={wrapRef} aria-label="Primary">

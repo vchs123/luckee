@@ -12,6 +12,7 @@ import { melbToday } from "~/lib/melbDate";
 import { playChime } from "~/lib/sound";
 import { m } from "framer-motion";
 import { PULL_COST, PRIZES, type PrizeType } from "~/lib/gachapon";
+import { isAdminEmail } from "~/lib/admin";
 
 const RECEIPT_MILESTONE = 30;
 
@@ -71,7 +72,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const env = (context as any)?.cloudflare?.env as Env;
   const user = requireAuth(context);
-  if (user.email === "luckee.app@gmail.com") return redirect("/admin");
+  if (isAdminEmail(user.email)) return redirect("/admin");
 
   const supabase = getSupabase(env);
   const today = melbToday();
