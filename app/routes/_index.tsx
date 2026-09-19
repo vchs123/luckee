@@ -51,8 +51,7 @@ export default function Home() {
           <m.div className="wrap" style={{ position: "relative", zIndex: 1 }}
             variants={staggerContainer(0.08)} initial="hidden" animate="show">
             <m.div className="hero-badge" variants={fadeUp}>✦ Melbourne's freebie hub</m.div>
-            <m.h1 className="hero-h" variants={fadeUp}>Score Melbourne's best <span className="ac">freebies</span> every day</m.h1>
-            <m.p className="hero-p" variants={fadeUp}>Birthday perks, loyalty sign-ups, free galleries and community dinners — curated for Melbourne locals.</m.p>
+            <m.h1 className="hero-h" variants={fadeUp}>Irresistible deals, freebies and <span className="ac">mystery prizes</span></m.h1>
             <m.form className="search" variants={fadeUp} onSubmit={e => { e.preventDefault(); handleSearchSubmit(); }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
