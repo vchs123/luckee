@@ -29,7 +29,7 @@ export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,500;1,9..144,700&family=Nunito:wght@400;500;600;700;800&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,500;1,9..144,700&family=Nunito:wght@400;500;600;700;800&family=Patrick+Hand&family=Space+Mono:wght@400;700&display=swap",
   },
 ];
 

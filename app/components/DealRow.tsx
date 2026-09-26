@@ -4,6 +4,7 @@ import type { Deal } from "~/data/types";
 import { BLOSSOM_TIERS } from "~/data/deals";
 import { useAuth } from "~/hooks/useAuth";
 import { LuckboardToggle } from "~/components/LuckboardToggle";
+import { trackDealClick } from "~/lib/dealClick";
 
 const LOGO_MAP: Record<string, string> = {
   cld: "/claude-logo.png",
@@ -28,14 +29,8 @@ export function DealRow({ deal: d }: { deal: Deal }) {
   }, [fetcher.state, fetcher.data]);
 
   function handleClick() {
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      (window as any).gtag("event", "referral_click", { deal_name: d.n });
-    }
-    fetch("/api/track-click", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ deal_name: d.n }),
-    }).catch(() => {});
+    // Points are submitted via the fetcher below so the toast can read them back.
+    trackDealClick(d.n, { awardPoints: false });
     if (user) {
       fetcher.submit(
         { action: "deal_click", description: `Clicked ${d.n} deal` },

@@ -90,9 +90,14 @@ body::after {
   100% { opacity: 0.9; }
 }
 
-a { color: inherit; text-decoration: none; }
-button { cursor: pointer; font-family: inherit; }
-img { max-width: 100%; }
+/* Element defaults sit in Tailwind's base layer so utilities can override them.
+   Unlayered rules beat every layered one, so `a { color: inherit }` out here
+   silently defeated `text-white` and friends on every link. */
+@layer base {
+  a { color: inherit; text-decoration: none; }
+  button { cursor: pointer; font-family: inherit; }
+  img { max-width: 100%; }
+}
 
 .wrap { position: relative; z-index: 1; max-width: var(--mx); margin: 0 auto; padding: 0 24px; }
 
@@ -1122,3 +1127,55 @@ body.dp-active .nav { top: 38px; }
 .bnav-tab.on { color: var(--pink); }
 .bnav-tab.on .bnav-ico { opacity: 0; }
 .bnav-tab.on .bnav-lbl { transform: translateY(4px); }
+
+/* ── v2 design port ──
+   Helpers the ported v2 components rely on. Only the classes app.css didn't
+   already define: v2's stylesheet was built from this file, so its tokens,
+   .btn-pink/.btn-ghost, .eyebrow and .sec-* rules are ours already and are
+   deliberately not duplicated here. */
+
+.font-fraunces { font-family: 'Fraunces', Georgia, serif; }
+.font-hand { font-family: 'Patrick Hand', cursive, sans-serif; }
+.font-mono-code { font-family: 'Space Mono', monospace; }
+
+/* Hard offset shadows — the sticker/cut-paper look */
+.shadow-hard-sm { box-shadow: 2px 2px 0 0 #000; }
+.shadow-hard-md { box-shadow: 6px 6px 0 0 #000; }
+.shadow-hard-lg { box-shadow: 8px 8px 0 0 #000; }
+.shadow-paper-lift {
+  box-shadow: 0 16px 32px -8px rgba(45, 35, 25, 0.2), 0 4px 10px -2px rgba(45, 35, 25, 0.1), 4px 4px 0 0 #000;
+}
+.shadow-paper-hover {
+  box-shadow: 0 24px 44px -10px rgba(45, 35, 25, 0.28), 0 8px 16px -4px rgba(45, 35, 25, 0.15), 5px 5px 0 0 #000;
+}
+
+/* Corkboard (community bulletin) */
+.corkboard-surface {
+  background-color: #cda270;
+  background-image:
+    radial-gradient(#a37746 16%, transparent 17%),
+    radial-gradient(#875c2e 16%, transparent 17%),
+    radial-gradient(#e4be8e 12%, transparent 13%);
+  background-size: 22px 22px, 22px 22px, 14px 14px;
+  background-position: 0 0, 11px 11px, 6px 6px;
+}
+
+.btn-bold-black, .btn-bold-red {
+  color: #fff;
+  border: 2px solid #000;
+  font-weight: 900;
+  box-shadow: 4px 4px 0 0 #000;
+  transition: all 0.15s ease;
+}
+.btn-bold-black { background-color: #000; }
+.btn-bold-red { background-color: #dc2626; }
+.btn-bold-black:hover { background-color: #dc2626; }
+.btn-bold-red:hover { background-color: #b91c1c; }
+.btn-bold-black:hover, .btn-bold-red:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 0 #000;
+}
+.btn-bold-black:active, .btn-bold-red:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 0 #000;
+}
