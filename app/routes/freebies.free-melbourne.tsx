@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import type { MetaFunction } from "react-router";
-import { Link } from "react-router";
 import { prefersReducedMotion } from "~/lib/reducedMotion";
 import { initScrollReveals } from "~/lib/scrollReveal";
 import { ExperienceCard } from "~/components/ExperienceCard";
@@ -31,9 +30,6 @@ export default function FreeMelbourne() {
   return (
     <div className="wrap" ref={rootRef}>
       <div className="sec-hd">
-        <p style={{ fontSize: 12, color: "var(--t3)", marginBottom: 8 }}>
-          <Link to="/freebies" style={{ textDecoration: "underline" }}>Freebies</Link> → Free Melbourne
-        </p>
         <p className="eyebrow">🌿 Zero cost, ongoing</p>
         <h1 className="sec-h">Free in Melbourne</h1>
         <p className="sec-p wide">A full day out in the Melbourne CBD can cost absolutely nothing. Free trams, world-class galleries, walking tours, outdoor fitness and community workshops — year-round.</p>

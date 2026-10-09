@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { Link, useSearchParams } from "react-router";
 import type { MetaFunction } from "react-router";
-import { Link } from "react-router";
 import { FreebieCard } from "~/components/FreebieCard";
+import { FilterBar } from "~/components/FilterBar";
+import { readFreebieFilters, applyFreebieFilters, hasActiveFilters } from "~/lib/freebieFilters";
 import { SIGNUP_FREEBIES } from "~/data/sign-up-freebies";
 
 export const meta: MetaFunction = () => [
@@ -12,27 +13,32 @@ export const meta: MetaFunction = () => [
 ];
 
 export default function SignUpFreebies() {
-  const [verifiedOnly, setVerifiedOnly] = useState(false);
-  const items = verifiedOnly ? SIGNUP_FREEBIES.filter(f => f.verified) : SIGNUP_FREEBIES;
+  const [searchParams] = useSearchParams();
+  const filters = readFreebieFilters(searchParams);
+  const items = applyFreebieFilters(SIGNUP_FREEBIES, filters);
 
   return (
     <div className="wrap">
       <div className="sec-hd">
-        <p style={{ fontSize: 12, color: "var(--t3)", marginBottom: 8 }}>
-          <Link to="/freebies" style={{ textDecoration: "underline" }}>Freebies</Link> → Sign-up Freebies
-        </p>
         <p className="eyebrow">🎁 One-time bonuses</p>
         <h1 className="sec-h">Sign-up Freebies</h1>
         <p className="sec-p">Join once and get the bonus — no birthday required. These are one-time welcome perks from loyalty programs worth signing up for regardless.</p>
       </div>
-      <div className="vtog-wrap">
-        <span className="vtog-lbl">Show:</span>
-        <button className={`vtog${!verifiedOnly ? " on" : ""}`} onClick={() => setVerifiedOnly(false)}>All</button>
-        <button className={`vtog${verifiedOnly ? " on" : ""}`} onClick={() => setVerifiedOnly(true)}>✓ Verified by Luckee only</button>
-      </div>
-      <div className="ga">
-        {items.map(f => <FreebieCard key={f.n} freebie={f} />)}
-      </div>
+      <FilterBar categories={false} placeholder="Search sign-up bonuses…" />
+      {items.length > 0 ? (
+        <div className="ga">
+          {items.map(f => <FreebieCard key={f.n} freebie={f} />)}
+        </div>
+      ) : (
+        <p className="sec-p">
+          No bonuses match those filters{filters.q ? ` and "${filters.q}"` : ""}.{" "}
+          {hasActiveFilters(filters) && (
+            <Link to="/freebies/sign-up-freebies" style={{ color: "var(--pink)", fontWeight: 700, textDecoration: "underline" }}>
+              Clear them
+            </Link>
+          )}
+        </p>
+      )}
     </div>
   );
 }

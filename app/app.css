@@ -227,10 +227,10 @@ body::after {
 .fc-dt { display: flex; flex-direction: column; gap: 4px; flex: 1; }
 .fc-d { display: flex; align-items: flex-start; gap: 6px; font-size: 12px; color: var(--t2); line-height: 1.45; }
 .fc-dc { display: flex; align-items: flex-start; gap: 6px; font-size: 12px; color: var(--warn); line-height: 1.45; }
-.fc-ft { display: flex; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px solid var(--cb); margin-top: auto; }
+.fc-ft { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-top: 10px; border-top: 1px solid var(--cb); margin-top: auto; }
 .fc-ver { font-size: 10px; color: var(--melb); font-weight: 700; }
 .fc-ver.fc-unver { color: var(--t3); font-weight: 600; }
-.fc-cta { padding: 6px 14px; border-radius: var(--rp); font-size: 12px; font-weight: 700; color: white; border: none; cursor: pointer; transition: all 0.18s; position: relative; overflow: hidden; }
+.fc-cta { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; padding: 6px 14px; border-radius: var(--rp); font-size: 12px; font-weight: 700; color: white; border: none; cursor: pointer; transition: all 0.18s; position: relative; overflow: hidden; }
 .fc.food .fc-cta { background: var(--food); }
 .fc.bty  .fc-cta { background: var(--bty); }
 .fc.melb .fc-cta { background: var(--melb); }
@@ -257,11 +257,6 @@ body.dp-active .nav { top: 38px; }
 @media (max-width: 560px) { .dp-banner-detail { display: none; } }
 
 /* verified-by-Luckee toggle on freebie listings */
-.vtog-wrap { display: flex; gap: 8px; align-items: center; margin: -6px 0 24px; flex-wrap: wrap; }
-.vtog-lbl { font-size: 11px; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; color: var(--t3); margin-right: 2px; }
-.vtog { padding: 7px 16px; background: white; border: 1.5px solid var(--cb); border-radius: var(--rp); font-size: 13px; font-weight: 700; color: var(--t2); cursor: pointer; font-family: inherit; transition: color 0.18s, border-color 0.18s, background 0.18s; }
-.vtog:hover { border-color: var(--pink); color: var(--pink); }
-.vtog.on { background: var(--pink); border-color: var(--pink); color: white; }
 
 /* ── tip box ── */
 .tip { display: flex; align-items: flex-start; gap: 12px; background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: var(--r); padding: 16px 20px; margin-bottom: 28px; font-size: 13.5px; color: #1e40af; line-height: 1.65; }
@@ -964,8 +959,6 @@ body.dp-active .nav { top: 38px; }
 .lb-toggle.lb-skip { background: #f9f9f9; border-color: #d1c4d8; color: #a08bb8; }
 .lb-toggle:hover { border-color: var(--pink); color: var(--pink); }
 
-/* ── fc-ft: row with toggle ── */
-.fc-ft { display: flex; align-items: center; gap: 10px; }
 
 /* ── xc-foot: tag + toggle row ── */
 .xc-foot { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
@@ -1034,8 +1027,10 @@ body.dp-active .nav { top: 38px; }
 
 /* ── Free Melbourne map ── */
 .melb-view-toggle { display: flex; gap: 8px; margin: 24px 0 16px; }
-.melb-vbtn { background: var(--pm); border: none; border-radius: var(--rp); padding: 8px 20px; font-size: 13px; font-weight: 700; color: var(--t2); cursor: pointer; font-family: inherit; transition: background 0.15s, color 0.15s; }
-.melb-vbtn.active { background: var(--melb); color: #fff; }
+/* Matches the freebies tab pills: white with a hairline border, filled when on. */
+.melb-vbtn { background: #fff; border: 1px solid var(--cb); border-radius: var(--rp); padding: 8px 20px; font-size: 13px; font-weight: 700; color: var(--t2); cursor: pointer; font-family: inherit; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+.melb-vbtn:hover { background: var(--pl); }
+.melb-vbtn.active { background: var(--melb); border-color: var(--melb); color: #fff; }
 .melb-map-wrap { border-radius: var(--r); overflow: hidden; border: 1.5px solid var(--cb); margin-bottom: 32px; }
 .melb-map { height: 460px; width: 100%; }
 .melb-map-loading { height: 460px; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--t3); }
@@ -1178,4 +1173,13 @@ body.dp-active .nav { top: 38px; }
 .btn-bold-black:active, .btn-bold-red:active {
   transform: translate(2px, 2px);
   box-shadow: 2px 2px 0 0 #000;
+}
+
+/* Card lift for the freebie/experience/event cards. The v2 paper-lift carries a
+   hard black offset that belongs on the corkboard's bordered post-its, not on
+   these soft cards, so this is the same lift without the black. */
+.card-lift { transition: box-shadow 0.2s ease, transform 0.2s ease; }
+.card-lift:hover {
+  box-shadow: 0 18px 34px -10px rgba(45, 35, 25, 0.18), 0 6px 12px -4px rgba(45, 35, 25, 0.1);
+  transform: translateY(-2px);
 }

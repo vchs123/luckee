@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
 import { useSearchParams, Link, useLoaderData } from "react-router";
 import type { MetaFunction, LoaderFunctionArgs } from "react-router";
 import { FreebieCard } from "~/components/FreebieCard";
-import { FilterBar, type FilterType } from "~/components/FilterBar";
+import { FilterBar } from "~/components/FilterBar";
+import { readFreebieFilters, applyFreebieFilters, hasActiveFilters } from "~/lib/freebieFilters";
 import { TipBox } from "~/components/TipBox";
 import { BDAY_FOOD } from "~/data/birthday-food";
 import { BDAY_BEAUTY } from "~/data/birthday-beauty";
@@ -36,48 +36,24 @@ export const meta: MetaFunction = () => [
 export default function BirthdayFreebies() {
   const { daysUntilBirthday, loggedIn, hasDob } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
-  const paramFilter = searchParams.get("filter");
-  const [filter, setFilter] = useState<FilterType>(
-    paramFilter === "food" ? "food" : paramFilter === "beauty" ? "beauty" : "all"
-  );
+  const filters = readFreebieFilters(searchParams);
 
-  useEffect(() => {
-    if (paramFilter === "food") setFilter("food");
-    else if (paramFilter === "beauty") setFilter("beauty");
-    else if (paramFilter === "nospend") setFilter("nospend");
-    else setFilter("all");
-  }, [paramFilter]);
-
-  const [verifiedOnly, setVerifiedOnly] = useState(false);
-
-  const showFood = filter === "all" || filter === "food" || filter === "nospend";
-  const showBeauty = filter === "all" || filter === "beauty" || filter === "nospend";
-  const applyFilters = (items: typeof BDAY_FOOD) => {
-    let out = filter === "nospend" ? items.filter(f => f.ns) : items;
-    if (verifiedOnly) out = out.filter(f => f.verified);
-    return out;
-  };
-  const foodItems = applyFilters(BDAY_FOOD);
-  const beautyItems = applyFilters(BDAY_BEAUTY);
+  const showFood = filters.category !== "beauty";
+  const showBeauty = filters.category !== "food";
+  const foodItems = applyFreebieFilters(BDAY_FOOD, filters);
+  const beautyItems = applyFreebieFilters(BDAY_BEAUTY, filters);
+  const nothingLeft =
+    (!showFood || foodItems.length === 0) && (!showBeauty || beautyItems.length === 0);
 
   return (
     <div className="wrap">
       <div className="sec-hd">
-        <p style={{ fontSize: 12, color: "var(--t3)", marginBottom: 8 }}>
-          <Link to="/freebies" style={{ cursor: "pointer", textDecoration: "underline" }}>Freebies</Link> → Birthday Freebies
-        </p>
         <p className="eyebrow">🎂 Birthday guide</p>
         <h1 className="sec-h">Birthday Freebies Melbourne</h1>
         <p className="sec-p wide">The complete guide across food, beauty and retail — with honest notes on which ones require a minimum spend. Offers we've personally confirmed are tagged <strong>✓ Verified by Luckee</strong>; the rest are community-listed and pending a check. Use the toggle to show verified only.</p>
       </div>
 
-      <FilterBar active={filter} onChange={setFilter} />
-
-      <div className="vtog-wrap">
-        <span className="vtog-lbl">Show:</span>
-        <button className={`vtog${!verifiedOnly ? " on" : ""}`} onClick={() => setVerifiedOnly(false)}>All</button>
-        <button className={`vtog${verifiedOnly ? " on" : ""}`} onClick={() => setVerifiedOnly(true)}>✓ Verified by Luckee only</button>
-      </div>
+      <FilterBar />
 
       {!loggedIn && (
         <TipBox icon="🎂">
@@ -112,6 +88,17 @@ export default function BirthdayFreebies() {
             {beautyItems.map(f => <FreebieCard key={f.n} freebie={f} daysUntilBirthday={daysUntilBirthday} />)}
           </div>
         </>
+      )}
+
+      {nothingLeft && (
+        <p className="sec-p" style={{ marginTop: 24 }}>
+          No offers match those filters{filters.q ? ` and "${filters.q}"` : ""}.{" "}
+          {hasActiveFilters(filters) && (
+            <Link to="/freebies/birthday-freebies" style={{ color: "var(--pink)", fontWeight: 700, textDecoration: "underline" }}>
+              Clear them
+            </Link>
+          )}
+        </p>
       )}
 
       <TipBox icon="⚠️" style={{ marginTop: 36 }}>
