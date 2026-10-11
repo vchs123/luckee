@@ -1,77 +1,178 @@
-import { redirect } from "react-router";
-import type { LoaderFunctionArgs } from "react-router";
+import { redirect, Form, useNavigation } from "react-router";
+import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "react-router";
+import type { Session } from "@supabase/supabase-js";
+import { Nav } from "~/components/Nav";
+import { Footer } from "~/components/Footer";
 import { getSupabaseAnonWithStorage, getSupabase } from "~/lib/supabase.server";
 import { authCookies, getCookie, CookieStorage } from "~/lib/auth.server";
 import { isAdminEmail } from "~/lib/admin";
+
+export const meta: MetaFunction = () => [
+  { title: "Finish signing in — Luckee" },
+  { name: "robots", content: "noindex" },
+];
+
+/*
+ * Email links are confirmed with a click, not on open.
+ *
+ * Mail security scanners open every link in a message as it arrives. When this
+ * route signed people in on GET, a scanner opening the link used up the
+ * one-time token before the person could — and the scanner saw a token-bearing
+ * sign-in URL on a free *.pages.dev host, which is exactly what credential
+ * phishing looks like, so the links were being reported as phishing.
+ *
+ * Now the GET only parks the token in a short-lived cookie and redirects to the
+ * bare /auth/callback, so the token is out of the address bar before any page
+ * (and the analytics tag on it) loads. Signing in happens on the POST from the
+ * "Continue" button, which scanners don't press.
+ */
+
+const OTP_COOKIE = "luckee_otp";
+const OTP_TYPES = ["email", "magiclink"] as const;
+type OtpType = (typeof OTP_TYPES)[number];
+
+function parseType(value: string | null): OtpType | null {
+  return OTP_TYPES.find((t) => t === value) ?? null;
+}
+
+function otpCookie(value: string, maxAge: number, request: Request): string {
+  const secure = new URL(request.url).protocol === "https:" ? "; Secure" : "";
+  return `${OTP_COOKIE}=${value}; Path=/auth/callback; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${secure}`;
+}
+
+/** On the redirect that still carries the token, so it can't leak via Referer. */
+function noReferrer(): Headers {
+  return new Headers({ "Referrer-Policy": "no-referrer" });
+}
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const env = (context as any)?.cloudflare?.env as Env;
   const url = new URL(request.url);
   const token_hash = url.searchParams.get("token_hash");
-  const type = (url.searchParams.get("type") ?? "email") as "email" | "magiclink";
   const code = url.searchParams.get("code");
 
-  if (!token_hash && !code) return redirect("/login?error=missing_code");
+  // Email link: park the token and bounce to the clean URL. Nothing is verified here.
+  if (token_hash) {
+    const type = parseType(url.searchParams.get("type") ?? "email");
+    if (!type) return redirect("/login?error=auth_failed");
+    const headers = noReferrer();
+    // Matches the 10-minute expiry the login page promises.
+    headers.append("Set-Cookie", otpCookie(encodeURIComponent(`${type}:${token_hash}`), 600, request));
+    return redirect("/auth/callback", { headers });
+  }
+
+  // OAuth return (?code=) is still exchanged on GET. That URL comes from Google
+  // redirecting a browser that started the flow — it never sits in an inbox for
+  // a scanner to open — and it's bound to this browser's PKCE verifier cookie.
+  if (code) {
+    try {
+      const storage = CookieStorage.from(getCookie(request, "luckee_pkce"));
+      // Declaring pkce makes a missing verifier throw immediately rather than
+      // posting an empty one to Supabase.
+      const supabase = getSupabaseAnonWithStorage(env, storage, { flowType: "pkce" });
+      const { data: exchanged, error } = await supabase.auth.exchangeCodeForSession(code);
+      if (error || !exchanged.session) return redirect("/login?error=auth_failed");
+      return await finishSignIn(request, env, exchanged.session);
+    } catch {
+      return redirect("/login?error=auth_failed");
+    }
+  }
+
+  // The clean URL: show the confirm button if a token is waiting, otherwise the
+  // link has expired (or this page was opened directly).
+  if (!getCookie(request, OTP_COOKIE)) return redirect("/login?error=link_expired");
+  return null;
+}
+
+export async function action({ request, context }: ActionFunctionArgs) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const env = (context as any)?.cloudflare?.env as Env;
+  const clear = otpCookie("", 0, request);
+  const parked = getCookie(request, OTP_COOKIE);
+  if (!parked) return redirect("/login?error=link_expired");
+
+  const sep = parked.indexOf(":");
+  const type = parseType(parked.slice(0, sep));
+  const token_hash = parked.slice(sep + 1);
+  if (sep < 0 || !type || !token_hash) {
+    return redirect("/login?error=auth_failed", { headers: { "Set-Cookie": clear } });
+  }
 
   try {
-    // Restore the PKCE code verifier from cookie so exchangeCodeForSession works in stateless Workers
+    // Magic links stay on the default (implicit) flow: they carry a token_hash
+    // and must work when opened in a different browser from the one that
+    // requested them, which a PKCE verifier cookie would prevent.
     const storage = CookieStorage.from(getCookie(request, "luckee_pkce"));
-
-    let session = null;
-    if (token_hash) {
-      // Magic links stay on the default (implicit) flow: they carry a token_hash
-      // and must work when opened in a different browser from the one that
-      // requested them, which a PKCE verifier cookie would prevent.
-      const supabase = getSupabaseAnonWithStorage(env, storage);
-      const { data, error } = await supabase.auth.verifyOtp({ token_hash, type });
-      if (error || !data.session) return redirect("/login?error=auth_failed");
-      session = data.session;
-    } else {
-      // OAuth comes back with ?code=. Declaring pkce here makes a missing verifier
-      // throw immediately rather than posting an empty one to Supabase.
-      const supabase = getSupabaseAnonWithStorage(env, storage, { flowType: "pkce" });
-      const { data, error } = await supabase.auth.exchangeCodeForSession(code!);
-      if (error || !data.session) return redirect("/login?error=auth_failed");
-      session = data.session;
+    const supabase = getSupabaseAnonWithStorage(env, storage);
+    const { data: verified, error } = await supabase.auth.verifyOtp({ token_hash, type });
+    if (error || !verified.session) {
+      return redirect("/login?error=auth_failed", { headers: { "Set-Cookie": clear } });
     }
-
-    const adminSupabase = getSupabase(env);
-    const { data: profile } = await adminSupabase
-      .from("user_profiles")
-      .select("id")
-      .eq("id", session.user.id)
-      .maybeSingle();
-
-    const headers = new Headers();
-    authCookies(session.access_token, session.refresh_token!, session.expires_in ?? 3600, request)
-      .forEach((c) => headers.append("Set-Cookie", c));
-
-    // Clear the PKCE cookie — it's single-use
-    headers.append("Set-Cookie", "luckee_pkce=; Path=/auth/callback; HttpOnly; SameSite=Lax; Max-Age=0");
-
-    // Wire referral: if ref cookie present and this is a new user, store referred_by
-    if (!profile) {
-      const refUserId = getCookie(request, "luckee_ref");
-      if (refUserId && refUserId !== session.user.id) {
-        const isSecure = new URL(request.url).protocol === "https:";
-        const secure = isSecure ? "; Secure" : "";
-        headers.append("Set-Cookie", `luckee_ref_pending=${refUserId}; Path=/; HttpOnly; SameSite=Lax; Max-Age=3600${secure}`);
-        headers.append("Set-Cookie", "luckee_ref=; Path=/; SameSite=Lax; Max-Age=0");
-      }
-    }
-
-    if (isAdminEmail(session.user.email)) return redirect("/admin", { headers });
-    return redirect(profile ? "/rewards" : "/profile/setup", { headers });
+    return await finishSignIn(request, env, verified.session, [clear]);
   } catch {
-    return redirect("/login?error=auth_failed");
+    return redirect("/login?error=auth_failed", { headers: { "Set-Cookie": clear } });
   }
 }
 
+/** Set the session cookies, wire a pending referral, and send the user on. */
+async function finishSignIn(request: Request, env: Env, session: Session, extraCookies: string[] = []) {
+  const adminSupabase = getSupabase(env);
+  const { data: profile } = await adminSupabase
+    .from("user_profiles")
+    .select("id")
+    .eq("id", session.user.id)
+    .maybeSingle();
+
+  const headers = new Headers();
+  authCookies(session.access_token, session.refresh_token!, session.expires_in ?? 3600, request)
+    .forEach((c) => headers.append("Set-Cookie", c));
+  extraCookies.forEach((c) => headers.append("Set-Cookie", c));
+
+  // Clear the PKCE cookie — it's single-use
+  headers.append("Set-Cookie", "luckee_pkce=; Path=/auth/callback; HttpOnly; SameSite=Lax; Max-Age=0");
+
+  // Wire referral: if ref cookie present and this is a new user, store referred_by
+  if (!profile) {
+    const refUserId = getCookie(request, "luckee_ref");
+    if (refUserId && refUserId !== session.user.id) {
+      const isSecure = new URL(request.url).protocol === "https:";
+      const secure = isSecure ? "; Secure" : "";
+      headers.append("Set-Cookie", `luckee_ref_pending=${refUserId}; Path=/; HttpOnly; SameSite=Lax; Max-Age=3600${secure}`);
+      headers.append("Set-Cookie", "luckee_ref=; Path=/; SameSite=Lax; Max-Age=0");
+    }
+  }
+
+  if (isAdminEmail(session.user.email)) return redirect("/admin", { headers });
+  return redirect(profile ? "/rewards" : "/profile/setup", { headers });
+}
+
 export default function AuthCallback() {
+  const navigation = useNavigation();
+  const submitting = navigation.state === "submitting";
+
   return (
-    <div className="wrap" style={{ paddingTop: 80, textAlign: "center" }}>
-      <p style={{ color: "var(--t2)" }}>Signing you in…</p>
-    </div>
+    <>
+      <Nav />
+      <div className="wrap">
+        <div className="auth-wrap">
+          <div className="auth-card">
+            <div className="auth-logo">🍀</div>
+            <h1 className="auth-h">One more tap</h1>
+            <p className="auth-sub">Confirm it's you to finish signing in to Luckee.</p>
+            <Form method="post">
+              <button className="btn-pink auth-btn" type="submit" disabled={submitting}>
+                {submitting ? "Signing you in…" : "Continue to Luckee →"}
+              </button>
+            </Form>
+            <p className="auth-terms">
+              This extra step stops email security scanners from using your one-time link before you
+              do.
+            </p>
+          </div>
+        </div>
+      </div>
+      <Footer />
+    </>
   );
 }
