@@ -44,6 +44,10 @@ export const links: Route.LinksFunction = () => [
  *     used to win the response and discard the root loader's Set-Cookie;
  *   - routes can require auth without knowing how the session was obtained.
  */
+function writesSessionCookies(response: Response): boolean {
+  return response.headers.getSetCookie().some((c) => /^(__Host-)?luckee_(at|rt)=/.test(c));
+}
+
 export const middleware: MiddlewareFunction<Response>[] = [
   async ({ request, context }, next) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -69,7 +73,10 @@ export const middleware: MiddlewareFunction<Response>[] = [
     }
 
     const response = await next();
-    if (rotated && response instanceof Response) {
+    // A route that writes the session itself — sign-out clearing it, sign-in
+    // replacing it — has the last word. Appending the refreshed cookies after
+    // those would undo a sign-out, or put back the account just signed out of.
+    if (rotated && response instanceof Response && !writesSessionCookies(response)) {
       rotated.forEach((c) => response.headers.append("Set-Cookie", c));
     }
     return response;

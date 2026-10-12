@@ -56,8 +56,12 @@ export function Nav() {
                           <Link to="/rewards" onClick={() => setProfileOpen(false)}><span>🎡</span> Rewards</Link>
                         </>
                       )}
+                      {/* No onClick that closes the menu here: the form lives inside the
+                          menu, so closing it removes the form before the browser submits
+                          it and the sign-out silently never happens. Signing out
+                          navigates away, which closes the menu anyway. */}
                       <Form method="post" action="/api/logout">
-                        <button type="submit" onClick={() => setProfileOpen(false)}><span>🚪</span> Sign out</button>
+                        <button type="submit"><span>🚪</span> Sign out</button>
                       </Form>
                     </div>
                   )}
