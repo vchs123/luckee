@@ -27,7 +27,7 @@ export default function Copyright() {
       <p>We'll review and, where appropriate, remove or amend the content promptly.</p>
 
       <h2>Contact</h2>
-      <p>Send requests to <a href="mailto:hello@luckee.com.au">hello@luckee.com.au</a>.</p>
+      <p>Send requests to <a href="mailto:luckee.app@gmail.com">luckee.app@gmail.com</a>.</p>
     </LegalLayout>
   );
 }

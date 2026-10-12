@@ -115,7 +115,7 @@ function waitlistEmailHtml(firstName: string, language: string) {
       <h1 style="font-size: 24px; color: #1e0a2e; margin-bottom: 12px;">You're on the list, ${firstName}! ✓</h1>
       <p style="color: #6b4d82; line-height: 1.7;">Thanks for signing up for a <strong>${language}</strong> dinner. I'll be in touch when a table opens up for your language group.</p>
       <p style="color: #6b4d82; line-height: 1.7;">In the meantime, check out the <a href="https://luckee-app.pages.dev/freebies/birthday-freebies" style="color: #e91e8c;">birthday freebies guide</a> — free food is always a good start.</p>
-      <p style="color: #a08bb8; font-size: 13px; margin-top: 32px;">— Vanessa · <a href="https://luckee-app.pages.dev" style="color: #e91e8c;">luckee.com.au</a></p>
+      <p style="color: #a08bb8; font-size: 13px; margin-top: 32px;">— Vanessa · <a href="https://luckee-app.pages.dev" style="color: #e91e8c;">luckee-app.pages.dev</a></p>
     </div>
   `;
 }

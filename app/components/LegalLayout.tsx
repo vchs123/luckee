@@ -48,7 +48,7 @@ export function LegalLayout({
 
         <p className="legal-disclaimer">
           This document is provided in good faith as general information and is not legal advice.
-          Have a question? Email <a href="mailto:hello@luckee.com.au">hello@luckee.com.au</a>.
+          Have a question? Email <a href="mailto:luckee.app@gmail.com">luckee.app@gmail.com</a>.
         </p>
       </div>
       <Footer />

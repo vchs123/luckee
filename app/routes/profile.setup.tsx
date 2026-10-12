@@ -173,7 +173,7 @@ export default function ProfileSetup() {
             {step === 1 && (
               <>
                 <h2 className="setup-h">Choose your username</h2>
-                <p className="setup-sub">This appears on your referral link: luckee.com.au/r/<strong>username</strong></p>
+                <p className="setup-sub">This appears on your referral link: luckee-app.pages.dev/r/<strong>username</strong></p>
                 <Form method="post" className="auth-form">
                   <input type="hidden" name="step" value="1" />
                   {actionData?.error && <div className="wf-error">{actionData.error}</div>}

@@ -47,7 +47,7 @@ export default function Terms() {
       <p>These terms are governed by the laws of Victoria, Australia.</p>
 
       <h2>Contact</h2>
-      <p>Questions? Email <a href="mailto:hello@luckee.com.au">hello@luckee.com.au</a>.</p>
+      <p>Questions? Email <a href="mailto:luckee.app@gmail.com">luckee.app@gmail.com</a>.</p>
     </LegalLayout>
   );
 }

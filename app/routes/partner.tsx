@@ -23,7 +23,7 @@ export default function Partner() {
       <p>Freebie guides stay editorially independent — we clearly label affiliate links and sponsored placements, and we only feature offers we believe are genuinely good for our community.</p>
 
       <h2>Get in touch</h2>
-      <p>Email <a href="mailto:hello@luckee.com.au">hello@luckee.com.au</a> with a bit about your business and what you have in mind, and we'll get back to you.</p>
+      <p>Email <a href="mailto:luckee.app@gmail.com">luckee.app@gmail.com</a> with a bit about your business and what you have in mind, and we'll get back to you.</p>
     </LegalLayout>
   );
 }

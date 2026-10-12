@@ -143,7 +143,7 @@ export default function Profile() {
   const mCode = codes.find(c => stored.startsWith(c)) ?? "+61";
   const mNum = stored.startsWith(mCode) ? stored.slice(mCode.length) : stored;
 
-  const referralUrl = `luckee.com.au/r/${profile.username}`;
+  const referralUrl = `luckee-app.pages.dev/r/${profile.username}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(`https://${referralUrl}`).then(() => {
