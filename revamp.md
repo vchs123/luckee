@@ -1,8 +1,8 @@
 # Luckee v2 design revamp
 
 **Created:** 2026-09-26 15:36 AEST
-**Last updated:** 2026-09-27 (Step 3-4 complete)
-**Status:** Phase 1 (home page) shipped in `55507d6`. Phase 2 in progress — Steps 1-4 done (tabs, breadcrumb, URL filters, all three cards, all five routes); awaiting your review.
+**Last updated:** 2026-10-12
+**Status:** Phase 1 (home) shipped in `55507d6`. Phase 2 (freebies) shipped in `6109019`. Phase 3 (deals) built and verified locally; not yet committed.
 **Scope:** customer-facing pages only — the admin dashboard is not touched
 
 ---
@@ -80,7 +80,7 @@ Leave `Nav`, `BottomNav` and `Footer` alone this phase. v2's `Header` adds a poi
 
 ---
 
-## Phase 2 — the five freebies pages
+## Phase 2 — the five freebies pages ✅ shipped in `6109019`
 
 `/freebies/birthday-freebies` carries the highest sitemap priority on the site (1.0), so this is the surface that matters most after the home page.
 
@@ -149,6 +149,61 @@ Two pre-existing problems get fixed on the way through:
 - [ ] ~400px wide: tab row scrolls horizontally, no page-level horizontal scroll. (Headless Chrome floors at ~500px on macOS — check a real phone.)
 - [x] `git status` shows nothing under `app/routes/admin*`.
 
+## Phase 3 — the Deals page
+
+`/deals` is now the most visibly mismatched page: the home page's referral cards already wear the v2 design, and `/deals` still renders the old `DealRow`.
+
+v2's deals page (`SecretCouponsPage`) is built for dozens of coupons — search, a category dropdown, a Normal/List toggle and pagination at five per page. There are **six** deals, so that machinery would make the page worse (pagination alone would split six deals over two pages). Taken: the header banner with the Luckee stamp spotlight, and the card. Left for when there are ~15+ deals: search, categories, list view, pagination.
+
+v2's card (`CleanReferralCard`) is the same design already ported for the home page in Phase 1, so this phase **extracts that card into one shared component** instead of building a third deal card.
+
+### Found while planning
+
+- **Luckboard bug from Phase 1.** The Luckboard page finds deals by their code (`slug: d.cls`, e.g. `bls`), and `DealRow` saves them that way, but the home page cards (`ReferralDeals.tsx`) have saved them as `slugify(d.n)` (`blossom`) since `55507d6`. A deal saved from the home page never showed up on the Luckboard page, and didn't show as saved on `/deals`.
+- **The home card hides Revolut's instruction.** The bonus requires DMing Luckee on Instagram *before* signing up. That instruction lives in `rl` and at the end of `desc`, and the home card shows neither — the description is clamped to two lines.
+- **Dead code.** `DealCard`, `DealTile` and `DealExplosion` have had no users since Phase 1, and `DealRow` won't after this phase. The Blossom tiers and logo map are duplicated across them.
+- **Anchors in use.** `search.tsx` links results to `/deals#${d.cls}`, so every card on `/deals` must keep `id={d.cls}`.
+
+### Decisions
+
+- One shared card, `app/components/ReferralDealCard.tsx`, used by both pages: compact on the home page, full on `/deals`.
+- Luckboard slug is always `d.cls`, matching the Luckboard page and existing saved data.
+- Keep the H1 "Deals I recommend", the `meta` export and the canonical.
+- Keep Claude Pro on `/deals` (the home page leaves it out, as before).
+- The Blossom regulatory disclaimer ("Target returns are not guaranteed. Not a bank. Read the PDS…") stays on the full card — it is a financial product.
+
+### Step 1 — shared card
+
+- [x] Create `ReferralDealCard` from the home page card: logo tile (one shared `LOGO_MAP`), stamp, name, reward, **the `rl` line on both variants** (fixes the hidden Revolut instruction), referral-code copy button, Luckboard toggle keyed by `d.cls` (signed-out users get the `/login` bookmark), and the outbound link through `trackDealClick`.
+- [x] Full variant adds: expandable description ("See more"), Blossom tiers + disclaimer, every tag, the deal's own CTA text, and `id={d.cls}` for the search anchors.
+- [x] Signed-in clicks award points through a fetcher and show the "+N pts" toast `DealRow` showed, on both pages.
+
+### Step 2 — pages
+
+- [x] Home: `ReferralDeals.tsx` renders the shared card (compact).
+- [x] `/deals`: v2 header banner with the stamp spotlight, then all six deals in a grid of full cards.
+
+### Step 3 — data fix
+
+- [x] `sql/fix_deal_luckboard_slugs.sql`: re-key rows saved under `blossom`, `kris`, `revolut`, `macadam`, `eatclub`, `claude-pro` to their codes. Where a user has both, keep the more recently updated row.
+
+### Cleanup
+
+- [x] Delete `DealCard`, `DealTile`, `DealExplosion`, `DealRow`.
+- [x] Delete their CSS (`.dc-*`, `.dl-*`, `.dlx-*`, `.bls-*`, …) — only after checking nothing else references each family.
+
+**Built-in extras.** "See more" only appears when the description is actually cut off (measured after mount and on resize) — a button that expanded nothing looked broken. Cleanup removed 119 dead CSS rules and three unused animations; three rules shared with live selectors (`.btn-pink`, `.fc-cta`) were trimmed, not deleted.
+
+### Phase 3 verification
+
+- [x] `npx tsc -b` clean; `/deals` and `/` render server-side with all cards present.
+- [x] Search result links (`/deals#bls` etc.) land on the right card.
+- [x] Revolut's Instagram instruction is visible on both pages.
+- [x] The Blossom disclaimer is present on `/deals`.
+- [ ] Signed in: saving a deal from either page shows up on `/luckboard` (browser check — needs you).
+- [x] ~500px wide: cards stack, nothing overflows.
+- [x] Nothing under `app/routes/admin*` touched.
+
 ---
 
 ## Guardrails
@@ -160,4 +215,4 @@ Two pre-existing problems get fixed on the way through:
 
 ## Later phases (not in scope now)
 
-Deals → luckboard/vault → rewards + gachapon last, as it is the most server-coupled. Then the shell (Header/BottomNav/Footer). Separately: the corkboard backend — `community_posts` with `pending/approved/rejected`, a submit action, and an approval queue modelled on the existing `admin.proof` flow.
+Luckboard/vault → rewards + gachapon last, as it is the most server-coupled. Then the shell (Header/BottomNav/Footer). Separately: the corkboard backend — `community_posts` with `pending/approved/rejected`, a submit action, and an approval queue modelled on the existing `admin.proof` flow.
