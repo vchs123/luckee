@@ -8,6 +8,7 @@ const LEGAL_LINKS = [
   { to: "/terms", label: "Terms & Conditions" },
   { to: "/copyright", label: "Copyright Policy" },
   { to: "/partner", label: "Partner With Us" },
+  { to: "/contact", label: "Contact" },
 ];
 
 export function LegalLayout({
@@ -48,7 +49,7 @@ export function LegalLayout({
 
         <p className="legal-disclaimer">
           This document is provided in good faith as general information and is not legal advice.
-          Have a question? Email <a href="mailto:luckee.app@gmail.com">luckee.app@gmail.com</a>.
+          Have a question? <Link to="/contact">Send us a message</Link>.
         </p>
       </div>
       <Footer />

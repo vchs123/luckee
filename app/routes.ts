@@ -18,6 +18,7 @@ export default [
   route("terms", "routes/terms.tsx"),
   route("copyright", "routes/copyright.tsx"),
   route("partner", "routes/partner.tsx"),
+  route("contact", "routes/contact.tsx"),
   route("blog", "routes/blog._index.tsx"),
   route("blog/:slug", "routes/blog.$slug.tsx"),
 
@@ -40,6 +41,7 @@ export default [
     route("admin/proof", "routes/admin.proof.tsx"),
     route("admin/proof/:id", "routes/admin.proof.$id.tsx"),
     route("admin/redemptions", "routes/admin.redemptions.tsx"),
+    route("admin/messages", "routes/admin.messages.tsx"),
   ]),
 
   // API

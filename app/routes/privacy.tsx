@@ -1,4 +1,5 @@
 import type { MetaFunction } from "react-router";
+import { Link } from "react-router";
 import { LegalLayout } from "~/components/LegalLayout";
 
 export const meta: MetaFunction = () => [
@@ -59,7 +60,7 @@ export default function Privacy() {
       <p>We may update this policy from time to time. Material changes will be reflected by the "last updated" date above.</p>
 
       <h2>Contact</h2>
-      <p>Questions or requests? Email <a href="mailto:luckee.app@gmail.com">luckee.app@gmail.com</a>.</p>
+      <p>Questions or requests? Use the <Link to="/contact?topic=privacy">contact form</Link>.</p>
     </LegalLayout>
   );
 }

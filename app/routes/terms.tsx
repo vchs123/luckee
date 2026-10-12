@@ -1,4 +1,5 @@
 import type { MetaFunction } from "react-router";
+import { Link } from "react-router";
 import { LegalLayout } from "~/components/LegalLayout";
 
 export const meta: MetaFunction = () => [
@@ -47,7 +48,7 @@ export default function Terms() {
       <p>These terms are governed by the laws of Victoria, Australia.</p>
 
       <h2>Contact</h2>
-      <p>Questions? Email <a href="mailto:luckee.app@gmail.com">luckee.app@gmail.com</a>.</p>
+      <p>Questions? <Link to="/contact">Send us a message</Link>.</p>
     </LegalLayout>
   );
 }

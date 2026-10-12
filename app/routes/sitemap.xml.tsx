@@ -16,6 +16,7 @@ const STATIC_ROUTES = [
   { url: "/terms", priority: "0.3", changefreq: "yearly" },
   { url: "/copyright", priority: "0.3", changefreq: "yearly" },
   { url: "/partner", priority: "0.4", changefreq: "yearly" },
+  { url: "/contact", priority: "0.4", changefreq: "yearly" },
 ];
 
 export async function loader({ request, context }: LoaderFunctionArgs) {

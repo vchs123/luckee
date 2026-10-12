@@ -1,4 +1,5 @@
 import type { MetaFunction } from "react-router";
+import { Link } from "react-router";
 import { LegalLayout } from "~/components/LegalLayout";
 
 export const meta: MetaFunction = () => [
@@ -27,7 +28,7 @@ export default function Copyright() {
       <p>We'll review and, where appropriate, remove or amend the content promptly.</p>
 
       <h2>Contact</h2>
-      <p>Send requests to <a href="mailto:luckee.app@gmail.com">luckee.app@gmail.com</a>.</p>
+      <p>Send requests through the <Link to="/contact?topic=copyright">contact form</Link>, choosing "Copyright request".</p>
     </LegalLayout>
   );
 }
