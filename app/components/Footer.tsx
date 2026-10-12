@@ -23,6 +23,7 @@ export function Footer() {
               <Link to="/dinners">Community Dinners</Link>
               <Link to="/rewards">Rewards</Link>
               <Link to="/about">About Luckee</Link>
+              <Link to="/contact">Contact</Link>
               <Link to="/blog">Blog</Link>
             </div>
             <div className="ft-col">
