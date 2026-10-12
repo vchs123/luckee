@@ -42,6 +42,7 @@ export default [
     route("admin/proof/:id", "routes/admin.proof.$id.tsx"),
     route("admin/redemptions", "routes/admin.redemptions.tsx"),
     route("admin/messages", "routes/admin.messages.tsx"),
+    route("admin/waitlist", "routes/admin.waitlist.tsx"),
   ]),
 
   // API

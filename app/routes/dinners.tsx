@@ -31,7 +31,6 @@ export async function loader({ context }: LoaderFunctionArgs) {
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const { getSupabase } = await import("~/lib/supabase.server");
-  const { getResend } = await import("~/lib/resend.server");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const env = (context as any)?.cloudflare?.env as Env;
 
@@ -74,17 +73,10 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return { error: "Something went wrong. Please try again." };
   }
 
-  try {
-    const resend = getResend(env);
-    await resend.emails.send({
-      from: "Vanessa at Luckee <luckee.app@gmail.com>",
-      to: email,
-      subject: "You're on the Luckee dinner waitlist ✓",
-      html: waitlistEmailHtml(firstName, dinnerLanguage),
-    });
-  } catch (e) {
-    console.error("Resend error (non-fatal):", e);
-  }
+  // No confirmation email: Resend only sends from a verified domain, and there
+  // isn't one, so it was failing silently on every signup (while putting the
+  // admin's Gmail in the From line). The page's success message is the
+  // confirmation; signups are reviewed on the admin Waitlist page.
 
   try {
     if (env.DISCORD_WEBHOOK_URL) {
@@ -109,16 +101,6 @@ export async function action({ request, context }: ActionFunctionArgs) {
   return { success: true };
 }
 
-function waitlistEmailHtml(firstName: string, language: string) {
-  return `
-    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px;">
-      <h1 style="font-size: 24px; color: #1e0a2e; margin-bottom: 12px;">You're on the list, ${firstName}! ✓</h1>
-      <p style="color: #6b4d82; line-height: 1.7;">Thanks for signing up for a <strong>${language}</strong> dinner. I'll be in touch when a table opens up for your language group.</p>
-      <p style="color: #6b4d82; line-height: 1.7;">In the meantime, check out the <a href="https://luckee-app.pages.dev/freebies/birthday-freebies" style="color: #e91e8c;">birthday freebies guide</a> — free food is always a good start.</p>
-      <p style="color: #a08bb8; font-size: 13px; margin-top: 32px;">— Vanessa · <a href="https://luckee-app.pages.dev" style="color: #e91e8c;">luckee-app.pages.dev</a></p>
-    </div>
-  `;
-}
 
 export default function Dinners() {
   const { waitlistCount } = useLoaderData<typeof loader>();
