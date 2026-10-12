@@ -3,7 +3,7 @@ import type { RouterContextProvider } from "react-router";
 import { userContext } from "~/lib/auth.context";
 import type { User } from "@supabase/supabase-js";
 import { getSupabase, getSupabaseAnon } from "~/lib/supabase.server";
-import { isAdminEmail } from "~/lib/admin";
+import { isAdminEmail } from "~/lib/admin.server";
 
 // Custom storage adapter that persists PKCE code verifier across stateless Worker requests via a cookie.
 export class CookieStorage {

@@ -5,7 +5,7 @@ import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
 import { getSupabaseAnonWithStorage, getSupabase } from "~/lib/supabase.server";
 import { authCookies, getCookie, CookieStorage } from "~/lib/auth.server";
-import { isAdminEmail } from "~/lib/admin";
+import { isAdminEmail } from "~/lib/admin.server";
 
 export const meta: MetaFunction = () => [
   { title: "Finish signing in — Luckee" },

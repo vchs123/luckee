@@ -7,7 +7,7 @@ import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
 import { requireAuth } from "~/lib/auth.server";
 import { getSupabase } from "~/lib/supabase.server";
-import { isAdminEmail } from "~/lib/admin";
+import { isAdminEmail } from "~/lib/admin.server";
 
 export const meta: MetaFunction = () => [
   { title: "Your profile — Luckee" },

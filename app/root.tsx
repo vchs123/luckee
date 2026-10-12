@@ -20,7 +20,7 @@ import { DoublePointsBanner } from "~/components/DoublePointsBanner";
 import { BottomNav } from "~/components/BottomNav";
 import { verifyUser, refreshAndGetUser } from "~/lib/auth.server";
 import { userContext } from "~/lib/auth.context";
-import { isAdminEmail, isAdminAllowedPath } from "~/lib/admin";
+import { isAdminEmail, isAdminAllowedPath } from "~/lib/admin.server";
 import { getSupabase } from "~/lib/supabase.server";
 import "./app.css";
 
@@ -104,6 +104,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
 
   return {
     user: user ? { id: user.id, email: user.email! } : null,
+    isAdmin: isAdminEmail(user?.email),
     profile,
     luckboard,
   };

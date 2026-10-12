@@ -12,7 +12,7 @@ import { melbToday } from "~/lib/melbDate";
 import { playChime } from "~/lib/sound";
 import { m } from "framer-motion";
 import { PULL_COST, PRIZES, type PrizeType } from "~/lib/gachapon";
-import { isAdminEmail } from "~/lib/admin";
+import { isAdminEmail } from "~/lib/admin.server";
 
 const RECEIPT_MILESTONE = 30;
 

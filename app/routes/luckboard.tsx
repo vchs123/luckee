@@ -12,7 +12,7 @@ import { BDAY_BEAUTY } from "~/data/birthday-beauty";
 import { SIGNUP_FREEBIES } from "~/data/sign-up-freebies";
 import { MELB_TRANSPORT, MELB_CULTURE, MELB_CLASSES, MELB_OUTDOORS } from "~/data/free-melbourne";
 import { DEALS } from "~/data/deals";
-import { isAdminEmail } from "~/lib/admin";
+import { isAdminEmail } from "~/lib/admin.server";
 
 export const meta: MetaFunction = () => [
   { title: "Luckboard — Your Tracker | Luckee" },
