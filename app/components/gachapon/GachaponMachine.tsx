@@ -65,6 +65,10 @@ const GLOBE: { theme: CuteCapsuleTheme; rotate: number; bob: number; x: number[]
   { theme: "peach", rotate: 12, bob: 1.1, x: [0, -44, 24, -40, 15, 0], y: [0, 20, -60, 12, -46, 0], r: [0, -350, 90, -200, 40, 0] },
   { theme: "rose", rotate: -14, bob: 0.7, x: [0, 34, -30, 36, -26, 0], y: [0, -54, 24, -36, 10, 0], r: [0, 300, -330, 180, -80, 0] },
   { theme: "matcha", rotate: 16, bob: 1.3, x: [0, -26, 36, -42, 20, 0], y: [0, 36, -50, 14, -52, 0], r: [0, -200, 350, -120, 180, 0] },
+  { theme: "peach", rotate: 9, bob: 0.5, x: [0, 30, -40, 22, -30, 0], y: [0, -40, 30, -60, 18, 0], r: [0, 210, -300, 140, -60, 0] },
+  { theme: "sky", rotate: -10, bob: 0.9, x: [0, -36, 28, -44, 30, 0], y: [0, -30, -44, 20, -36, 0], r: [0, -160, 280, -340, 70, 0] },
+  { theme: "strawberry", rotate: 14, bob: 1.2, x: [0, 40, -22, 34, -40, 0], y: [0, 24, -52, -18, 30, 0], r: [0, 320, -120, 240, -30, 0] },
+  { theme: "lemon", rotate: -18, bob: 0.2, x: [0, -20, 44, -30, 36, 0], y: [0, -56, 12, -40, -20, 0], r: [0, -250, 170, -90, 110, 0] },
 ];
 
 /** What a prize means for the player. Thresholds come from PRIZES so this can't go stale. */
@@ -313,10 +317,10 @@ export function GachaponMachine({ balance, freePulls, pullsToday, dailyLimit, re
               {/* Globe */}
               <div className="relative z-10 flex h-[162px] w-[185px] items-end justify-center overflow-hidden rounded-b-xl rounded-t-full border-[3px] border-black bg-gradient-to-b from-white/95 via-sky-50/40 to-white/80 p-1.5 shadow-[inset_0_6px_16px_rgba(255,255,255,0.8),inset_0_-8px_12px_rgba(0,0,0,0.1),4px_4px_0px_#000] sm:w-[205px]">
                 <div className="pointer-events-none absolute left-4 top-2 z-20 h-16 w-3.5 -rotate-12 rounded-full bg-gradient-to-b from-white/90 to-transparent" />
-                <div className="relative z-10 flex w-full max-w-[172px] flex-wrap items-end justify-center -space-x-1.5 -space-y-2 px-0.5 pb-1.5">
+                <div className="relative z-10 flex w-full max-w-[172px] flex-wrap items-end justify-center -space-x-1.5 -space-y-2 px-0.5 pb-1">
                   {GLOBE.map((c, i) => (
                     <m.div
-                      key={c.theme}
+                      key={i}
                       animate={
                         phase === "cranking"
                           ? { x: c.x, y: c.y, rotate: c.r, scale: [1, 1.25, 0.82, 1.2, 0.9, 1] }
@@ -330,7 +334,7 @@ export function GachaponMachine({ balance, freePulls, pullsToday, dailyLimit, re
                       className="-m-0.5 flex items-center justify-center"
                       aria-hidden
                     >
-                      <CuteCapsule theme={c.theme} size={30} showGlow={false} />
+                      <CuteCapsule theme={c.theme} size={44} showGlow={false} />
                     </m.div>
                   ))}
                 </div>
