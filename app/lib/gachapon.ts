@@ -33,6 +33,25 @@ export const PRIZES: Record<PrizeType, PrizeMeta> = {
 /** Prize types that are collected toward a physical redemption. */
 export const COLLECTIBLE_TYPES: PrizeType[] = ["food", "drink", "grand"];
 
+export type Collection = Record<"food" | "drink" | "grand", number>;
+
+/**
+ * Collectible capsules a user still holds: everything pulled, minus units
+ * already spent on redemptions that weren't cancelled. The one definition, so
+ * Rewards and the Luckboard can't disagree about a user's count.
+ */
+export function computeCollection(
+  pulls: { prize_type: string }[],
+  redemptions: { prize_type: string; units: number; status: string }[],
+): Collection {
+  const held = (type: string) =>
+    pulls.filter((p) => p.prize_type === type).length -
+    redemptions
+      .filter((r) => r.prize_type === type && r.status !== "cancelled")
+      .reduce((sum, r) => sum + r.units, 0);
+  return { food: held("food"), drink: held("drink"), grand: held("grand") };
+}
+
 // Weighted roll table — weights are percentages summing to 100.
 export const PRIZE_WEIGHTS: { type: PrizeType; weight: number }[] = [
   { type: "points",        weight: 30 },

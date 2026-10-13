@@ -11,7 +11,7 @@ import { awardPoints } from "~/lib/points.server";
 import { melbToday } from "~/lib/melbDate";
 import { playChime } from "~/lib/sound";
 import { m } from "framer-motion";
-import { PULL_COST, PRIZES, type PrizeType } from "~/lib/gachapon";
+import { PULL_COST, PRIZES, computeCollection, type PrizeType } from "~/lib/gachapon";
 import { isAdminEmail } from "~/lib/admin.server";
 
 const RECEIPT_MILESTONE = 30;
@@ -119,15 +119,10 @@ export async function loader({ context }: LoaderFunctionArgs) {
   // Gachapon collection: available = pulled − units already spent on (non-cancelled) redemptions
   const pulls = pullsRes.data ?? [];
   const redemptions = redemptionsRes.data ?? [];
-  const pulledCount = (type: string) => pulls.filter(p => p.prize_type === type).length;
-  const spentUnits = (type: string) =>
-    redemptions.filter(r => r.prize_type === type && r.status !== "cancelled")
-      .reduce((sum, r) => sum + (r.units as number), 0);
-  const collection = {
-    food:  pulledCount("food")  - spentUnits("food"),
-    drink: pulledCount("drink") - spentUnits("drink"),
-    grand: pulledCount("grand") - spentUnits("grand"),
-  };
+  const collection = computeCollection(
+    pulls as { prize_type: string }[],
+    redemptions as { prize_type: string; units: number; status: string }[],
+  );
   const pullsToday = pulls.filter(
     (p) => new Date(p.created_at as string).toLocaleDateString("en-CA", { timeZone: "Australia/Melbourne" }) === today,
   ).length;
