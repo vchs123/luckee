@@ -829,31 +829,6 @@ body.dp-active .nav { top: 38px; }
 /* ── dl-row-actions: cta + toggle ── */
 
 /* ── luckboard page ── */
-.lb-stats { display: flex; gap: 24px; margin: 24px 0 32px; flex-wrap: wrap; }
-.lb-stat { display: flex; flex-direction: column; background: var(--card); border-radius: var(--rs); border: 1px solid var(--cb); padding: 16px 24px; min-width: 100px; text-align: center; }
-.lb-stat-n { font-family: 'Fraunces', serif; font-size: 36px; font-weight: 700; color: var(--t1); line-height: 1; }
-.lb-stat-l { font-size: 12px; color: var(--t3); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
-
-.lb-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
-.lb-filter-btn { padding: 6px 14px; border-radius: 999px; border: 1.5px solid var(--cb); background: transparent; font-size: 13px; font-weight: 600; color: var(--t2); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.15s; }
-.lb-filter-btn.active, .lb-filter-btn:hover { background: var(--pink); border-color: var(--pink); color: #fff; }
-.lb-filter-ct { background: rgba(255,255,255,0.3); border-radius: 999px; padding: 1px 7px; font-size: 11px; }
-.lb-filter-btn:not(.active) .lb-filter-ct { background: var(--pm); color: var(--pink); }
-
-.lb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
-.lb-card { background: var(--card); border-radius: var(--rs); border: 1.5px solid var(--cb); padding: 16px; display: flex; flex-direction: column; gap: 6px; transition: border-color 0.15s; }
-.lb-card.lb-want { border-color: #f59e0b; }
-.lb-card.lb-done { border-color: #16a34a; }
-.lb-card.lb-skip { opacity: 0.55; }
-
-.lb-card-top { display: flex; justify-content: space-between; align-items: center; }
-.lb-type-badge { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--t3); background: var(--pm); border-radius: var(--rp); padding: 2px 8px; }
-.lb-name { font-weight: 800; font-size: 14px; color: var(--t1); margin-top: 4px; }
-.lb-sub { font-size: 12px; color: var(--t2); }
-.lb-status-label { font-size: 11px; font-weight: 700; color: var(--t3); margin-top: 4px; }
-.lb-card.lb-want .lb-status-label { color: #f59e0b; }
-.lb-card.lb-done .lb-status-label { color: #16a34a; }
-.lb-empty { font-size: 14px; color: var(--t3); padding: 40px 0; text-align: center; }
 
 /* ── Referral ledger (profile page) ── */
 .ref-ledger { margin-top: 24px; }
@@ -917,11 +892,6 @@ body.dp-active .nav { top: 38px; }
 .lb-pop-opt.active .lb-pop-label { color: var(--pink); }
 
 /* ── Luckboard how-to hint ── */
-.lb-howto { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: var(--t2); margin-top: 10px; }
-.lb-howto-state { font-weight: 700; border-radius: var(--rp); padding: 2px 10px; font-size: 12px; }
-.lb-howto-want { background: #fef3c7; color: #92400e; }
-.lb-howto-done { background: #dcfce7; color: #166534; }
-.lb-howto-skip { background: #f1f5f9; color: #64748b; }
 
 /* ── melting bottom nav ── */
 .bnav {

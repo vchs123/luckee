@@ -2,7 +2,7 @@
 
 **Created:** 2026-09-26 15:36 AEST
 **Last updated:** 2026-10-12
-**Status:** Phase 1 (home) shipped in `55507d6`. Phase 2 (freebies) shipped in `6109019`. Phase 3 (deals) built and verified locally; not yet committed.
+**Status:** Phase 1 (home) shipped in `55507d6`. Phase 2 (freebies) shipped in `6109019`. Phase 3 (deals) shipped in `6d68ccc`. Phase 4 (Luckboard) built and verified locally; not yet committed.
 **Scope:** customer-facing pages only — the admin dashboard is not touched
 
 ---
@@ -149,7 +149,7 @@ Two pre-existing problems get fixed on the way through:
 - [ ] ~400px wide: tab row scrolls horizontally, no page-level horizontal scroll. (Headless Chrome floors at ~500px on macOS — check a real phone.)
 - [x] `git status` shows nothing under `app/routes/admin*`.
 
-## Phase 3 — the Deals page
+## Phase 3 — the Deals page ✅ shipped in `6d68ccc`
 
 `/deals` is now the most visibly mismatched page: the home page's referral cards already wear the v2 design, and `/deals` still renders the old `DealRow`.
 
@@ -200,9 +200,55 @@ v2's card (`CleanReferralCard`) is the same design already ported for the home p
 - [x] Search result links (`/deals#bls` etc.) land on the right card.
 - [x] Revolut's Instagram instruction is visible on both pages.
 - [x] The Blossom disclaimer is present on `/deals`.
-- [ ] Signed in: saving a deal from either page shows up on `/luckboard` (browser check — needs you).
+- [x] Signed in: saving a deal from either page shows up on `/luckboard` — confirmed on the live site.
 - [x] ~500px wide: cards stack, nothing overflows.
 - [x] Nothing under `app/routes/admin*` touched.
+
+---
+
+## Phase 4 — the Luckboard
+
+v2's equivalent is "My Loot": a list of only what you've saved, with a General tab and a Won tab for gachapon prizes, in v2's bold black-bordered style. The current Luckboard is a tracker over the **whole catalogue** (68 freebies, experiences and deals), mostly "Not explored".
+
+### Decisions
+
+- **Keep the whole catalogue, but open on your list.** Default view is *Want to try*. Chips switch between Want to try · Done · Not for me · Explore all. Someone with nothing saved yet lands on *Explore all* rather than an empty page. The view (`?show=`), tab (`?tab=`) and search (`?q=`) live in the URL, like the freebies filters.
+- **Add a Won tab, read-only.** It shows the real gachapon collection (food and drinks out of 10, grand prize out of 1) and the status of any redemptions. Redeeming stays on the Rewards page, linked from the tab, so nothing is built twice.
+- **Keep the name "Luckboard".** The URL, the save buttons on every card and the bottom nav all use it.
+- Statuses are unchanged: Want to try / Done it / Not for me / Not explored.
+- v2's slide-out vault drawer belongs to the shell (header and bottom nav), so it waits for that phase.
+
+### Found while planning
+
+- **Saves could be lost.** Every card on the current page shares one `useFetcher`, and a new submission on a fetcher cancels the one still in flight. Tapping two cards quickly could drop the first save while the screen showed it saved. Each card will use `LuckboardToggle`, which has its own fetcher.
+- **The collection formula lived inline in the Rewards loader.** It becomes one shared function in `app/lib/gachapon.ts`, used by both pages.
+
+### Step 1 — data
+
+- [x] `computeCollection(pulls, redemptions)` in `app/lib/gachapon.ts`; Rewards uses it instead of its inline copy.
+- [x] Luckboard loader: saved statuses plus gachapon pulls and redemptions; resolves the default view on the server.
+
+### Step 2 — page
+
+- [x] v2 layout: header, Saved / Won tabs with counts, status chips with counts, search.
+- [x] Saved cards in v2's style: type badge, status badge, name and detail, a link to the item (the freebie's page, `/deals#code`, or Free Melbourne), and `LuckboardToggle` for the status.
+- [x] Won tab: collection progress for food, drinks and the grand prize, a "ready to redeem" state, redemption statuses, and a link to Rewards.
+- [x] Empty states for each view, each pointing somewhere useful.
+
+### Cleanup
+
+- [x] Remove the old page's CSS (`.lb-stats`, `.lb-filters`, `.lb-grid`, `.lb-card`, …). **Keep** `.lb-toggle*`, `.lb-popover*` and the `.lb-want/.lb-done/.lb-skip/.lb-unexplored` state classes: `LuckboardToggle` still uses them.
+
+**How it was checked.** The page needs a signed-in account, so it was rendered through a temporary dev-only copy with sample data (since deleted; `routes.ts` matches the committed file). That confirmed the default view, the fallback to *Explore all*, every `?show=` / `?q=` view, the Won-tab arithmetic (14 food pulled − 10 spent on an arranged redemption = 4 of 10), and the 500px layout. The CSS cleanup kept three class families that are built dynamically and so look unused to a text search: `.lb-pop-opt`, the `.lb-want/.lb-done/.lb-skip` states, and `.lb-admin-*` on the admin user page.
+
+### Phase 4 verification
+
+- [x] `npx tsc -b` clean; signed-out visitors are redirected to login.
+- [x] Default view: *Want to try* when it has items, *Explore all* when it doesn't.
+- [x] `?show=`, `?tab=` and `?q=` render on the server and survive a reload.
+- [x] Rewards still shows the same collection numbers after the refactor.
+- [ ] Signed in: changing a status updates the list; two quick taps both stick (browser check — needs you).
+- [x] ~500px wide: nothing overflows.
 
 ---
 
@@ -215,4 +261,4 @@ v2's card (`CleanReferralCard`) is the same design already ported for the home p
 
 ## Later phases (not in scope now)
 
-Luckboard/vault → rewards + gachapon last, as it is the most server-coupled. Then the shell (Header/BottomNav/Footer). Separately: the corkboard backend — `community_posts` with `pending/approved/rejected`, a submit action, and an approval queue modelled on the existing `admin.proof` flow.
+Rewards + gachapon last, as it is the most server-coupled. Then the shell (Header/BottomNav/Footer). Separately: the corkboard backend — `community_posts` with `pending/approved/rejected`, a submit action, and an approval queue modelled on the existing `admin.proof` flow.
