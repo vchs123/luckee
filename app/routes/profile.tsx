@@ -7,6 +7,7 @@ import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
 import { requireAuth } from "~/lib/auth.server";
 import { getSupabase } from "~/lib/supabase.server";
+import { awardPoints } from "~/lib/points.server";
 import { isAdminEmail } from "~/lib/admin.server";
 
 export const meta: MetaFunction = () => [
@@ -111,12 +112,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const allFilled = profile?.first_name && profile?.last_name && profile?.mobile && profile?.dob;
   if (allFilled && !profile?.profile_complete) {
     await supabase.from("user_profiles").update({ profile_complete: true }).eq("id", user.id);
-    await supabase.from("points_ledger").insert({
-      user_id: user.id, action: "profile_complete", points: 100, description: "Completed your profile",
-    });
-    await supabase.from("user_profiles")
-      .update({ total_points: (profile.total_points ?? 0) + 100, monthly_entries: Math.floor(((profile.total_points ?? 0) + 100) / 100) })
-      .eq("id", user.id);
+    await awardPoints(supabase, user.id, "profile_complete", 100, "Completed your profile", { doubleEligible: false });
     return { success: true, bonus: true, tab };
   }
 

@@ -2,7 +2,7 @@
 
 **Created:** 2026-09-26 15:36 AEST
 **Last updated:** 2026-10-12
-**Status:** Phase 1 (home) shipped in `55507d6`. Phase 2 (freebies) shipped in `6109019`. Phase 3 (deals) shipped in `6d68ccc`. Phase 4 (Luckboard) built and verified locally; not yet committed.
+**Status:** Phase 1 (home) shipped in `55507d6`. Phase 2 (freebies) shipped in `6109019`. Phase 3 (deals) shipped in `6d68ccc`. Phase 4 (Luckboard) shipped in `00e3b7f`. Phase 5 (Rewards + gachapon) in progress.
 **Scope:** customer-facing pages only — the admin dashboard is not touched
 
 ---
@@ -206,7 +206,7 @@ v2's card (`CleanReferralCard`) is the same design already ported for the home p
 
 ---
 
-## Phase 4 — the Luckboard
+## Phase 4 — the Luckboard ✅ shipped in `00e3b7f`
 
 v2's equivalent is "My Loot": a list of only what you've saved, with a General tab and a Won tab for gachapon prizes, in v2's bold black-bordered style. The current Luckboard is a tracker over the **whole catalogue** (68 freebies, experiences and deals), mostly "Not explored".
 
@@ -252,6 +252,63 @@ v2's equivalent is "My Loot": a list of only what you've saved, with a General t
 
 ---
 
+## Phase 5 — Rewards and the gachapon
+
+The page the home page headline promises ("mystery prizes"), and the most server-coupled. v2's Rewards page has three tabs — **Earn** (daily check-in grid, trivia, receipt upload, quests), **Play** (the animated gachapon machine), **Activity** (points history). The live page has the same three areas, plus a real daily spin wheel v2 doesn't have.
+
+Every live feature carries over: daily spin, timed trivia, receipt uploads with milestone bonuses, login streak, gachapon with collection and redemption, activity and proof history.
+
+### Decisions
+
+- **Multi-pull ships, as real pulls in a row.** Turning the crank stays the main way to play. "Pull ×N" runs that many real server pulls one after another, each charged and rolled by the server, then reveals them together. Capped at what the player can afford and their remaining daily pulls (8 a day); stops at the first error.
+- **The pull feed shows the player's own recent pulls.** v2's "Recent pulls" feed is invented people winning invented prizes "Just now" — the same fabricated social proof as the corkboard seed, so it doesn't ship.
+- **Prizes are the real prize types** (free food, free drink, bonus points, double-points day, free pull, better luck, grand prize). v2's prizes are specific vouchers with codes that don't exist.
+- **v2's "quests" become the real ways to earn**, each linking to where you do it. v2's quests aren't backed by anything.
+- **v2's check-in grid shows the real login streak.**
+- **Fix the double-spend now** (see below).
+
+### Found while planning: points can be double-spent or lost
+
+`/api/gachapon` reads the balance, then writes back balance − 150 as a separate step, so two pulls fired at once can both pass one balance check. `awardPoints` — which every award on the site goes through — has the same read-then-write shape, so two awards landing together can lose one. The two interact: an award running alongside a pull can write back a stale balance and undo the 150-point charge. Fixing only the pull wouldn't hold.
+
+Fix: two Postgres functions, each changing the balance in a single atomic step under a row lock — `gachapon_pull` (daily limit, free pull or points charge, prize effects, pull row) and `award_points` (the double-points booster logic, ledger row, balance). Both callable only by the server's service-role key. The prize is still rolled in TypeScript (`PRIZE_WEIGHTS`) and passed in, so odds don't change.
+
+If the SQL hasn't been run yet, the code falls back to today's behaviour, so the deploy and the SQL can happen in either order.
+
+### Step 1 — atomic points (server)
+
+- [x] `sql/atomic_points.sql`: `gachapon_pull` and `award_points`, service-role only.
+- [x] Tested in an in-memory Postgres (PGlite): charge, free pull, insufficient points, daily limit, each prize effect, booster downgrade, award doubling, ledger rows.
+- [x] `/api/gachapon` and `awardPoints` call them, falling back to the current code if the functions don't exist yet.
+
+**Also routed through the atomic award:** three hand-rolled awards in the profile pages — the profile-completion bonus, the referrer's +100, and a setup bonus that *set* the balance to 100 (wiping anything earned before setup) instead of adding 100. None used the booster, so they pass `doubleEligible: false` and amounts are unchanged. The fallback triggers only on PostgREST's "function not found" (`PGRST202`, confirmed against the live project); any other error is logged without retrying, so nothing is charged or awarded twice.
+
+### Step 2 — Play tab
+
+- [ ] Port v2's machine (`GachaponMachine`, `CuteCapsule`): interactive crank, "Pull ×N", capsule drop, open and reveal, confetti and sounds (respecting reduced motion and the sound opt-in).
+- [ ] Every pull comes from `/api/gachapon`; the reveal shows the real prize type.
+- [ ] Your recent pulls, from the server.
+- [ ] Collection and redemption (the existing redeem form) restyled.
+
+### Step 3 — Earn tab
+
+- [ ] Daily spin, trivia, receipt upload and the streak (as v2's check-in grid), restyled, same endpoints.
+- [ ] "Ways to earn" in place of v2's quests.
+
+### Step 4 — Activity tab
+
+- [ ] v2's points history over the real `points_ledger`, plus proof submissions.
+
+### Phase 5 verification
+
+- [ ] `npx tsc -b` clean; build passes.
+- [x] SQL functions pass their PGlite tests (28/28). PGlite is single-connection, so concurrency itself rests on Postgres's `FOR UPDATE` row lock rather than a race test.
+- [ ] Every Rewards feature still works signed in: spin, trivia, receipt upload, pull, multi-pull, redeem (browser check — needs you, after the SQL is run).
+- [ ] Reduced motion: the machine still works without the animation.
+- [ ] ~500px wide: nothing overflows.
+
+---
+
 ## Guardrails
 
 - Every ported component must survive server render: no `localStorage`, `window` or `document` access at module scope or during render. v2's components are clean here — only `App.tsx`, which we are not porting, reads `localStorage` in `useState` initialisers.
@@ -261,4 +318,4 @@ v2's equivalent is "My Loot": a list of only what you've saved, with a General t
 
 ## Later phases (not in scope now)
 
-Rewards + gachapon last, as it is the most server-coupled. Then the shell (Header/BottomNav/Footer). Separately: the corkboard backend — `community_posts` with `pending/approved/rejected`, a submit action, and an approval queue modelled on the existing `admin.proof` flow.
+Then the shell (Header/BottomNav/Footer). Separately: the corkboard backend — `community_posts` with `pending/approved/rejected`, a submit action, and an approval queue modelled on the existing `admin.proof` flow.

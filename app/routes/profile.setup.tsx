@@ -4,6 +4,7 @@ import type { MetaFunction, ActionFunctionArgs, LoaderFunctionArgs } from "react
 import { Nav } from "~/components/Nav";
 import { requireAuth, getCookie } from "~/lib/auth.server";
 import { getSupabase } from "~/lib/supabase.server";
+import { awardPoints } from "~/lib/points.server";
 
 export const meta: MetaFunction = () => [
   { title: "Set up your profile — Luckee" },
@@ -66,16 +67,10 @@ export async function action({ request, context }: ActionFunctionArgs) {
     if (refUserId && refUserId !== user.id) {
       const { data: refProfile } = await supabase
         .from("user_profiles").select("total_points").eq("id", refUserId).single();
-      const refPts = (refProfile?.total_points ?? 0) + 100;
-      await Promise.all([
-        supabase.from("points_ledger").insert({
-          user_id: refUserId, action: "referral_account",
-          points: 100, description: "Your referral created a Luckee account",
-        }),
-        supabase.from("user_profiles").update({
-          total_points: refPts, monthly_entries: Math.floor(refPts / 100),
-        }).eq("id", refUserId),
-      ]);
+      if (refProfile) {
+        await awardPoints(supabase, refUserId, "referral_account", 100,
+          "Your referral created a Luckee account", { doubleEligible: false });
+      }
     }
 
     return redirect("/profile/setup?step=2");
@@ -125,16 +120,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
       .eq("id", user.id);
 
     if (allFilled) {
-      await supabase.from("points_ledger").insert({
-        user_id: user.id,
-        action: "profile_complete",
-        points: 100,
-        description: "Completed your profile",
-      });
-      await supabase
-        .from("user_profiles")
-        .update({ total_points: 100, monthly_entries: 1 })
-        .eq("id", user.id);
+      // Adds 100. It used to *set* the balance to 100, wiping anything earned
+      // before setup finished.
+      await awardPoints(supabase, user.id, "profile_complete", 100, "Completed your profile", { doubleEligible: false });
     }
 
     return redirect("/rewards");
