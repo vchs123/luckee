@@ -46,7 +46,13 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   const { pts, segIndex } = weightedRandom();
 
-  await supabase.from("daily_spins").insert({ user_id: user.id, spin_date: today, points_won: pts });
+  // Award only if recording the spin succeeded. Two requests at once used to
+  // both pass the lookup above and both get paid; with the unique index in
+  // sql/daily_unique.sql the second insert fails and nothing is awarded twice.
+  const { error } = await supabase.from("daily_spins").insert({ user_id: user.id, spin_date: today, points_won: pts });
+  if (error) {
+    return Response.json({ pts: 0, segIndex: 0, alreadySpun: true });
+  }
   await awardPoints(supabase, user.id, "daily_spin", pts, `Daily spin — won ${pts} pts`);
 
   return Response.json({ pts, segIndex });

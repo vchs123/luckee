@@ -353,7 +353,8 @@ function TriviaSection({
       else if (finalScore === 4) pts = 10;
       else if (finalScore >= 3) pts = 5;
       setPtsEarned(pts);
-      fetcher.submit({ score: String(finalScore), pts: String(pts) }, { method: "POST", action: "/api/trivia" });
+      // The server works out the points from the score; it no longer accepts an amount.
+      fetcher.submit({ score: String(finalScore) }, { method: "POST", action: "/api/trivia" });
       setTimeout(() => revalidator.revalidate(), 1000);
     }
   }, [qIdx, answers, questions, fetcher, revalidator]);

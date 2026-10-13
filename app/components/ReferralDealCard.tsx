@@ -65,10 +65,10 @@ export function ReferralDealCard({ deal: d, variant = "compact" }: Props) {
 
   function handleOutbound() {
     // Points go through the fetcher, not trackDealClick, so the toast can show them.
-    trackDealClick(d.n, { awardPoints: false });
+    trackDealClick(d, { awardPoints: false });
     if (user) {
       fetcher.submit(
-        { action: "deal_click", description: `Clicked ${d.n} deal` },
+        { action: "deal_click", deal: d.cls },
         { method: "POST", action: "/api/award-points", encType: "application/json" },
       );
     }
