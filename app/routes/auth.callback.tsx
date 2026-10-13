@@ -35,9 +35,15 @@ function parseType(value: string | null): OtpType | null {
   return OTP_TYPES.find((t) => t === value) ?? null;
 }
 
+/**
+ * Path=/auth, not /auth/callback. The Continue button is a React Router form,
+ * which posts to /auth/callback.data — and a cookie scoped to /auth/callback
+ * isn't sent there (the next character after the path must be "/"), so every
+ * confirm click reported the link as expired.
+ */
 function otpCookie(value: string, maxAge: number, request: Request): string {
   const secure = new URL(request.url).protocol === "https:" ? "; Secure" : "";
-  return `${OTP_COOKIE}=${value}; Path=/auth/callback; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${secure}`;
+  return `${OTP_COOKIE}=${value}; Path=/auth; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${secure}`;
 }
 
 /** On the redirect that still carries the token, so it can't leak via Referer. */
