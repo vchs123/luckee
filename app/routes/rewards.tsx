@@ -100,9 +100,31 @@ export async function loader({ context }: LoaderFunctionArgs) {
     .insert({ user_id: user.id, login_date: today })
     .select()
     .maybeSingle();
+  let birthdayBonus = false;
   if (!loginCheckRes.error) {
     // First login today — award 5pts (respects any active double-points booster)
-    const newTotal = await awardPoints(supabase, user.id, "daily_login", 5, "Daily login");
+    let newTotal = await awardPoints(supabase, user.id, "daily_login", 5, "Daily login");
+
+    // Birthday bonus: 50 pts during the birthday month, once per calendar year.
+    // Checked here, on the first visit of the day, so the daily_logins insert
+    // above serialises it. Date of birth can be edited, so the once-a-year rule
+    // (not the month) is what stops it being claimed repeatedly.
+    const dob = profileRes.data?.dob as string | null | undefined;
+    if (dob && dob.slice(5, 7) === today.slice(5, 7)) {
+      // 1 January is always daylight time in Melbourne (+11:00).
+      const yearStart = `${today.slice(0, 4)}-01-01T00:00:00+11:00`;
+      const { count } = await supabase
+        .from("points_ledger")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("action", "birthday_bonus")
+        .gte("created_at", yearStart);
+      if (!count) {
+        newTotal = await awardPoints(supabase, user.id, "birthday_bonus", 50, "Happy birthday month!");
+        birthdayBonus = true;
+      }
+    }
+
     if (profileRes.data) profileRes.data.total_points = newTotal;
   }
 
@@ -148,6 +170,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
     pullsToday,
     dailyPullLimit: 8,
     recentPulls: (pulls as { prize_type: string; points_won: number | null; created_at: string }[]).slice(0, 5),
+    birthdayBonus,
   };
 }
 
@@ -881,11 +904,11 @@ export default function Rewards() {
                   ["Trivia 5/5 correct", "25 pts"],
                   ["Upload a receipt", "5 pts (+50 every 30)"],
                   ["Complete profile", "100 pts (once)"],
-                  ["Dinner waitlist (logged in)", "10 pts"],
-                  ["Dinner attended (proof)", "25 pts"],
+                  ["Join the dinner waitlist (signed in)", "10 pts (once)"],
+                  ["Attend a community dinner (upload proof)", "25 pts (once dinners start)"],
                   ["Refer a friend (account)", "100 pts"],
                   ["Refer a friend (deal signup)", "150 pts (proof)"],
-                  ["Birthday bonus", "50 pts (annual)"],
+                  ["Birthday bonus (in your birthday month)", "50 pts (once a year)"],
                 ].map(([action, pts]) => (
                   <div key={action} className="earn-row">
                     <span>{action}</span>

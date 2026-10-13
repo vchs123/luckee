@@ -4,6 +4,8 @@ import type { MetaFunction, ActionFunctionArgs, LoaderFunctionArgs } from "react
 import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
 import { getSupabase } from "~/lib/supabase.server";
+import { awardPoints } from "~/lib/points.server";
+import { userContext } from "~/lib/auth.context";
 import { MELBOURNE_SUBURBS } from "~/data/suburbs";
 import { prefersReducedMotion } from "~/lib/reducedMotion";
 import { initScrollReveals } from "~/lib/scrollReveal";
@@ -98,7 +100,28 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
   } catch { /* non-fatal */ }
 
-  return { success: true };
+  // 10 points for joining while signed in — once per account. The waitlist
+  // already rejects a repeat email; the ledger check stops a second email on
+  // the same account from paying again.
+  let pts = 0;
+  const user = context.get(userContext);
+  if (user) {
+    try {
+      const { count } = await supabase
+        .from("points_ledger")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("action", "dinner_waitlist");
+      if (!count) {
+        await awardPoints(supabase, user.id, "dinner_waitlist", 10, "Joined the dinner waitlist");
+        pts = 10;
+      }
+    } catch (e) {
+      console.error("[dinners] waitlist bonus failed (non-fatal):", e);
+    }
+  }
+
+  return { success: true, pts };
 }
 
 
@@ -147,7 +170,10 @@ export default function Dinners() {
               <p className="wf-sub">Once you're matched, I'll reach out by email with date, venue and payment details. No commitment until you confirm.</p>
 
               {actionData?.success ? (
-                <div className="success-msg">✅ You're on the list! I'll be in touch when a table opens up for your language group.</div>
+                <div className="success-msg">
+                  ✅ You're on the list! I'll be in touch when a table opens up for your language group.
+                  {"pts" in actionData && actionData.pts ? <> <strong>+{actionData.pts} points</strong> added to your Rewards.</> : null}
+                </div>
               ) : (
                 <Form method="post">
                   {actionData?.error && (
