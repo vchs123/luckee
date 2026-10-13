@@ -4,7 +4,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import type { MetaFunction, LoaderFunctionArgs } from "react-router";
 import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
-import { GachaponMachine } from "~/components/GachaponMachine";
+import { GachaponMachine } from "~/components/gachapon/GachaponMachine";
+import { Collection, type Redemption } from "~/components/gachapon/Collection";
 import { requireAuth } from "~/lib/auth.server";
 import { getSupabase } from "~/lib/supabase.server";
 import { awardPoints } from "~/lib/points.server";
@@ -18,7 +19,7 @@ const RECEIPT_MILESTONE = 30;
 
 export const meta: MetaFunction = () => [
   { title: "Rewards — Earn Points & Win Prizes | Luckee" },
-  { name: "description", content: "Spin the wheel, answer trivia, earn points and enter the monthly draw. Every 100 points = 1 entry." },
+  { name: "description", content: "Spin the wheel, answer trivia and upload receipts to earn points, then spend them on the gachapon for free food, drinks and a grand prize." },
 ];
 
 type StreakDay = { label: string; active: boolean; isToday: boolean };
@@ -85,7 +86,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
     supabase.from("proof_submissions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20),
     supabase.from("trivia_questions").select("*").eq("active", true),
     supabase.from("daily_logins").select("login_date").eq("user_id", user.id).order("login_date", { ascending: false }).limit(400),
-    supabase.from("gachapon_pulls").select("prize_type, created_at").eq("user_id", user.id),
+    supabase.from("gachapon_pulls").select("prize_type, points_won, created_at").eq("user_id", user.id).order("created_at", { ascending: false }),
     supabase.from("gachapon_redemptions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
     supabase.from("proof_submissions").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("action", "receipt").eq("status", "approved"),
   ]);
@@ -146,6 +147,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
     receiptCount: receiptCountRes.count ?? 0,
     pullsToday,
     dailyPullLimit: 8,
+    recentPulls: (pulls as { prize_type: string; points_won: number | null; created_at: string }[]).slice(0, 5),
   };
 }
 
@@ -751,119 +753,6 @@ function ReceiptsSection({ receiptCount }: { receiptCount: number }) {
   );
 }
 
-// ── Gachapon collection + redemption (Play Gachapon tab) ─────────────────────────
-type Redemption = {
-  id: string; prize_type: string; units: number; status: string;
-  dietary_requirements?: string | null; notes?: string | null; arranged_for?: string | null; created_at: string;
-};
-
-function RedemptionSection({
-  collection,
-  redemptions,
-}: {
-  collection: { food: number; drink: number; grand: number };
-  redemptions: Redemption[];
-}) {
-  const revalidator = useRevalidator();
-  const [redeemType, setRedeemType] = useState<PrizeType | null>(null);
-  const [dietary, setDietary] = useState("");
-  const [notes, setNotes] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const COLLECTIBLES: PrizeType[] = ["food", "drink", "grand"];
-
-  const submitRedeem = async () => {
-    if (!redeemType) return;
-    setError(null);
-    if (!dietary.trim()) { setError("Please note any dietary requirements (or write 'none')."); return; }
-    setSubmitting(true);
-    try {
-      const res = await fetch("/api/redeem", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prizeType: redeemType, dietary, notes }),
-      });
-      const result = await res.json() as { ok: boolean; error?: string };
-      if (!result.ok) throw new Error(result.error ?? "Failed to redeem");
-      setRedeemType(null); setDietary(""); setNotes("");
-      revalidator.revalidate();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to redeem.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  return (
-    <div>
-      <div className="gacha-collection">
-        {COLLECTIBLES.map((type) => {
-          const have = collection[type as keyof typeof collection];
-          const need = PRIZES[type].threshold;
-          const ready = have >= need;
-          return (
-            <div key={type} className="gacha-col-card">
-              <div className="gacha-col-icon">{PRIZES[type].icon}</div>
-              <p className="gacha-col-name">{PRIZES[type].label}</p>
-              <p className="gacha-col-count">{have} / {need}</p>
-              <div className="gacha-col-bar">
-                <div className="gacha-col-bar-fill" style={{ width: `${Math.min(100, (have / need) * 100)}%` }} />
-              </div>
-              <p className="gacha-col-sub">{ready ? "Ready to redeem!" : `${need - have} more to go`}</p>
-              <button className="btn-pink gacha-redeem-btn" disabled={!ready} onClick={() => { setRedeemType(type); setError(null); }}>
-                Redeem
-              </button>
-            </div>
-          );
-        })}
-      </div>
-
-      {redeemType && (
-        <div className="proof-form wf" style={{ marginTop: 18 }}>
-          <p className="wf-sub">
-            Redeeming <strong>{PRIZES[redeemType].label}</strong>. This surprise gift is picked up in person —
-            the organiser will arrange a date &amp; time to meet you in front of Daniel's Donuts at Southern Cross Station.
-          </p>
-          {error && <div className="wf-error">{error}</div>}
-          <div className="fg">
-            <label className="fl">Dietary requirements <span style={{ color: "var(--pink)" }}>*</span></label>
-            <input className="fi" type="text" value={dietary} onChange={e => setDietary(e.target.value)} placeholder="e.g. vegetarian, nut allergy, or 'none'" />
-          </div>
-          <div className="fg">
-            <label className="fl">Notes <span style={{ color: "var(--t3)", fontWeight: 400 }}>(optional)</span></label>
-            <input className="fi" type="text" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Preferred days/times to meet…" />
-          </div>
-          <div style={{ display: "flex", gap: 10 }}>
-            <button className="wf-btn" type="button" onClick={submitRedeem} disabled={submitting} style={{ flex: 1 }}>
-              {submitting ? "Submitting…" : "Submit redemption"}
-            </button>
-            <button type="button" onClick={() => setRedeemType(null)} style={{ padding: "8px 16px", fontSize: 13, background: "var(--pm)", color: "var(--pink)", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700 }}>
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-
-      {redemptions.length > 0 && (
-        <div className="gacha-redemptions">
-          <h3 style={{ fontSize: 15, fontWeight: 800, color: "var(--t1)" }}>Your redemptions</h3>
-          {redemptions.map((r) => (
-            <div key={r.id} className="gacha-redemption-row">
-              <div>
-                <p style={{ fontWeight: 800, color: "var(--t1)", fontSize: 14 }}>{PRIZES[r.prize_type as PrizeType]?.icon} {PRIZES[r.prize_type as PrizeType]?.label}</p>
-                <p className="gacha-redemption-meta">Dietary: {r.dietary_requirements || "—"}</p>
-                {r.arranged_for && <p className="gacha-redemption-arranged">📍 Pickup: {r.arranged_for}</p>}
-              </div>
-              <span className={`proof-badge ${r.status === "collected" ? "approved" : r.status === "cancelled" ? "rejected" : "pending"}`}>{r.status}</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ── Streak card (Earn tab) ──────────────────────────────────────────────────────
 function StreakCard({ streak, best, last7 }: { streak: number; best: number; last7: StreakDay[] }) {
   return (
@@ -907,6 +796,10 @@ const ACTION_ICONS: Record<string, string> = {
 
 export default function Rewards() {
   const data = useLoaderData<typeof loader>();
+  // Hooks before the early return below, so every render calls them in the same order.
+  const [tab, setTab] = useState<"earn" | "gachapon" | "activity">("earn");
+  const [filterAction, setFilterAction] = useState("all");
+  const [filterPeriod, setFilterPeriod] = useState("all");
 
   if (!data.profile) {
     return (
@@ -919,11 +812,7 @@ export default function Rewards() {
     );
   }
 
-  const { profile, ledger, hasSpunToday, spinPointsWon, triviaCompleted, triviaScore, proofSubmissions, triviaQuestions, streak, bestStreak, last7, collection, redemptions, freePulls, receiptCount, pullsToday, dailyPullLimit } = data;
-
-  const [tab, setTab] = useState<"earn" | "gachapon" | "activity">("earn");
-  const [filterAction, setFilterAction] = useState("all");
-  const [filterPeriod, setFilterPeriod] = useState("all");
+  const { profile, ledger, hasSpunToday, spinPointsWon, triviaCompleted, triviaScore, proofSubmissions, triviaQuestions, streak, bestStreak, last7, collection, redemptions, freePulls, receiptCount, pullsToday, dailyPullLimit, recentPulls } = data;
 
   const balance = profile.total_points ?? 0;
 
@@ -1011,14 +900,27 @@ export default function Rewards() {
           <>
             <section className="rewards-sec">
               <h2 className="rewards-sec-h">🎰 Play Gachapon</h2>
-              <p className="rewards-sec-sub">Spend {PULL_COST} pts for a surprise capsule. Win points, boosters, or collect 5 of a kind to redeem a real gift. Up to {dailyPullLimit} pulls per day.</p>
-              <GachaponMachine balance={balance} freePulls={freePulls} pullsToday={pullsToday} dailyLimit={dailyPullLimit} />
+              <p className="rewards-sec-sub">
+                Spend {PULL_COST} pts (or a free pull) on a surprise capsule: bonus points, a double-points day, a free
+                pull, or food and drink capsules toward a real gift. Up to {dailyPullLimit} pulls a day.
+              </p>
+              <GachaponMachine
+                balance={balance}
+                freePulls={freePulls}
+                pullsToday={pullsToday}
+                dailyLimit={dailyPullLimit}
+                recentPulls={recentPulls}
+                onEarn={() => setTab("earn")}
+              />
             </section>
 
             <section className="rewards-sec">
               <h2 className="rewards-sec-h">🎁 Your collection</h2>
-              <p className="rewards-sec-sub">Collect 5 food or 5 drink capsules (or 1 grand prize) to arrange a pickup at Southern Cross Station, in front of Daniel's Donuts.</p>
-              <RedemptionSection collection={collection} redemptions={redemptions as Redemption[]} />
+              <p className="rewards-sec-sub">
+                Collect {PRIZES.food.threshold} food or {PRIZES.drink.threshold} drink capsules (or 1 grand prize) to
+                arrange a pickup at Southern Cross Station, in front of Daniel's Donuts.
+              </p>
+              <Collection collection={collection} redemptions={redemptions as Redemption[]} />
             </section>
           </>
         )}

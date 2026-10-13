@@ -285,10 +285,18 @@ If the SQL hasn't been run yet, the code falls back to today's behaviour, so the
 
 ### Step 2 — Play tab
 
-- [ ] Port v2's machine (`GachaponMachine`, `CuteCapsule`): interactive crank, "Pull ×N", capsule drop, open and reveal, confetti and sounds (respecting reduced motion and the sound opt-in).
-- [ ] Every pull comes from `/api/gachapon`; the reveal shows the real prize type.
-- [ ] Your recent pulls, from the server.
-- [ ] Collection and redemption (the existing redeem form) restyled.
+- [x] Port v2's machine (`GachaponMachine`, `CuteCapsule`): interactive crank, "Pull ×N", capsule drop, open and reveal, confetti and sounds (respecting reduced motion and the sound opt-in).
+- [x] Every pull comes from `/api/gachapon`; the reveal shows the real prize type.
+- [x] Your recent pulls, from the server.
+- [x] Collection and redemption (the existing redeem form) restyled.
+
+**Also fixed in Step 2:**
+- **Copy said 5, the server needs 10.** The Rewards page told players to collect 5 food or drink capsules; `PRIZES` (and `/api/redeem`) require 10. All gachapon copy now reads the thresholds from `PRIZES`.
+- v2's "JACKPOT $500" badge became "Grand prize · 1% a pull" (the real weight); its "Claim +1 token" button became a link to the Earn tab; its "100% free & verified / self-funded or sponsored" claim was dropped.
+- The crank, token, coin slot and chute are real buttons with labels (they were clickable `div`s); the reveal is a dialog that closes with Escape.
+- `Rewards()` called its `useState` hooks after an early return; they now run first. The page's meta description still advertised the retired monthly draw.
+
+Checked through a temporary dev-only page with sample data (deleted; `routes.ts` matches the committed file): available pulls (1 free + 4 from 640 pts, capped by 6 left today = 5), the odds badge, thresholds from data, no invented names or dollar claims, desktop and 500px layouts. The pull flow itself makes real, charged requests, so it needs a signed-in browser check.
 
 ### Step 3 — Earn tab
 
