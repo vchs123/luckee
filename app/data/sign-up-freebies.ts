@@ -26,7 +26,7 @@ export const SIGNUP_FREEBIES: Freebie[] = [
     link: "https://www.fergusonplarre.com.au",
   },
   {
-    e: "🍟", n: "Grill'd", pg: "Relish rewards track",
+    e: "🍟", n: "Grill'd", pg: "Relish rewards track", id: "grill-d-signup",
     r: "Free chips after your 2nd visit · Free drink after 5th · Free burger after 8th", m: "App · Relish card",
     t: "Ongoing milestones",
     c: "Also get birthday chips daily for your entire birth month (requires purchase)",

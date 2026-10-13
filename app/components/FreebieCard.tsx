@@ -4,7 +4,7 @@ import type { Freebie } from "~/data/types";
 import { LuckboardToggle } from "~/components/LuckboardToggle";
 import { renderBrandOrEmojiSvg } from "~/components/SvgIcons";
 import { useAuth } from "~/hooks/useAuth";
-import { slugify } from "~/lib/slugify";
+import { freebieKey } from "~/lib/slugify";
 
 interface Props {
   freebie: Freebie;
@@ -76,7 +76,7 @@ export function FreebieCard({ freebie: f, daysUntilBirthday }: Props) {
             <span className="fc-ver fc-unver">Community · unverified</span>
           )}
           {user ? (
-            <LuckboardToggle itemType="freebie" itemSlug={slugify(f.n)} />
+            <LuckboardToggle itemType="freebie" itemSlug={freebieKey(f)} />
           ) : (
             <Link
               to="/login"

@@ -7,7 +7,7 @@ import { LuckboardToggle } from "~/components/LuckboardToggle";
 import { requireAuth } from "~/lib/auth.server";
 import { getSupabase } from "~/lib/supabase.server";
 import { isAdminEmail } from "~/lib/admin.server";
-import { slugify } from "~/lib/slugify";
+import { freebieKey, slugify } from "~/lib/slugify";
 import { PRIZES, computeCollection, type PrizeType } from "~/lib/gachapon";
 import { BDAY_FOOD } from "~/data/birthday-food";
 import { BDAY_BEAUTY } from "~/data/birthday-beauty";
@@ -39,14 +39,22 @@ interface Item {
 // Everything that can be on a Luckboard. Slugs must match what the save
 // buttons write: slugify(name) for freebies and experiences, the code for deals.
 const ALL_ITEMS: Item[] = [
-  ...BDAY_FOOD.map((f) => ({ type: "freebie" as const, slug: slugify(f.n), name: f.n, sub: f.pg, badge: "Birthday food", to: "/freebies/birthday-freebies?filter=food", claim: f.link })),
-  ...BDAY_BEAUTY.map((f) => ({ type: "freebie" as const, slug: slugify(f.n), name: f.n, sub: f.pg, badge: "Birthday beauty", to: "/freebies/birthday-freebies?filter=beauty", claim: f.link })),
-  ...SIGNUP_FREEBIES.map((f) => ({ type: "freebie" as const, slug: slugify(f.n), name: f.n, sub: f.pg, badge: "Sign-up bonus", to: "/freebies/sign-up-freebies", claim: f.link })),
+  ...BDAY_FOOD.map((f) => ({ type: "freebie" as const, slug: freebieKey(f), name: f.n, sub: f.pg, badge: "Birthday food", to: "/freebies/birthday-freebies?filter=food", claim: f.link })),
+  ...BDAY_BEAUTY.map((f) => ({ type: "freebie" as const, slug: freebieKey(f), name: f.n, sub: f.pg, badge: "Birthday beauty", to: "/freebies/birthday-freebies?filter=beauty", claim: f.link })),
+  ...SIGNUP_FREEBIES.map((f) => ({ type: "freebie" as const, slug: freebieKey(f), name: f.n, sub: f.pg, badge: "Sign-up bonus", to: "/freebies/sign-up-freebies", claim: f.link })),
   ...[...MELB_TRANSPORT, ...MELB_CULTURE, ...MELB_CLASSES, ...MELB_OUTDOORS].map((x) => ({
     type: "experience" as const, slug: slugify(x.n), name: x.n, sub: x.cat, badge: "Free Melbourne", to: "/freebies/free-melbourne",
   })),
   ...DEALS.map((d) => ({ type: "deal" as const, slug: d.cls, name: d.n, sub: d.sub, badge: "Deal", to: `/deals#${d.cls}` })),
 ];
+
+// Two items sharing a key would share one saved status and a React key (which
+// can render phantom duplicate cards). Catch it in development.
+if (import.meta.env.DEV) {
+  const keys = ALL_ITEMS.map((i) => `${i.type}:${i.slug}`);
+  const dupes = keys.filter((k, n) => keys.indexOf(k) !== n);
+  if (dupes.length) console.error("[luckboard] duplicate item keys:", [...new Set(dupes)]);
+}
 
 const SHOWS: { id: Show; label: string }[] = [
   { id: "want", label: "★ Want to try" },

@@ -10,6 +10,12 @@ export interface Freebie {
   link: string;
   cat: "food" | "bty" | "sgn";
   verified: boolean;
+  /**
+   * Luckboard key, when the name alone isn't unique. Two offers from the same
+   * brand (Grill'd's birthday freebie and its sign-up bonus) would otherwise
+   * share one saved status. Defaults to slugify(n) — see freebieKey().
+   */
+  id?: string;
 }
 
 export interface Experience {
