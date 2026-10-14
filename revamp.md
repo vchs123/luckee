@@ -300,20 +300,28 @@ Checked through a temporary dev-only page with sample data (deleted; `routes.ts`
 
 ### Step 3 — Earn tab
 
-- [ ] Daily spin, trivia, receipt upload and the streak (as v2's check-in grid), restyled, same endpoints.
-- [ ] "Ways to earn" in place of v2's quests.
+- [x] Daily spin, trivia, receipt upload and the streak (as v2's check-in grid), restyled, same endpoints. Components in `app/components/rewards/` (`EarnCard`, `CheckInGrid`, `SpinCard`, `TriviaCard`, `ReceiptCard`), in the Play tab's black-border style.
+- [x] "Ways to earn" in place of v2's quests: each real way to earn, with a done mark (spin/trivia today, profile, waitlist, birthday this year) or a link to where you do it; "Invite a friend" copies the real `/r/<username>` link.
+- [x] Birthday banner on the Earn tab when the loader has just paid the birthday bonus.
+
+**Also fixed in Step 3:**
+- **Trivia never counted the last answer.** The answer timeout ran a callback holding the answers from before the last click, so a perfect 5/5 was scored and paid as 4/5 (10 pts, not 25). Answers are now read through a ref.
+- **Receipts were paid per upload, not per receipt.** Up to 6 images went in as one submission, which the admin approves for 5 pts once, while the copy said "5 pts per receipt". The card now takes one receipt at a time (up to 3 photos for a long one).
+- Failed photo uploads (non-2xx from storage) are now reported instead of submitting a record with missing files.
+- v2's merchant/amount fields, its instant "verified" scan and its trivia practice replay weren't carried over (nothing reads them; points land only after review; the questions ship with their answers).
 
 ### Step 4 — Activity tab
 
-- [ ] v2's points history over the real `points_ledger`, plus proof submissions.
+- [x] v2's points history over the real `points_ledger` (`ActivityLedger`): balance and earned/spent totals for the current view, activity/period filters covering every ledger action, search by reference or description, copyable `#REF` codes, Melbourne-time dates. Says when only the latest 100 entries are shown.
+- [x] Proof submissions restyled (`ProofCard`), same upload flow, with status chips and admin notes.
 
 ### Phase 5 verification
 
-- [ ] `npx tsc -b` clean; build passes.
+- [x] `npx tsc -b` clean; build passes.
 - [x] SQL functions pass their PGlite tests (28/28). PGlite is single-connection, so concurrency itself rests on Postgres's `FOR UPDATE` row lock rather than a race test.
 - [ ] Every Rewards feature still works signed in: spin, trivia, receipt upload, pull, multi-pull, redeem (browser check — needs you, after the SQL is run).
 - [ ] Reduced motion: the machine still works without the animation.
-- [ ] ~500px wide: nothing overflows.
+- [x] ~500px wide: nothing overflows (Play tab in Step 2; Earn and Activity checked through a temporary preview page with sample data, since deleted).
 
 ---
 
