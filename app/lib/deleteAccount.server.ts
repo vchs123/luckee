@@ -19,6 +19,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 const OWNED_TABLES = [
   "proof_submissions", // before points_ledger: it can point at ledger rows
   "community_pin_likes",
+  "deal_drop_likes", // likes given while signed in; anonymous ones carry no account
   "luckboard",
   "daily_logins",
   "daily_spins",

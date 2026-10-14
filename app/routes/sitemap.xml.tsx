@@ -7,6 +7,7 @@ const STATIC_ROUTES = [
   { url: "/freebies/sign-up-freebies", priority: "0.8", changefreq: "monthly" },
   { url: "/freebies/free-melbourne", priority: "0.8", changefreq: "monthly" },
   { url: "/freebies/events-calendar", priority: "0.7", changefreq: "monthly" },
+  { url: "/drops", priority: "0.8", changefreq: "daily" },
   { url: "/deals", priority: "0.8", changefreq: "weekly" },
   { url: "/dinners", priority: "0.8", changefreq: "weekly" },
   { url: "/rewards", priority: "0.6", changefreq: "monthly" },
@@ -40,6 +41,16 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
         priority: "0.8",
         changefreq: "monthly",
       }));
+    }
+
+    const { data: drops } = await supabase
+      .from("deal_drops")
+      .select("slug")
+      .eq("published", true)
+      .order("published_at", { ascending: false })
+      .limit(500);
+    if (drops) {
+      blogRoutes.push(...drops.map((d) => ({ url: `/drops/${d.slug}`, priority: "0.6", changefreq: "weekly" })));
     }
   } catch {
     // Supabase not configured yet — skip blog routes

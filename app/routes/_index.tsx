@@ -3,6 +3,10 @@ import type { LoaderFunctionArgs, MetaFunction } from "react-router";
 import { getSupabase } from "~/lib/supabase.server";
 import type { CommunityPin } from "~/lib/pins";
 import { userContext } from "~/lib/auth.context";
+import { DropsTeaser } from "~/components/DropsTeaser";
+import { likerKey, loadDrops } from "~/lib/drops.server";
+import { melbToday } from "~/lib/melbDate";
+import type { DealDrop } from "~/lib/drops";
 import { useEffect, useRef } from "react";
 import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
@@ -25,7 +29,7 @@ export const meta: MetaFunction = () => [
 ];
 
 /** Approved community pins for the corkboard, newest first. Empty until any are approved. */
-export async function loader({ context }: LoaderFunctionArgs) {
+export async function loader({ request, context }: LoaderFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const env = (context as any)?.cloudflare?.env as Env;
   const viewer = context.get(userContext);
@@ -66,11 +70,19 @@ export async function loader({ context }: LoaderFunctionArgs) {
   } catch {
     /* the corkboard falls back to its example pins */
   }
-  return { pins };
+  // The newest deal drops (empty until sql/deal_drops.sql has run and one is posted).
+  let drops: DealDrop[] = [];
+  try {
+    drops = await loadDrops(getSupabase(env), env.SUPABASE_URL, likerKey(request, viewer), { limit: 3 });
+  } catch {
+    /* section hidden */
+  }
+
+  return { pins, drops, today: melbToday() };
 }
 
 export default function Home() {
-  const { pins } = useLoaderData<typeof loader>();
+  const { pins, drops, today } = useLoaderData<typeof loader>();
   const pageRef = useRef<HTMLDivElement>(null);
 
   // Scroll reveals for section headers (the hero animates on mount instead).
@@ -84,6 +96,7 @@ export default function Home() {
       <Nav />
       <div ref={pageRef}>
         <Hero />
+        <DropsTeaser drops={drops} today={today} />
         <ReferralDeals />
         <TopPicks />
         <FreeMelbourne />

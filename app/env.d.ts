@@ -10,4 +10,10 @@ interface Env {
    * token is verified by Supabase against the copy in its dashboard.
    */
   TURNSTILE_SECRET?: string;
+  /**
+   * Claude API key for the admin deal-drop caption autofill. Set as a Pages
+   * *secret*. Unset means the autofill button explains it's not configured and
+   * posts are typed in by hand.
+   */
+  ANTHROPIC_API_KEY?: string;
 }

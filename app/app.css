@@ -979,3 +979,6 @@ body.dp-active .nav { top: 38px; }
 .admin-pin-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
 .admin-pin-reject { display: flex; gap: 8px; align-items: center; flex: 1; min-width: 240px; }
 .admin-pin-reject .fi { flex: 1; }
+.admin-emoji-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.admin-emoji { width: 38px; height: 38px; font-size: 20px; border: 1.5px solid var(--cb); border-radius: 8px; background: #fff; cursor: pointer; }
+.admin-emoji.on { border-color: var(--pink); background: var(--pm); }

@@ -19,6 +19,8 @@ export default [
   route("copyright", "routes/copyright.tsx"),
   route("partner", "routes/partner.tsx"),
   route("contact", "routes/contact.tsx"),
+  route("drops", "routes/drops._index.tsx"),
+  route("drops/:slug", "routes/drops.$slug.tsx"),
   route("blog", "routes/blog._index.tsx"),
   route("blog/:slug", "routes/blog.$slug.tsx"),
 
@@ -45,6 +47,8 @@ export default [
     route("admin/waitlist", "routes/admin.waitlist.tsx"),
     route("admin/inactive", "routes/admin.inactive.tsx"),
     route("admin/pins", "routes/admin.pins.tsx"),
+    route("admin/drops", "routes/admin.drops.tsx"),
+    route("admin/drops/:id", "routes/admin.drops.$id.tsx"),
   ]),
 
   // API
@@ -60,6 +64,7 @@ export default [
   route("api/redeem", "routes/api.redeem.tsx"),
   route("api/pins", "routes/api.pins.tsx"),
   route("api/pins/like", "routes/api.pins.like.tsx"),
+  route("api/drops/like", "routes/api.drops.like.tsx"),
 
   route("sitemap.xml", "routes/sitemap.xml.tsx"),
   route("robots.txt", "routes/robots.txt.tsx"),

@@ -381,6 +381,19 @@ Invite links used to set the referral cookie and bounce straight to `/login`, so
 - [x] Deleting an account keeps its pins on the board without the username ("Member pin"); its likes go. Privacy policy says so.
 - [ ] Signed-in check: pin a deal, approve it in admin, see it on the home page and the +10 in Activity; like it from another account.
 
+## Phase 8 — Deal drops
+
+Short posts about free deals and discounts, written by the admin, that members and the public can like and share. (The long-form `/blog` stays for guides.)
+
+- [x] `sql/deal_drops.sql`: `deal_drops` (slug, headline, place, saving, how-to, icon, photo, source link, end date, live/hidden), `deal_drop_likes` (one per member account or per browser), a public `deal-drops` photo bucket (5 MB, JPEG/PNG/WebP). Tested in PGlite.
+- [x] Admin → Deal drops: list with likes, Edit, Hide/Show, Delete (removes the photo too). Editor at `/admin/drops/new` and `/admin/drops/:id`: paste a caption, "✨ Autofill" asks Claude (`claude-haiku-5-5`, forced tool call, told to invent nothing, end date resolved from today's Melbourne date) for a draft; optional photo; publish.
+- [x] `/drops` feed and `/drops/:slug` post pages with link-preview tags (title, text, photo); the latest three on the home page under the hero; footer link; sitemap.
+- [x] Likes open to everyone (`POST /api/drops/like`): members once per account, visitors once per browser (random id cookie). No points.
+- [x] Share: the phone's share sheet where available, otherwise copy link, WhatsApp, Facebook, X and email.
+- [x] "Ends 18 Oct" / "Ended" labels; ended drops fade.
+- [x] Members' likes go with a deleted account.
+- [ ] Live check: run the SQL, add the `ANTHROPIC_API_KEY` secret, publish a drop with a photo, like and share it from a phone.
+
 ## Later phases (not in scope now)
 
-Nothing planned. Ideas raised: Instagram share cards for freebies and pins; embedding public Instagram posts.
+Nothing planned. Ideas raised: Instagram-sized share images for drops; embedding public Instagram posts.

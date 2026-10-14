@@ -15,6 +15,7 @@ const NAV_LINKS = [
   { to: "/admin/users", label: "Users" },
   { to: "/admin/proof", label: "Proof queue" },
   { to: "/admin/pins", label: "Pins" },
+  { to: "/admin/drops", label: "Deal drops" },
   { to: "/admin/redemptions", label: "Redemptions" },
   { to: "/admin/messages", label: "Messages" },
   { to: "/admin/waitlist", label: "Waitlist" },
