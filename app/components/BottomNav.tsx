@@ -1,19 +1,34 @@
-"use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { m, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { Bookmark, Compass, Gift, Tag, type LucideIcon } from "lucide-react";
 import { prefersReducedMotion } from "~/lib/reducedMotion";
 import { useAuth } from "~/hooks/useAuth";
+import { LuckeeMascot } from "~/components/LuckeeMascot";
 
-type Tab = { to: string; icon: string; label: string; match: (p: string) => boolean };
+type Tab = { to: string; icon: LucideIcon | "mascot"; label: string; match: (p: string) => boolean };
 
+// v2's tab set: Rewards sits in the middle as the mascot. Dinners is reached from
+// the home page and footer, making room for the Luckboard.
 const TABS: Tab[] = [
-  { to: "/", icon: "🏠", label: "Home", match: p => p === "/" },
-  { to: "/freebies", icon: "🎁", label: "Freebies", match: p => p.startsWith("/freebies") },
-  { to: "/deals", icon: "💸", label: "Deals", match: p => p === "/deals" },
-  { to: "/dinners", icon: "🍜", label: "Dinners", match: p => p === "/dinners" },
-  { to: "/rewards", icon: "🎡", label: "Rewards", match: p => p === "/rewards" },
+  { to: "/", icon: Compass, label: "Home", match: p => p === "/" },
+  { to: "/freebies", icon: Gift, label: "Freebies", match: p => p.startsWith("/freebies") },
+  { to: "/rewards", icon: "mascot", label: "Rewards", match: p => p === "/rewards" },
+  { to: "/deals", icon: Tag, label: "Deals", match: p => p === "/deals" },
+  { to: "/luckboard", icon: Bookmark, label: "Luckboard", match: p => p === "/luckboard" },
 ];
+
+function TabIcon({ icon, size, active }: { icon: Tab["icon"]; size: number; active?: boolean }) {
+  if (icon === "mascot") {
+    return (
+      <span className="flex items-center justify-center" style={{ width: size + 6, height: size + 6 }}>
+        <LuckeeMascot size="xs" pose={active ? "celebrating" : "winking"} interactive={false} />
+      </span>
+    );
+  }
+  const Icon = icon;
+  return <Icon width={size} height={size} strokeWidth={2.2} aria-hidden="true" />;
+}
 
 const N = TABS.length;
 const BAR_H = 64;      // solid bar height
@@ -47,7 +62,7 @@ function topEdge(w: number, cx: number, depth: number, width: number) {
 
 export function BottomNav() {
   const { pathname } = useLocation();
-  const { isAdmin } = useAuth();
+  const { isAdmin, profile } = useAuth();
   const wrapRef = useRef<HTMLElement>(null);
   const [width, setWidth] = useState(0);
   const [reduce, setReduce] = useState(false);
@@ -118,7 +133,7 @@ export function BottomNav() {
   const bubbleScaleX = useTransform(travel, t => 1 + 0.18 * t);
   const bubbleScaleY = useTransform(travel, t => 1 - 0.14 * t);
 
-  const activeIcon = useMemo(() => TABS[parked]?.icon ?? "", [parked]);
+  const activeIcon = TABS[parked]?.icon ?? Compass;
 
   // The admin only sees the dashboard, which has its own sidebar nav.
   if (isAdmin) return null;
@@ -136,7 +151,7 @@ export function BottomNav() {
         style={{ x: bubbleX, y: bubbleY, scaleX: bubbleScaleX, scaleY: bubbleScaleY, opacity: presence }}
         aria-hidden="true"
       >
-        <span className="bnav-bubble-ico">{activeIcon}</span>
+        <span className="bnav-bubble-ico"><TabIcon icon={activeIcon} size={22} active /></span>
       </m.div>
       )}
 
@@ -146,7 +161,12 @@ export function BottomNav() {
           return (
             <li key={t.to}>
               <Link to={t.to} className={`bnav-tab${on ? " on" : ""}`} aria-current={on ? "page" : undefined}>
-                <span className="bnav-ico">{t.icon}</span>
+                <span className="bnav-ico">
+                  <TabIcon icon={t.icon} size={20} />
+                  {t.icon === "mascot" && profile && (
+                    <span className="bnav-pts">{profile.totalPoints.toLocaleString("en-AU")}</span>
+                  )}
+                </span>
                 <span className="bnav-lbl">{t.label}</span>
               </Link>
             </li>

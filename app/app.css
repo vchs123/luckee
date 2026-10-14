@@ -846,7 +846,7 @@ body.dp-active .nav { top: 38px; }
   display: flex; align-items: center; justify-content: center;
   will-change: transform;
 }
-.bnav-bubble-ico { font-size: 22px; line-height: 1; }
+.bnav-bubble-ico { font-size: 22px; line-height: 1; color: #fff; display: flex; align-items: center; justify-content: center; }
 
 .bnav-tabs {
   position: absolute;
@@ -871,7 +871,9 @@ body.dp-active .nav { top: 38px; }
   -webkit-tap-highlight-color: transparent;
   transition: color 0.18s;
 }
-.bnav-ico { font-size: 20px; line-height: 1; transition: opacity 0.14s; }
+.bnav-ico { position: relative; display: flex; align-items: center; justify-content: center; height: 22px; font-size: 20px; line-height: 1; transition: opacity 0.14s; }
+/* points on the Rewards mascot, as in v2 */
+.bnav-pts { position: absolute; top: -7px; left: calc(50% + 6px); padding: 0 4px; border: 1.5px solid #fff; border-radius: 999px; background: #f59e0b; color: #78350f; font-size: 8.5px; font-weight: 900; line-height: 13px; white-space: nowrap; }
 .bnav-lbl { letter-spacing: 0.01em; }
 /* the active icon lives in the bubble instead */
 .bnav-tab.on { color: var(--pink); }

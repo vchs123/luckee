@@ -2,7 +2,7 @@
 
 **Created:** 2026-09-26 15:36 AEST
 **Last updated:** 2026-10-12
-**Status:** Phase 1 (home) shipped in `55507d6`. Phase 2 (freebies) shipped in `6109019`. Phase 3 (deals) shipped in `6d68ccc`. Phase 4 (Luckboard) shipped in `00e3b7f`. Phase 5 (Rewards + gachapon) in progress.
+**Status:** Phase 1 (home) shipped in `55507d6`. Phase 2 (freebies) shipped in `6109019`. Phase 3 (deals) shipped in `6d68ccc`. Phase 4 (Luckboard) shipped in `00e3b7f`. Phase 5 (Rewards + gachapon) shipped in `d3e2ad3`. Phase 6 (shell + referral page) shipped.
 **Scope:** customer-facing pages only — the admin dashboard is not touched
 
 ---
@@ -332,6 +332,37 @@ Checked through a temporary dev-only page with sample data (deleted; `routes.ts`
 - Business logic stays server-side. v2's client-side prize selection (`Math.random()` over `GACHAPON_PRIZES`) is never ported; `app/lib/gachapon.ts` and `/api/gachapon` remain authoritative.
 - Keep each route's `meta` export and existing headings.
 
+## Phase 6 — the shell, and the referral landing page
+
+### Decisions
+
+- **Bottom nav keeps its liquid animation** (the bubble that melts between tabs) and takes v2's look: lucide icons, the mascot as the centre Rewards tab with your points on it.
+- **Tabs are v2's:** Home, Freebies, Rewards (centre), Deals, Luckboard. Dinners leaves the bar; it's reached from the home page and footer.
+- **No vault drawer.** v2's "loot vault" is a drawer of saved and won items, which is what the Luckboard page already is (Saved/Won tabs). With Luckboard now a bottom tab, a drawer would be a second copy of it.
+- **Ticker carries no deal claims.** v2's strip named specific offers ("Nando's $15 · Krispy Kreme 4-Pack…"); ours says what Luckee is, so it can't go stale.
+
+### Header, bottom nav, footer
+
+- [x] Header (`Nav.tsx`): dark strip that scrolls away, mascot logo, sound toggle (the same opt-in switch as the profile page; hidden under 640px for space), search drawer submitting to `/search` with popular searches that all return results, points pill → Rewards, account menu (admin keeps its single dashboard link), Sign in otherwise. Menu and drawer close on Escape and on navigation.
+- [x] Bottom nav: new tabs and icons, points chip on the Rewards mascot, liquid animation unchanged.
+- [x] Footer: v2's dark footer with every real page (adds Luckboard; About/Contact/Partner grouped under "Luckee").
+
+### Referral landing page (`/r/:username`)
+
+Invite links used to set the referral cookie and bounce straight to `/login`, so a friend saw a bare sign-in form with no idea what Luckee was or who sent them.
+
+- [x] The link now lands on a page: an "admit one" ticket from @username, what's inside (freebie count from the data, daily points, gachapon with thresholds from `PRIZES`, Luckboard), three real verified birthday freebies, how joining works, and a "Join free with @username's invite" button to `/login`.
+- [x] Same cookie as before, so `auth.callback` still credits the referrer. Set only for signed-out visitors with a valid invite.
+- [x] Other states: your own link (shows what friends see, with a copy button), already signed in (nothing to claim, link to Rewards), unknown username (still invites you to join, no cookie).
+- [x] Only the username is shown (it's already in the link). `noindex`, with an og:title of "@username invited you to Luckee" for chat previews.
+- [x] Honest about the reward: says joining thanks the referrer with 100 pts; doesn't invent a bonus for the friend.
+
+### Phase 6 verification
+
+- [x] `npx tsc -b` clean.
+- [x] Screenshots at 1280px and 500px: header, ticker, bottom nav on `/freebies`, footer on `/about`, the invite and not-found states of `/r/:username` (invite state via a temporary dev-only hook, removed).
+- [ ] Signed-in check: points pill, account menu, sign out, Rewards chip; open your own `/r/<username>` link.
+
 ## Later phases (not in scope now)
 
-Then the shell (Header/BottomNav/Footer). Separately: the corkboard backend — `community_posts` with `pending/approved/rejected`, a submit action, and an approval queue modelled on the existing `admin.proof` flow.
+The corkboard backend — `community_posts` with `pending/approved/rejected`, a submit action, and an approval queue modelled on the existing `admin.proof` flow.
