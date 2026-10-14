@@ -22,6 +22,7 @@ import { verifyUser, refreshAndGetUser } from "~/lib/auth.server";
 import { userContext } from "~/lib/auth.context";
 import { isAdminEmail, isAdminAllowedPath } from "~/lib/admin.server";
 import { getSupabase } from "~/lib/supabase.server";
+import { melbDay, melbToday } from "~/lib/melbDate";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
@@ -94,10 +95,21 @@ export async function loader({ context }: LoaderFunctionArgs) {
     try {
       const supabase = getSupabase(env);
       const [profileRes, lbRes] = await Promise.all([
-        supabase.from("user_profiles").select("username, total_points, double_points_until").eq("id", user.id).single(),
+        // "*" rather than a column list, so this keeps working before
+        // sql/account_lifecycle.sql adds last_seen_at.
+        supabase.from("user_profiles").select("*").eq("id", user.id).single(),
         supabase.from("luckboard").select("item_type, item_slug, status").eq("user_id", user.id),
       ]);
       if (profileRes.data) profile = { username: profileRes.data.username, totalPoints: profileRes.data.total_points, doublePointsUntil: profileRes.data.double_points_until ?? null };
+      // Last seen, for the inactivity policy: bumped at most once a Melbourne
+      // day, and coming back cancels a pending inactivity reminder.
+      const seen = profileRes.data?.last_seen_at as string | null | undefined;
+      if (profileRes.data && "last_seen_at" in profileRes.data && (!seen || melbDay(seen) !== melbToday())) {
+        await supabase
+          .from("user_profiles")
+          .update({ last_seen_at: new Date().toISOString(), inactivity_reminded_at: null })
+          .eq("id", user.id);
+      }
       if (lbRes.data) lbRes.data.forEach(r => { luckboard[`${r.item_type}:${r.item_slug}`] = r.status as string; });
     } catch { /* non-fatal */ }
   }

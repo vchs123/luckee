@@ -43,6 +43,7 @@ export default function AdminUsers() {
   return (
     <div className="admin-content">
       <h1 className="admin-h">Users <span className="admin-count">{users.length}</span></h1>
+      {searchParams.get("deleted") && <p className="admin-flash">Account deleted.</p>}
 
       <Form method="get" className="admin-search-bar">
         <input className="fi" type="search" name="q" defaultValue={q} placeholder="Search username, name…" style={{ maxWidth: 300 }} />

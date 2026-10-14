@@ -43,6 +43,7 @@ export default [
     route("admin/redemptions", "routes/admin.redemptions.tsx"),
     route("admin/messages", "routes/admin.messages.tsx"),
     route("admin/waitlist", "routes/admin.waitlist.tsx"),
+    route("admin/inactive", "routes/admin.inactive.tsx"),
   ]),
 
   // API

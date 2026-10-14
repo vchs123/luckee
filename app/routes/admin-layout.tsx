@@ -17,6 +17,7 @@ const NAV_LINKS = [
   { to: "/admin/redemptions", label: "Redemptions" },
   { to: "/admin/messages", label: "Messages" },
   { to: "/admin/waitlist", label: "Waitlist" },
+  { to: "/admin/inactive", label: "Inactive" },
   { to: "/admin/trivia", label: "Trivia" },
 ];
 

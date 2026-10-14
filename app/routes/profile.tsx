@@ -5,7 +5,8 @@ import type { MetaFunction, ActionFunctionArgs, LoaderFunctionArgs } from "react
 import { isSoundEnabled, setSoundEnabled } from "~/lib/sound";
 import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
-import { requireAuth } from "~/lib/auth.server";
+import { requireAuth, clearAuthCookies } from "~/lib/auth.server";
+import { deleteAccount } from "~/lib/deleteAccount.server";
 import { getSupabase } from "~/lib/supabase.server";
 import { awardPoints } from "~/lib/points.server";
 import { isAdminEmail } from "~/lib/admin.server";
@@ -59,7 +60,14 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   const referralPts = (refPtsRows ?? []).reduce((sum, r) => sum + (r.points as number), 0);
 
-  return { email: user.email!, profile, referrals, referralPts };
+  // Prize pickups still in progress, so deleting can warn that it cancels them.
+  const { count: openRedemptions } = await supabase
+    .from("gachapon_redemptions")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .in("status", ["requested", "arranged"]);
+
+  return { email: user.email!, profile, referrals, referralPts, openRedemptions: openRedemptions ?? 0 };
 }
 
 export async function action({ request, context }: ActionFunctionArgs) {
@@ -69,6 +77,21 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const supabase = getSupabase(env);
   const form = await request.formData();
   const tab = (form.get("tab") as string) ?? "profile";
+
+  if (tab === "delete") {
+    if (isAdminEmail(user.email)) return { error: "The admin account can't be deleted here.", tab };
+    if ((form.get("confirm") as string)?.trim() !== "DELETE") {
+      return { error: "Type DELETE in capitals to confirm.", tab };
+    }
+    const result = await deleteAccount(supabase, user.id, user.email);
+    if (!result.ok) {
+      console.error("[profile] account deletion failed:", result.error);
+      return { error: "Something went wrong and your account wasn't fully deleted. Please try again, or ask us through the contact form.", tab };
+    }
+    const headers = new Headers();
+    clearAuthCookies().forEach((c) => headers.append("Set-Cookie", c));
+    return redirect("/login?deleted=1", { headers });
+  }
 
   if (tab === "socials") {
     const updates = {
@@ -120,7 +143,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 }
 
 export default function Profile() {
-  const { email, profile, referrals, referralPts } = useLoaderData<typeof loader>();
+  const { email, profile, referrals, referralPts, openRedemptions } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const submitting = navigation.state === "submitting";
@@ -306,9 +329,66 @@ export default function Profile() {
               </Form>
             )}
           </div>
+
+          <DeleteAccount
+            points={profile.total_points ?? 0}
+            openRedemptions={openRedemptions}
+            error={actionData && "error" in actionData && actionData.tab === "delete" ? (actionData.error ?? null) : null}
+            submitting={submitting}
+          />
         </div>
       </div>
       <Footer />
     </>
+  );
+}
+
+function DeleteAccount({
+  points,
+  openRedemptions,
+  error,
+  submitting,
+}: {
+  points: number;
+  openRedemptions: number;
+  error: string | null;
+  submitting: boolean;
+}) {
+  const [confirm, setConfirm] = useState("");
+  return (
+    <details className="profile-card profile-danger" open={Boolean(error)}>
+      <summary>Delete my account</summary>
+      <p>
+        This permanently deletes your account and everything attached to it: your{" "}
+        <strong>{points.toLocaleString("en-AU")} points</strong>, your gachapon capsules, saved freebies, receipts and
+        uploaded photos. It can't be undone, and you can sign up again later with the same email as a new member.
+      </p>
+      {openRedemptions > 0 && (
+        <p className="profile-danger-warn">
+          You have {openRedemptions === 1 ? "a prize pickup" : `${openRedemptions} prize pickups`} in progress. Deleting
+          your account cancels {openRedemptions === 1 ? "it" : "them"}.
+        </p>
+      )}
+      <Form method="post">
+        <input type="hidden" name="tab" value="delete" />
+        {error && <div className="wf-error">{error}</div>}
+        <div className="fg">
+          <label className="fl" htmlFor="delete-confirm">Type DELETE to confirm</label>
+          <input
+            id="delete-confirm"
+            className="fi"
+            type="text"
+            name="confirm"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            autoComplete="off"
+            autoCapitalize="characters"
+          />
+        </div>
+        <button className="profile-danger-btn" type="submit" disabled={submitting || confirm.trim() !== "DELETE"}>
+          {submitting ? "Deleting…" : "Permanently delete my account"}
+        </button>
+      </Form>
+    </details>
   );
 }

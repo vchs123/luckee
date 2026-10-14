@@ -9,7 +9,7 @@ export const meta: MetaFunction = () => [
 
 export default function Privacy() {
   return (
-    <LegalLayout eyebrow="🔒 Legal" title="Privacy Policy" updated="August 2026" active="/privacy">
+    <LegalLayout eyebrow="🔒 Legal" title="Privacy Policy" updated="October 2026" active="/privacy">
       <p>Luckee ("we", "us", "our") is a Melbourne-based platform for finding freebies, deals and community dinners. This policy explains what personal information we collect, how we use it, and the choices you have. By using Luckee you agree to this policy.</p>
 
       <h2>Information we collect</h2>
@@ -44,12 +44,17 @@ export default function Privacy() {
       <p>We use essential cookies to keep you signed in, and analytics cookies (Google Analytics 4) to understand how the site is used. You can control cookies through your browser settings.</p>
 
       <h2>Data retention</h2>
-      <p>We keep your information for as long as your account is active or as needed to provide the service. You can ask us to delete your account and associated data at any time.</p>
+      <p>We keep your information while your account is in use.</p>
+      <ul>
+        <li><strong>Deleting your account:</strong> you can delete it yourself at any time from your <a href="/profile">profile</a> page, or ask us through the <Link to="/contact?topic=privacy">contact form</Link>. This permanently removes your profile, points, gachapon capsules and prize requests, saved freebies, check-in history, receipts and uploaded photos, your dinner waitlist entry, and your login.</li>
+        <li><strong>Inactive accounts:</strong> if you haven't used Luckee for 6 months, we'll email you a reminder. If you don't sign in within 2 weeks of that email, we delete your account and its data in the same way. Signing in once is enough to keep it.</li>
+        <li>Messages you've sent us through the contact form are kept as correspondence (for example, a deletion request itself), but are no longer linked to an account once it's deleted.</li>
+      </ul>
 
       <h2>Your choices and rights</h2>
       <ul>
         <li>Access, update or correct your profile information from your <a href="/profile">profile</a> page.</li>
-        <li>Request a copy or deletion of your data by emailing us.</li>
+        <li>Delete your account from your <a href="/profile">profile</a> page, or request a copy or deletion of your data through the <Link to="/contact?topic=privacy">contact form</Link>.</li>
         <li>Opt out of non-essential emails at any time.</li>
       </ul>
 

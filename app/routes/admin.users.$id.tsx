@@ -4,6 +4,8 @@ import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
 import { requireAdmin } from "~/lib/auth.server";
 import { getSupabase } from "~/lib/supabase.server";
 import { awardPoints } from "~/lib/points.server";
+import { deleteAccount } from "~/lib/deleteAccount.server";
+import { isAdminEmail } from "~/lib/admin.server";
 
 export async function loader({ request, context, params }: LoaderFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -69,6 +71,19 @@ export async function action({ request, context, params }: ActionFunctionArgs) {
   const supabase = getSupabase(env);
   const { id } = params;
   const form = await request.formData();
+
+  if (form.get("intent") === "delete") {
+    const { data: authUser } = await supabase.auth.admin.getUserById(id!);
+    const userEmail = authUser.user?.email ?? null;
+    if (isAdminEmail(userEmail)) return { error: "The admin account can't be deleted.", intent: "delete" };
+    if ((form.get("confirm") as string)?.trim() !== "DELETE") {
+      return { error: "Type DELETE to confirm the deletion.", intent: "delete" };
+    }
+    const result = await deleteAccount(supabase, id!, userEmail);
+    if (!result.ok) return { error: `Deletion stopped: ${result.error}. Nothing after that step was removed; try again.`, intent: "delete" };
+    return redirect("/admin/users?deleted=1");
+  }
+
   const pts = parseInt(form.get("pts") as string);
   const reason = (form.get("reason") as string)?.trim();
 
@@ -111,7 +126,7 @@ export default function AdminUserDetail() {
 
         <div className="admin-card">
           <h3>Award bonus points</h3>
-          {actionData?.error && <div className="wf-error" style={{ marginBottom: 12 }}>{actionData.error}</div>}
+          {actionData?.error && !("intent" in actionData) && <div className="wf-error" style={{ marginBottom: 12 }}>{actionData.error}</div>}
           <Form method="post">
             <div className="fg"><label className="fl">Points</label>
               <input className="fi" type="number" name="pts" min={1} max={10000} placeholder="e.g. 50" required /></div>
@@ -222,6 +237,22 @@ export default function AdminUserDetail() {
             </tbody>
           </table>
         )}
+      </div>
+
+      <div className="admin-card admin-danger" style={{ marginTop: 24 }}>
+        <h3>Delete account</h3>
+        <p className="admin-muted">
+          Permanently deletes @{profile.username}: points, capsules, redemptions, saved items, check-ins, proof photos,
+          dinner waitlist entry and their login. Use for deletion requests and the inactivity policy. Can't be undone.
+        </p>
+        {actionData && "intent" in actionData && <div className="wf-error" style={{ marginBottom: 12 }}>{actionData.error}</div>}
+        <Form method="post" className="admin-danger-form">
+          <input type="hidden" name="intent" value="delete" />
+          <input className="fi" name="confirm" placeholder="Type DELETE" autoComplete="off" style={{ maxWidth: 180 }} />
+          <button type="submit" className="admin-danger-btn" disabled={submitting}>
+            {submitting ? "Deleting…" : "Delete account"}
+          </button>
+        </Form>
       </div>
 
       {/* Login streak */}

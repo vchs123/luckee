@@ -245,6 +245,9 @@ export default function Login() {
               </div>
             ) : (
               <>
+                {searchParams.get("deleted") && (
+                  <div className="auth-notice" role="status">Your account and its data have been deleted. Thanks for being part of Luckee.</div>
+                )}
                 {actionData && "error" in actionData ? (
                   <div className="wf-error">{actionData.error}</div>
                 ) : (
