@@ -465,6 +465,8 @@ body.dp-active .nav { top: 38px; }
 .auth-sent h2 { font-size: 20px; color: var(--t1); margin-bottom: 8px; }
 .auth-sent p { font-size: 14px; color: var(--t2); }
 .auth-sent-note { font-size: 12px; color: var(--t3); margin-top: 12px; }
+.auth-code { font-size: 26px; font-weight: 800; letter-spacing: 0.3em; text-align: center; font-variant-numeric: tabular-nums; }
+.setup-invite { margin: 4px 0 14px; padding: 12px 14px; border: 2px solid #000; background: #ffcf00; font-size: 13px; font-weight: 700; color: #1e0a2e; line-height: 1.45; }
 .auth-terms { font-size: 11px; color: var(--t3); text-align: center; margin-top: 20px; line-height: 1.5; }
 
 /* ── profile setup ── */

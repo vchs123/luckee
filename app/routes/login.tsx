@@ -6,6 +6,7 @@ import { TurnstileWidget, turnstileHint, type TurnstileStatus } from "~/componen
 import { Footer } from "~/components/Footer";
 import { getSupabaseAnonWithStorage } from "~/lib/supabase.server";
 import { CookieStorage } from "~/lib/auth.server";
+import { finishSignIn } from "~/lib/signIn.server";
 
 export const meta: MetaFunction = () => [
   { title: "Sign in — Luckee" },
@@ -57,6 +58,31 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   const email = (form.get("email") as string)?.trim().toLowerCase();
 
+  // Step two: the code from the email. Typed into this tab, so the session and
+  // any invite cookie stay in the browser the person started in. (Emailed links
+  // often open in a different browser, e.g. the Gmail app's own, which can't see
+  // that cookie, so the inviter wasn't credited.)
+  if (form.get("intent") === "verify") {
+    const token = ((form.get("code") as string) ?? "").replace(/\D/g, "");
+    if (!email || !/^\d{6,8}$/.test(token)) {
+      return { success: true as const, email, codeError: "Enter the code from the email." };
+    }
+    try {
+      const supabase = getSupabaseAnonWithStorage(env, new CookieStorage());
+      const { data: verified, error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
+      if (error || !verified.session) {
+        return {
+          success: true as const,
+          email,
+          codeError: "That code didn't work. Check it, or it may have expired — send a new one below.",
+        };
+      }
+      return await finishSignIn(request, env, verified.session);
+    } catch {
+      return { success: true as const, email, codeError: "Service unavailable. Please try again." };
+    }
+  }
+
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { error: "Please enter a valid email address." };
   }
@@ -81,7 +107,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
     const headers = new Headers();
     headers.append("Set-Cookie", pkceCookie(storage, request));
-    return data({ success: true, email }, { headers });
+    return data({ success: true as const, email, codeError: null as string | null }, { headers });
   } catch {
     return { error: "Service unavailable. Please try again." };
   }
@@ -101,9 +127,9 @@ function GoogleMark() {
 
 /** Why /auth/callback sent someone back here. It used to set ?error= with nothing reading it. */
 const CALLBACK_ERRORS: Record<string, string> = {
-  auth_failed: "That sign-in link didn't work — it may have expired or already been used. Request a new one below.",
-  link_expired: "That sign-in link has expired. Request a new one below.",
-  missing_code: "That sign-in link was incomplete. Request a new one below.",
+  auth_failed: "That sign-in didn't work — it may have expired or already been used. Ask for a new code below.",
+  link_expired: "That sign-in link has expired. Ask for a new code below.",
+  missing_code: "That sign-in link was incomplete. Ask for a new code below.",
 };
 
 export default function Login() {
@@ -126,15 +152,37 @@ export default function Login() {
           <div className="auth-card">
             <div className="auth-logo">🍀</div>
             <h1 className="auth-h">Sign in or create your account</h1>
-            <p className="auth-sub">No password to remember — continue with Google, or we'll email you a link.</p>
+            <p className="auth-sub">No password to remember. Continue with Google, or we'll email you a 6-digit code.</p>
 
             {actionData && "success" in actionData ? (
               <div className="auth-sent">
                 <div className="auth-sent-ico">📬</div>
                 <h2>Check your inbox</h2>
-                <p>We sent a sign-in link to <strong>{actionData.email}</strong>. It expires in 10 minutes.</p>
-                <p className="auth-sent-note">Can't find it? Check your spam folder.</p>
-                <Form method="post" style={{ marginTop: 16 }}>
+                <p>We sent a sign-in code to <strong>{actionData.email}</strong>. It expires in 10 minutes.</p>
+                <Form method="post" className="auth-form" style={{ marginTop: 16 }}>
+                  <input type="hidden" name="intent" value="verify" />
+                  <input type="hidden" name="email" value={actionData.email} />
+                  {actionData.codeError && <div className="wf-error">{actionData.codeError}</div>}
+                  <label className="fl" htmlFor="login-code">Your code</label>
+                  <input
+                    id="login-code"
+                    className="fi auth-code"
+                    type="text"
+                    name="code"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    pattern="[0-9 ]{6,9}"
+                    maxLength={9}
+                    placeholder="123456"
+                    required
+                    autoFocus
+                  />
+                  <button className="btn-pink auth-btn" type="submit" disabled={submitting}>
+                    {submitting ? "Checking…" : "Sign in →"}
+                  </button>
+                </Form>
+                <p className="auth-sent-note">Can't find it? Check your spam folder, and if it's there, mark it "Not spam" so the next one arrives safely.</p>
+                <Form method="post" style={{ marginTop: 12 }}>
                   <input type="hidden" name="email" value={actionData.email} />
                   {turnstileSiteKey && (
                     <TurnstileWidget siteKey={turnstileSiteKey} action="login" resetKey={actionData} onStatus={setCheck} />
@@ -145,7 +193,7 @@ export default function Login() {
                     disabled={submitting || blocked}
                     style={{ background: "none", border: "none", color: "var(--purple)", fontSize: 14, fontWeight: 600, cursor: "pointer", textDecoration: "underline", padding: 0 }}
                   >
-                    {submitting ? "Sending…" : "Resend magic link"}
+                    {submitting ? "Sending…" : "Send a new code"}
                   </button>
                 </Form>
               </div>
@@ -181,7 +229,7 @@ export default function Login() {
                 )}
                 {hint && <p className="auth-terms" style={{ marginTop: 0 }}>{hint}</p>}
                 <button className="btn-pink auth-btn" type="submit" disabled={submitting || blocked}>
-                  {submitting ? "Sending…" : "Email me a link →"}
+                  {submitting ? "Sending…" : "Email me a code →"}
                 </button>
                 </Form>
               </>

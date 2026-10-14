@@ -1,4 +1,4 @@
-import { Form, useActionData, useNavigation, useSearchParams } from "react-router";
+import { Form, useActionData, useLoaderData, useNavigation, useSearchParams } from "react-router";
 import { redirect } from "react-router";
 import type { MetaFunction, ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { Nav } from "~/components/Nav";
@@ -23,7 +23,15 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     .eq("id", user.id)
     .maybeSingle();
   if (profile) return redirect("/rewards");
-  return { userId: user.id };
+
+  // Show who invited them, so a lost invite is visible rather than silent.
+  let invitedBy: string | null = null;
+  const refUserId = getCookie(request, "luckee_ref_pending") ?? getCookie(request, "luckee_ref");
+  if (refUserId && refUserId !== user.id) {
+    const { data: ref } = await supabase.from("user_profiles").select("username").eq("id", refUserId).maybeSingle();
+    invitedBy = (ref?.username as string | undefined) ?? null;
+  }
+  return { userId: user.id, invitedBy };
 }
 
 export async function action({ request, context }: ActionFunctionArgs) {
@@ -47,7 +55,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       .maybeSingle();
     if (existing) return { error: "That username is taken. Try another.", step: "1" };
     // Wire referral: cookie takes priority, then manual code field
-    let refUserId: string | null = getCookie(request, "luckee_ref_pending");
+    let refUserId: string | null = getCookie(request, "luckee_ref_pending") ?? getCookie(request, "luckee_ref");
     if (!refUserId) {
       const referralCode = (form.get("referral_code") as string)?.trim().toLowerCase();
       if (referralCode) {
@@ -73,7 +81,11 @@ export async function action({ request, context }: ActionFunctionArgs) {
       }
     }
 
-    return redirect("/profile/setup?step=2");
+    // The invite has been used (or wasn't needed): forget it.
+    const headers = new Headers();
+    headers.append("Set-Cookie", "luckee_ref_pending=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0");
+    headers.append("Set-Cookie", "luckee_ref=; Path=/; SameSite=Lax; Max-Age=0");
+    return redirect("/profile/setup?step=2", { headers });
   }
 
   if (step === "2") {
@@ -134,6 +146,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 const STEPS = ["Username", "Personal details", "Socials"];
 
 export default function ProfileSetup() {
+  const { invitedBy } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const [searchParams] = useSearchParams();
@@ -172,10 +185,17 @@ export default function ProfileSetup() {
                       style={{ textTransform: "lowercase" }} />
                     <p style={{ fontSize: 12, color: "var(--t3)", marginTop: 4 }}>3–30 characters · letters, numbers, underscores</p>
                   </div>
-                  <div className="fg">
-                    <label className="fl">Referral code <span style={{ color: "var(--t3)", fontWeight: 400 }}>(optional)</span></label>
-                    <input className="fi" type="text" name="referral_code" placeholder="Friend's username" style={{ textTransform: "lowercase" }} />
-                  </div>
+                  {invitedBy ? (
+                    <div className="setup-invite">
+                      🎟️ Invited by <strong>@{invitedBy}</strong>. They'll get 100 pts as a thank-you when you finish this step.
+                    </div>
+                  ) : (
+                    <div className="fg">
+                      <label className="fl">Referral code <span style={{ color: "var(--t3)", fontWeight: 400 }}>(optional)</span></label>
+                      <input className="fi" type="text" name="referral_code" placeholder="Friend's username" style={{ textTransform: "lowercase" }} />
+                      <p style={{ fontSize: 12, color: "var(--t3)", marginTop: 4 }}>Did a friend invite you? Enter their username so they get the credit.</p>
+                    </div>
+                  )}
                   <button className="btn-pink auth-btn" type="submit" disabled={submitting}>
                     {submitting ? "Checking…" : "Continue →"}
                   </button>

@@ -1,11 +1,10 @@
 import { redirect, Form, useNavigation } from "react-router";
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "react-router";
-import type { Session } from "@supabase/supabase-js";
 import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
-import { getSupabaseAnonWithStorage, getSupabase } from "~/lib/supabase.server";
-import { authCookies, getCookie, CookieStorage } from "~/lib/auth.server";
-import { isAdminEmail } from "~/lib/admin.server";
+import { getSupabaseAnonWithStorage } from "~/lib/supabase.server";
+import { getCookie, CookieStorage } from "~/lib/auth.server";
+import { finishSignIn } from "~/lib/signIn.server";
 
 export const meta: MetaFunction = () => [
   { title: "Finish signing in — Luckee" },
@@ -119,38 +118,6 @@ export async function action({ request, context }: ActionFunctionArgs) {
   } catch {
     return redirect("/login?error=auth_failed", { headers: { "Set-Cookie": clear } });
   }
-}
-
-/** Set the session cookies, wire a pending referral, and send the user on. */
-async function finishSignIn(request: Request, env: Env, session: Session, extraCookies: string[] = []) {
-  const adminSupabase = getSupabase(env);
-  const { data: profile } = await adminSupabase
-    .from("user_profiles")
-    .select("id")
-    .eq("id", session.user.id)
-    .maybeSingle();
-
-  const headers = new Headers();
-  authCookies(session.access_token, session.refresh_token!, session.expires_in ?? 3600, request)
-    .forEach((c) => headers.append("Set-Cookie", c));
-  extraCookies.forEach((c) => headers.append("Set-Cookie", c));
-
-  // Clear the PKCE cookie — it's single-use
-  headers.append("Set-Cookie", "luckee_pkce=; Path=/auth/callback; HttpOnly; SameSite=Lax; Max-Age=0");
-
-  // Wire referral: if ref cookie present and this is a new user, store referred_by
-  if (!profile) {
-    const refUserId = getCookie(request, "luckee_ref");
-    if (refUserId && refUserId !== session.user.id) {
-      const isSecure = new URL(request.url).protocol === "https:";
-      const secure = isSecure ? "; Secure" : "";
-      headers.append("Set-Cookie", `luckee_ref_pending=${refUserId}; Path=/; HttpOnly; SameSite=Lax; Max-Age=3600${secure}`);
-      headers.append("Set-Cookie", "luckee_ref=; Path=/; SameSite=Lax; Max-Age=0");
-    }
-  }
-
-  if (isAdminEmail(session.user.email)) return redirect("/admin", { headers });
-  return redirect(profile ? "/rewards" : "/profile/setup", { headers });
 }
 
 export default function AuthCallback() {

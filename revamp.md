@@ -357,6 +357,13 @@ Invite links used to set the referral cookie and bounce straight to `/login`, so
 - [x] Only the username is shown (it's already in the link). `noindex`, with an og:title of "@username invited you to Luckee" for chat previews.
 - [x] Honest about the reward: says joining thanks the referrer with 100 pts; doesn't invent a bonus for the friend.
 
+### Sign-in by code, and invites that stick
+
+- [x] Email sign-in sends a 6-digit code typed on `/login` instead of a link (`verifyOtp` with `type: "email"`). Emailed links often open in another browser (the Gmail app's own), which lost the invite cookie and sometimes the session; a code is typed where you started. Old link emails still work through `/auth/callback`.
+- [x] `finishSignIn` moved to `app/lib/signIn.server.ts`, shared by code, Google and old links.
+- [x] Invites no longer expire an hour after sign-in (now 30 days, cleared once the profile exists). Profile setup shows "Invited by @username" when there is one, otherwise asks for a friend's username.
+- [x] New email template `emails/sign-in-code.html`: no links or images, code in a yellow ticket, a "mark as Not spam" note, and a safety line. Pasted into Supabase's Magic Link and Confirm signup templates by hand.
+
 ### Phase 6 verification
 
 - [x] `npx tsc -b` clean.
