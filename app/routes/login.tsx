@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { data, redirect, Form, useActionData, useLoaderData, useNavigation, useSearchParams } from "react-router";
+import { redirect, Form, useActionData, useLoaderData, useNavigation, useSearchParams } from "react-router";
 import type { MetaFunction, ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { Nav } from "~/components/Nav";
 import { TurnstileWidget, turnstileHint, type TurnstileStatus } from "~/components/TurnstileWidget";
 import { Footer } from "~/components/Footer";
 import { getSupabaseAnonWithStorage } from "~/lib/supabase.server";
-import { CookieStorage } from "~/lib/auth.server";
+import { CookieStorage, getCookie } from "~/lib/auth.server";
 import { finishSignIn } from "~/lib/signIn.server";
 
 export const meta: MetaFunction = () => [
@@ -24,10 +24,38 @@ function pkceCookie(storage: CookieStorage, request: Request): string {
  * sign-in works exactly as before, so this can ship ahead of switching on
  * Supabase's captcha check.
  */
-export async function loader({ context }: LoaderFunctionArgs) {
+export async function loader({ request, context }: LoaderFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const env = (context as any)?.cloudflare?.env as Env;
-  return { turnstileSiteKey: env.TURNSTILE_SITE_KEY || "" };
+  return {
+    turnstileSiteKey: env.TURNSTILE_SITE_KEY || "",
+    pendingEmail: readPendingEmail(request),
+  };
+}
+
+/*
+ * Which address a code was sent to, so the code screen survives anything that
+ * reloads the page. It used to live only in the send action's response, and the
+ * root revalidates when a tab becomes visible again, which drops that response:
+ * switching to the mail app to read the code and coming back reset the page to
+ * the email form, every time. Path=/ because the form posts to /login.data,
+ * which a /login-scoped cookie wouldn't be sent to.
+ */
+const PENDING_COOKIE = "luckee_login_email";
+
+function pendingCookie(value: string, maxAge: number, request: Request): string {
+  const secure = new URL(request.url).protocol === "https:" ? "; Secure" : "";
+  return `${PENDING_COOKIE}=${encodeURIComponent(value)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${secure}`;
+}
+
+function readPendingEmail(request: Request): string | null {
+  const raw = getCookie(request, PENDING_COOKIE);
+  if (!raw) return null;
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return null;
+  }
 }
 
 export async function action({ request, context }: ActionFunctionArgs) {
@@ -56,6 +84,11 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
   }
 
+  // "Use a different email": forget the pending address.
+  if (form.get("intent") === "restart") {
+    return redirect("/login", { headers: { "Set-Cookie": pendingCookie("", 0, request) } });
+  }
+
   const email = (form.get("email") as string)?.trim().toLowerCase();
 
   // Step two: the code from the email. Typed into this tab, so the session and
@@ -64,22 +97,20 @@ export async function action({ request, context }: ActionFunctionArgs) {
   // that cookie, so the inviter wasn't credited.)
   if (form.get("intent") === "verify") {
     const token = ((form.get("code") as string) ?? "").replace(/\D/g, "");
-    if (!email || !/^\d{6,8}$/.test(token)) {
-      return { success: true as const, email, codeError: "Enter the code from the email." };
+    const codeEmail = readPendingEmail(request) ?? email;
+    if (!codeEmail) return redirect("/login");
+    if (!/^\d{6,8}$/.test(token)) {
+      return { codeError: "Enter the code from the email." };
     }
     try {
       const supabase = getSupabaseAnonWithStorage(env, new CookieStorage());
-      const { data: verified, error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
+      const { data: verified, error } = await supabase.auth.verifyOtp({ email: codeEmail, token, type: "email" });
       if (error || !verified.session) {
-        return {
-          success: true as const,
-          email,
-          codeError: "That code didn't work. Check it, or it may have expired — send a new one below.",
-        };
+        return { codeError: "That code didn't work. Check it, or it may have expired — send a new one below." };
       }
-      return await finishSignIn(request, env, verified.session);
+      return await finishSignIn(request, env, verified.session, [pendingCookie("", 0, request)]);
     } catch {
-      return { success: true as const, email, codeError: "Service unavailable. Please try again." };
+      return { codeError: "Service unavailable. Please try again." };
     }
   }
 
@@ -107,7 +138,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
     const headers = new Headers();
     headers.append("Set-Cookie", pkceCookie(storage, request));
-    return data({ success: true as const, email, codeError: null as string | null }, { headers });
+    // 10 minutes, the code's own lifetime.
+    headers.append("Set-Cookie", pendingCookie(email, 600, request));
+    return redirect("/login?sent=1", { headers });
   } catch {
     return { error: "Service unavailable. Please try again." };
   }
@@ -133,7 +166,8 @@ const CALLBACK_ERRORS: Record<string, string> = {
 };
 
 export default function Login() {
-  const { turnstileSiteKey } = useLoaderData<typeof loader>();
+  const loaderData = useLoaderData<typeof loader>();
+  const { turnstileSiteKey, pendingEmail } = loaderData;
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const submitting = navigation.state === "submitting";
@@ -154,15 +188,18 @@ export default function Login() {
             <h1 className="auth-h">Sign in or create your account</h1>
             <p className="auth-sub">No password to remember. Continue with Google, or we'll email you a 6-digit code.</p>
 
-            {actionData && "success" in actionData ? (
+            {pendingEmail ? (
               <div className="auth-sent">
                 <div className="auth-sent-ico">📬</div>
                 <h2>Check your inbox</h2>
-                <p>We sent a sign-in code to <strong>{actionData.email}</strong>. It expires in 10 minutes.</p>
+                <p>
+                  We sent a sign-in code to <strong>{pendingEmail}</strong>. It expires in 10 minutes.
+                </p>
                 <Form method="post" className="auth-form" style={{ marginTop: 16 }}>
                   <input type="hidden" name="intent" value="verify" />
-                  <input type="hidden" name="email" value={actionData.email} />
-                  {actionData.codeError && <div className="wf-error">{actionData.codeError}</div>}
+                  {actionData && "codeError" in actionData && <div className="wf-error">{actionData.codeError}</div>}
+                  {/* A failed resend (e.g. the human check) comes back here too. */}
+                  {actionData && "error" in actionData && <div className="wf-error">{actionData.error}</div>}
                   <label className="fl" htmlFor="login-code">Your code</label>
                   <input
                     id="login-code"
@@ -183,9 +220,9 @@ export default function Login() {
                 </Form>
                 <p className="auth-sent-note">Can't find it? Check your spam folder, and if it's there, mark it "Not spam" so the next one arrives safely.</p>
                 <Form method="post" style={{ marginTop: 12 }}>
-                  <input type="hidden" name="email" value={actionData.email} />
+                  <input type="hidden" name="email" value={pendingEmail} />
                   {turnstileSiteKey && (
-                    <TurnstileWidget siteKey={turnstileSiteKey} action="login" resetKey={actionData} onStatus={setCheck} />
+                    <TurnstileWidget siteKey={turnstileSiteKey} action="login" resetKey={loaderData} onStatus={setCheck} />
                   )}
                   {hint && <p className="auth-terms" style={{ marginTop: 0 }}>{hint}</p>}
                   <button
@@ -194,6 +231,15 @@ export default function Login() {
                     style={{ background: "none", border: "none", color: "var(--purple)", fontSize: 14, fontWeight: 600, cursor: "pointer", textDecoration: "underline", padding: 0 }}
                   >
                     {submitting ? "Sending…" : "Send a new code"}
+                  </button>
+                </Form>
+                <Form method="post" style={{ marginTop: 8 }}>
+                  <input type="hidden" name="intent" value="restart" />
+                  <button
+                    type="submit"
+                    style={{ background: "none", border: "none", color: "var(--t3)", fontSize: 13, fontWeight: 600, cursor: "pointer", textDecoration: "underline", padding: 0 }}
+                  >
+                    Use a different email
                   </button>
                 </Form>
               </div>
