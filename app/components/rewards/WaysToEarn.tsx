@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router";
-import { CalendarCheck, Check, Disc3, Gift, Receipt, Share2, UserCheck, Users, Utensils, UtensilsCrossed } from "lucide-react";
+import { CalendarCheck, Check, Disc3, Gift, Pin, Receipt, Share2, UserCheck, Users, Utensils, UtensilsCrossed } from "lucide-react";
 import { FourLeafCloverSvg } from "~/components/SvgIcons";
 import { EarnCard } from "~/components/rewards/EarnCard";
 
@@ -71,6 +71,11 @@ export function WaysToEarn({
       status: username
         ? { kind: "copy", text: `/r/${username}`, label: "Copy link" }
         : { kind: "link", to: "/profile", label: "Get link" },
+    },
+    {
+      icon: <Pin className="h-5 w-5" />, title: "Pin a deal to the corkboard", pts: "10 pts per approved pin",
+      detail: "Share a find you've used yourself; it goes up once we've checked it",
+      status: { kind: "link", to: "/#community", label: "Pin" },
     },
     {
       icon: <Gift className="h-5 w-5" />, title: "Birthday bonus", pts: "50 pts a year", detail: "Paid on your first visit in your birthday month",

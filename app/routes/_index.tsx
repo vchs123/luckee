@@ -1,4 +1,7 @@
-import type { MetaFunction } from "react-router";
+import { useLoaderData } from "react-router";
+import type { LoaderFunctionArgs, MetaFunction } from "react-router";
+import { getSupabase } from "~/lib/supabase.server";
+import type { CommunityPin } from "~/lib/pins";
 import { useEffect, useRef } from "react";
 import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
@@ -20,7 +23,43 @@ export const meta: MetaFunction = () => [
   { property: "og:type", content: "website" },
 ];
 
+/** Approved community pins for the corkboard, newest first. Empty until any are approved. */
+export async function loader({ context }: LoaderFunctionArgs) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const env = (context as any)?.cloudflare?.env as Env;
+  let pins: CommunityPin[] = [];
+  try {
+    const supabase = getSupabase(env);
+    const { data } = await supabase
+      .from("community_pins")
+      .select("id, user_id, title, spot, savings, notes, emoji, created_at")
+      .eq("status", "approved")
+      .order("reviewed_at", { ascending: false })
+      .limit(8);
+    const rows = data ?? [];
+    const ids = [...new Set(rows.map((r) => r.user_id as string))];
+    const { data: profiles } = ids.length
+      ? await supabase.from("user_profiles").select("id, username").in("id", ids)
+      : { data: [] };
+    const names = new Map((profiles ?? []).map((p) => [p.id as string, p.username as string]));
+    pins = rows.map((r) => ({
+      id: r.id as string,
+      title: r.title as string,
+      spot: r.spot as string,
+      savings: (r.savings as string | null) ?? null,
+      notes: (r.notes as string | null) ?? null,
+      emoji: r.emoji as string,
+      username: names.get(r.user_id as string) ?? null,
+      createdAt: r.created_at as string,
+    }));
+  } catch {
+    /* the corkboard falls back to its example pins */
+  }
+  return { pins };
+}
+
 export default function Home() {
+  const { pins } = useLoaderData<typeof loader>();
   const pageRef = useRef<HTMLDivElement>(null);
 
   // Scroll reveals for section headers (the hero animates on mount instead).
@@ -39,7 +78,7 @@ export default function Home() {
         <FreeMelbourne />
         <DinnersTeaser />
         <RewardsBanner />
-        <Corkboard />
+        <Corkboard pins={pins} />
       </div>
       <Footer />
     </>

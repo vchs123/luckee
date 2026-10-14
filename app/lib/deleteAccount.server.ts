@@ -17,6 +17,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  */
 const OWNED_TABLES = [
   "proof_submissions", // before points_ledger: it can point at ledger rows
+  "community_pins",
   "luckboard",
   "daily_logins",
   "daily_spins",
@@ -27,6 +28,9 @@ const OWNED_TABLES = [
 ] as const;
 
 const PROOF_BUCKET = "proof-submissions";
+
+/** PostgREST's "no such table" (schema cache) and Postgres's undefined_table. */
+const MISSING_TABLE = ["PGRST205", "42P01"];
 
 export async function deleteAccount(
   supabase: SupabaseClient,
@@ -48,7 +52,10 @@ export async function deleteAccount(
   // 2. Rows they own.
   for (const table of OWNED_TABLES) {
     const { error } = await supabase.from(table).delete().eq("user_id", userId);
-    if (error) return { ok: false, error: `Couldn't clear ${table}: ${error.message}` };
+    // A table whose SQL hasn't been run yet holds nothing to delete.
+    if (error && !MISSING_TABLE.includes(error.code)) {
+      return { ok: false, error: `Couldn't clear ${table}: ${error.message}` };
+    }
   }
 
   // 3. The dinner waitlist is keyed by email address, not account. Matched

@@ -370,6 +370,15 @@ Invite links used to set the referral cookie and bounce straight to `/login`, so
 - [x] Screenshots at 1280px and 500px: header, ticker, bottom nav on `/freebies`, footer on `/about`, the invite and not-found states of `/r/:username` (invite state via a temporary dev-only hook, removed).
 - [ ] Signed-in check: points pill, account menu, sign out, Rewards chip; open your own `/r/<username>` link.
 
+## Phase 7 — the corkboard backend
+
+- [x] `sql/community_pins.sql`: `community_pins` (pending/approved/rejected/removed), length checks, RLS with no policies (server only), rows cascade with the account. Tested in PGlite.
+- [x] `POST /api/pins`: signed-in members only (not admin); title, spot, optional saving and notes, an icon from a fixed set. At most 3 pending and 5 a day per member.
+- [x] Corkboard: approved pins (8 newest, with @username) replace the example pins once the first is approved; "Pin a deal" opens v2's form for members, "Sign in to pin a deal" otherwise.
+- [x] Admin → Pins: approve (+10 pts, paid once even on a double click), reject with a private note, take down approved pins when a deal ends.
+- [x] Pins are deleted with the account; "Ways to earn" lists pinning; the ledger files `community_pin` under Bonuses.
+- [ ] Signed-in check: pin a deal, approve it in admin, see it on the home page and the +10 in Activity.
+
 ## Later phases (not in scope now)
 
-The corkboard backend — `community_posts` with `pending/approved/rejected`, a submit action, and an approval queue modelled on the existing `admin.proof` flow.
+Nothing planned. Ideas raised: Instagram share cards for freebies and pins; embedding public Instagram posts.

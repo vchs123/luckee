@@ -969,3 +969,13 @@ body.dp-active .nav { top: 38px; }
 .admin-copy-head { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-bottom: 1px solid var(--cb); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--t3); }
 .admin-copy-head button { border: 1px solid var(--cb); background: #fff; border-radius: 6px; padding: 3px 10px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; color: var(--t1); }
 .admin-copy p, .admin-copy pre { margin: 0; padding: 10px; font-size: 13px; color: var(--t1); white-space: pre-wrap; word-break: break-word; font-family: inherit; }
+
+/* ── admin: community pins ── */
+.admin-pins { display: grid; gap: 14px; margin-top: 16px; }
+.admin-pin-head { display: flex; gap: 12px; align-items: flex-start; }
+.admin-pin-emoji { font-size: 26px; line-height: 1; }
+.admin-pin-title { font-size: 15px; font-weight: 800; color: var(--t1); margin-bottom: 2px; }
+.admin-pin-notes { margin-top: 10px; padding: 10px 12px; background: #faf8fc; border-radius: 8px; font-size: 13px; color: var(--t1); white-space: pre-line; }
+.admin-pin-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+.admin-pin-reject { display: flex; gap: 8px; align-items: center; flex: 1; min-width: 240px; }
+.admin-pin-reject .fi { flex: 1; }

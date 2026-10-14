@@ -17,7 +17,7 @@ const ACTIVITIES: { value: string; label: string; actions: string[] }[] = [
   { value: "referrals", label: "Referrals", actions: ["referral_account", "referral_deal"] },
   {
     value: "bonuses", label: "Bonuses & proof",
-    actions: ["profile_complete", "dinner_waitlist", "birthday_bonus", "admin_bonus", "proof_approved", "dinner_attended"],
+    actions: ["profile_complete", "dinner_waitlist", "birthday_bonus", "admin_bonus", "proof_approved", "dinner_attended", "community_pin"],
   },
 ];
 

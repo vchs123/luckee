@@ -44,6 +44,7 @@ export default [
     route("admin/messages", "routes/admin.messages.tsx"),
     route("admin/waitlist", "routes/admin.waitlist.tsx"),
     route("admin/inactive", "routes/admin.inactive.tsx"),
+    route("admin/pins", "routes/admin.pins.tsx"),
   ]),
 
   // API
@@ -57,6 +58,7 @@ export default [
   route("api/luckboard", "routes/api.luckboard.tsx"),
   route("api/gachapon", "routes/api.gachapon.tsx"),
   route("api/redeem", "routes/api.redeem.tsx"),
+  route("api/pins", "routes/api.pins.tsx"),
 
   route("sitemap.xml", "routes/sitemap.xml.tsx"),
   route("robots.txt", "routes/robots.txt.tsx"),
