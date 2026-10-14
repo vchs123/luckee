@@ -10,7 +10,7 @@ import { melbToday } from "~/lib/melbDate";
 
 /*
  * Write or edit a deal drop (/admin/drops/new or /admin/drops/<id>). Paste the
- * caption of a post you found and "Autofill" asks Claude to draft the fields;
+ * caption of a post you found and "Autofill" drafts the fields (Workers AI);
  * you check them, optionally add a photo, and publish.
  */
 
@@ -23,7 +23,7 @@ export async function loader({ context, params }: LoaderFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const env = (context as any)?.cloudflare?.env as Env;
   requireAdmin(context);
-  const autofillReady = Boolean(env.ANTHROPIC_API_KEY);
+  const autofillReady = Boolean(env.AI);
   const empty: Fields = { title: "", place: "", saving: "", body: "", emoji: DROP_EMOJIS[0], endsOn: "", sourceUrl: "" };
   if (params.id === "new") return { isNew: true, autofillReady, fields: empty, imageUrl: null as string | null, published: true };
 
@@ -68,8 +68,8 @@ export async function action({ request, context, params }: ActionFunctionArgs): 
   if (form.get("intent") === "autofill") {
     const caption = ((form.get("caption") as string) ?? "").trim();
     if (caption.length < 10) return { error: "Paste the post's caption first." };
-    if (!env.ANTHROPIC_API_KEY) return { error: "Autofill isn't set up yet (no ANTHROPIC_API_KEY secret)." };
-    const result = await draftDropFromCaption(env.ANTHROPIC_API_KEY, caption, melbToday());
+    if (!env.AI) return { error: "Autofill isn't available here (no AI binding)." };
+    const result = await draftDropFromCaption(env.AI, caption, melbToday());
     if (!result.ok) return { error: result.error };
     return result.draft.found
       ? { draft: result.draft }
@@ -174,7 +174,7 @@ export default function AdminDropEditor() {
               {drafting ? "Drafting…" : "✨ Autofill from caption"}
             </button>
           </autofill.Form>
-          {!autofillReady && <span className="admin-muted">Autofill needs the ANTHROPIC_API_KEY secret; you can still type below.</span>}
+          {!autofillReady && <span className="admin-muted">Autofill isn't available here; you can still type below.</span>}
         </div>
         {autofill.data?.error && <div className="wf-error" style={{ marginTop: 10 }}>{autofill.data.error}</div>}
       </div>

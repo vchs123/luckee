@@ -386,13 +386,14 @@ Invite links used to set the referral cookie and bounce straight to `/login`, so
 Short posts about free deals and discounts, written by the admin, that members and the public can like and share. (The long-form `/blog` stays for guides.)
 
 - [x] `sql/deal_drops.sql`: `deal_drops` (slug, headline, place, saving, how-to, icon, photo, source link, end date, live/hidden), `deal_drop_likes` (one per member account or per browser), a public `deal-drops` photo bucket (5 MB, JPEG/PNG/WebP). Tested in PGlite.
-- [x] Admin → Deal drops: list with likes, Edit, Hide/Show, Delete (removes the photo too). Editor at `/admin/drops/new` and `/admin/drops/:id`: paste a caption, "✨ Autofill" asks Claude (`claude-haiku-5-5`, forced tool call, told to invent nothing, end date resolved from today's Melbourne date) for a draft; optional photo; publish.
+- [x] Admin → Deal drops: list with likes, Edit, Hide/Show, Delete (removes the photo too). Editor at `/admin/drops/new` and `/admin/drops/:id`: paste a caption, "✨ Autofill" asks Cloudflare Workers AI (`@cf/meta/llama-3.3-70b-instruct-fp8-fast` through the site's `AI` binding, JSON mode, told to invent nothing, end date resolved from today's Melbourne date) for a draft; optional photo; publish. Free: ~30 neurons an autofill against 10,000 a day. Tested against the real model: a deal caption (headline, place, saving, how-to, "this Saturday" → the right date) and a non-deal caption (flagged).
 - [x] `/drops` feed and `/drops/:slug` post pages with link-preview tags (title, text, photo); the latest three on the home page under the hero; footer link; sitemap.
 - [x] Likes open to everyone (`POST /api/drops/like`): members once per account, visitors once per browser (random id cookie). No points.
 - [x] Share: the phone's share sheet where available, otherwise copy link, WhatsApp, Facebook, X and email.
 - [x] "Ends 18 Oct" / "Ended" labels; ended drops fade.
 - [x] Members' likes go with a deleted account.
-- [ ] Live check: run the SQL, add the `ANTHROPIC_API_KEY` secret, publish a drop with a photo, like and share it from a phone.
+- [x] SQL run.
+- [ ] Live check: publish a drop with a photo using autofill, like and share it from a phone.
 
 ## Later phases (not in scope now)
 
