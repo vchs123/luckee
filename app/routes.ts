@@ -59,6 +59,7 @@ export default [
   route("api/gachapon", "routes/api.gachapon.tsx"),
   route("api/redeem", "routes/api.redeem.tsx"),
   route("api/pins", "routes/api.pins.tsx"),
+  route("api/pins/like", "routes/api.pins.like.tsx"),
 
   route("sitemap.xml", "routes/sitemap.xml.tsx"),
   route("robots.txt", "routes/robots.txt.tsx"),

@@ -31,7 +31,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   if (error) return { setupNeeded: true as const, status, pins: [] };
 
   const rows = data ?? [];
-  const ids = [...new Set(rows.map((r) => r.user_id as string))];
+  const ids = [...new Set(rows.map((r) => r.user_id as string | null).filter((id): id is string => !!id))];
   const { data: profiles } = ids.length
     ? await supabase.from("user_profiles").select("id, username").in("id", ids)
     : { data: [] };
@@ -42,7 +42,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     status,
     pins: rows.map((r) => ({
       id: r.id as string,
-      userId: r.user_id as string,
+      userId: (r.user_id as string | null) ?? null,
       username: names.get(r.user_id as string) ?? null,
       title: r.title as string,
       spot: r.spot as string,
@@ -155,7 +155,8 @@ export default function AdminPins() {
                   <p className="admin-muted">
                     {p.spot}
                     {p.savings && <> · <strong>{p.savings}</strong></>} · by{" "}
-                    <Link to={`/admin/users/${p.userId}`}>@{p.username ?? "unknown"}</Link> · {fmt(p.createdAt)}
+                    {p.userId ? <Link to={`/admin/users/${p.userId}`}>@{p.username ?? "unknown"}</Link> : "a deleted account"} ·{" "}
+                    {fmt(p.createdAt)}
                   </p>
                 </div>
               </div>

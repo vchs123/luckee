@@ -18,4 +18,9 @@ export type CommunityPin = {
   emoji: string;
   username: string | null;
   createdAt: string;
+  likes: number;
+  /** The viewer has liked it. */
+  liked: boolean;
+  /** The viewer pinned it (can't like their own). */
+  mine: boolean;
 };

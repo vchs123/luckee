@@ -377,7 +377,9 @@ Invite links used to set the referral cookie and bounce straight to `/login`, so
 - [x] Corkboard: approved pins (8 newest, with @username) replace the example pins once the first is approved; "Pin a deal" opens v2's form for members, "Sign in to pin a deal" otherwise.
 - [x] Admin → Pins: approve (+10 pts, paid once even on a double click), reject with a private note, take down approved pins when a deal ends.
 - [x] Pins are deleted with the account; "Ways to earn" lists pinning; the ledger files `community_pin` under Bonuses.
-- [ ] Signed-in check: pin a deal, approve it in admin, see it on the home page and the +10 in Activity.
+- [x] Likes (`sql/community_pin_likes.sql`, `POST /api/pins/like`): members only, one per pin, toggles, not on your own pin, no points. Signed-out visitors see counts and the heart links to sign in.
+- [x] Deleting an account keeps its pins on the board without the username ("Member pin"); its likes go. Privacy policy says so.
+- [ ] Signed-in check: pin a deal, approve it in admin, see it on the home page and the +10 in Activity; like it from another account.
 
 ## Later phases (not in scope now)
 

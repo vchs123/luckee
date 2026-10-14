@@ -46,7 +46,7 @@ export default function Privacy() {
       <h2>Data retention</h2>
       <p>We keep your information while your account is in use.</p>
       <ul>
-        <li><strong>Deleting your account:</strong> you can delete it yourself at any time from your <a href="/profile">profile</a> page, or ask us through the <Link to="/contact?topic=privacy">contact form</Link>. This permanently removes your profile, points, gachapon capsules and prize requests, saved freebies, check-in history, receipts and uploaded photos, your dinner waitlist entry, and your login.</li>
+        <li><strong>Deleting your account:</strong> you can delete it yourself at any time from your <a href="/profile">profile</a> page, or ask us through the <Link to="/contact?topic=privacy">contact form</Link>. This permanently removes your profile, points, gachapon capsules and prize requests, saved freebies, check-in history, receipts and uploaded photos, your dinner waitlist entry, your likes, and your login. Deals you pinned to the community corkboard stay up for others to use, but without your username.</li>
         <li><strong>Inactive accounts:</strong> if you haven't used Luckee for 6 months, we'll email you a reminder. If you don't sign in within 2 weeks of that email, we delete your account and its data in the same way. Signing in once is enough to keep it.</li>
         <li>Messages you've sent us through the contact form are kept as correspondence (for example, a deletion request itself), but are no longer linked to an account once it's deleted.</li>
       </ul>

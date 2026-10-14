@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useFetcher } from "react-router";
 import { AnimatePresence, m } from "framer-motion";
-import { CheckCircle2, Pin, PlusCircle, Send, X } from "lucide-react";
+import { CheckCircle2, Heart, Pin, PlusCircle, Send, X } from "lucide-react";
 import { EXAMPLE_PINS } from "~/data/community-posts";
 import { fadeUp, inViewOnce } from "~/lib/motion";
 import { useAuth } from "~/hooks/useAuth";
@@ -23,6 +23,8 @@ type Note = {
   savings: string | null;
   notes: string | null;
   badge: string;
+  /** Set for real pins, which can be liked; examples can't. */
+  pin?: CommunityPin;
 };
 
 /**
@@ -45,6 +47,7 @@ export function Corkboard({ pins }: { pins: CommunityPin[] }) {
         savings: p.savings,
         notes: p.notes,
         badge: p.username ? `@${p.username}` : "Member pin",
+        pin: p,
       }))
     : EXAMPLE_PINS.map((p) => ({
         id: p.id,
@@ -170,6 +173,7 @@ export function Corkboard({ pins }: { pins: CommunityPin[] }) {
                     </p>
                   )}
                 </div>
+                {post.pin && <LikeButton pin={post.pin} signedIn={!!user} />}
               </m.div>
             );
           })}
@@ -182,6 +186,59 @@ export function Corkboard({ pins }: { pins: CommunityPin[] }) {
 
       <AnimatePresence>{open && <PinForm onClose={() => setOpen(false)} />}</AnimatePresence>
     </section>
+  );
+}
+
+/**
+ * Like/unlike, members only. Shows the new state straight away; the server's
+ * count replaces it when it answers. Signed-out visitors see the count and
+ * are sent to sign in.
+ */
+function LikeButton({ pin, signedIn }: { pin: CommunityPin; signedIn: boolean }) {
+  const fetcher = useFetcher<{ ok: boolean; liked?: boolean; count?: number }>();
+  const pending = fetcher.state !== "idle";
+  const optimistic = pending ? !pin.liked : undefined;
+  const liked = fetcher.data?.ok && !pending ? !!fetcher.data.liked : (optimistic ?? pin.liked);
+  const count =
+    fetcher.data?.ok && !pending
+      ? (fetcher.data.count ?? pin.likes)
+      : pin.likes + (optimistic === undefined ? 0 : optimistic ? 1 : -1);
+
+  const inner = (
+    <>
+      <Heart className={`h-4 w-4 ${liked ? "fill-red-600 text-red-600" : "text-black"}`} strokeWidth={2.5} />
+      <span>{count}</span>
+    </>
+  );
+  const cls =
+    "mt-2 inline-flex items-center gap-1.5 self-start border-2 border-black bg-white px-2.5 py-1 text-xs font-black text-black shadow-xs";
+
+  if (!signedIn) {
+    return (
+      <Link to="/login" className={`${cls} hover:bg-[#fff0f8]`} aria-label={`${count} likes. Sign in to like this pin`}>
+        {inner}
+      </Link>
+    );
+  }
+  if (pin.mine) {
+    return (
+      <span className={`${cls} opacity-70`} title="Your pin" aria-label={`${count} likes on your pin`}>
+        {inner}
+      </span>
+    );
+  }
+  return (
+    <fetcher.Form method="post" action="/api/pins/like">
+      <input type="hidden" name="pinId" value={pin.id} />
+      <button
+        type="submit"
+        aria-pressed={liked}
+        aria-label={liked ? `Unlike (${count} likes)` : `Like (${count} likes)`}
+        className={`${cls} cursor-pointer hover:bg-[#fff0f8]`}
+      >
+        {inner}
+      </button>
+    </fetcher.Form>
   );
 }
 

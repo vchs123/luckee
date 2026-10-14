@@ -12,12 +12,13 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  * leaving data behind for an account that no longer exists.
  *
  * Members they referred keep their accounts; only the link back is cleared.
+ * Their corkboard pins stay up for others to use, with the author removed.
  * Contact-form messages are kept (they're correspondence, and may be the
  * deletion request itself) but unlinked from the account.
  */
 const OWNED_TABLES = [
   "proof_submissions", // before points_ledger: it can point at ledger rows
-  "community_pins",
+  "community_pin_likes",
   "luckboard",
   "daily_logins",
   "daily_spins",
@@ -73,6 +74,16 @@ export async function deleteAccount(
   ];
   for (const res of await Promise.all(unlink)) {
     if (res.error) return { ok: false, error: `Couldn't unlink records: ${res.error.message}` };
+  }
+
+  // Corkboard pins stay, without their author. Before sql/community_pin_likes.sql
+  // the column can't be empty (23502), so they're deleted instead, as before.
+  const pins = await supabase.from("community_pins").update({ user_id: null }).eq("user_id", userId);
+  if (pins.error?.code === "23502") {
+    const del = await supabase.from("community_pins").delete().eq("user_id", userId);
+    if (del.error) return { ok: false, error: `Couldn't clear community_pins: ${del.error.message}` };
+  } else if (pins.error && !MISSING_TABLE.includes(pins.error.code)) {
+    return { ok: false, error: `Couldn't unlink pins: ${pins.error.message}` };
   }
 
   // 5. The profile, then the login.

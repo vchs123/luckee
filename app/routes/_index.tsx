@@ -2,6 +2,7 @@ import { useLoaderData } from "react-router";
 import type { LoaderFunctionArgs, MetaFunction } from "react-router";
 import { getSupabase } from "~/lib/supabase.server";
 import type { CommunityPin } from "~/lib/pins";
+import { userContext } from "~/lib/auth.context";
 import { useEffect, useRef } from "react";
 import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
@@ -27,6 +28,7 @@ export const meta: MetaFunction = () => [
 export async function loader({ context }: LoaderFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const env = (context as any)?.cloudflare?.env as Env;
+  const viewer = context.get(userContext);
   let pins: CommunityPin[] = [];
   try {
     const supabase = getSupabase(env);
@@ -37,11 +39,17 @@ export async function loader({ context }: LoaderFunctionArgs) {
       .order("reviewed_at", { ascending: false })
       .limit(8);
     const rows = data ?? [];
-    const ids = [...new Set(rows.map((r) => r.user_id as string))];
-    const { data: profiles } = ids.length
-      ? await supabase.from("user_profiles").select("id, username").in("id", ids)
-      : { data: [] };
+    const ids = [...new Set(rows.map((r) => r.user_id as string | null).filter((id): id is string => !!id))];
+    const pinIds = rows.map((r) => r.id as string);
+    const [{ data: profiles }, { data: likes }] = await Promise.all([
+      ids.length ? supabase.from("user_profiles").select("id, username").in("id", ids) : Promise.resolve({ data: [] }),
+      // Likes come from sql/community_pin_likes.sql; until it's run this errors and counts stay 0.
+      pinIds.length
+        ? supabase.from("community_pin_likes").select("pin_id, user_id").in("pin_id", pinIds)
+        : Promise.resolve({ data: [] }),
+    ]);
     const names = new Map((profiles ?? []).map((p) => [p.id as string, p.username as string]));
+    const likeRows = (likes ?? []) as { pin_id: string; user_id: string }[];
     pins = rows.map((r) => ({
       id: r.id as string,
       title: r.title as string,
@@ -51,6 +59,9 @@ export async function loader({ context }: LoaderFunctionArgs) {
       emoji: r.emoji as string,
       username: names.get(r.user_id as string) ?? null,
       createdAt: r.created_at as string,
+      likes: likeRows.filter((l) => l.pin_id === r.id).length,
+      liked: !!viewer && likeRows.some((l) => l.pin_id === r.id && l.user_id === viewer.id),
+      mine: !!viewer && r.user_id === viewer.id,
     }));
   } catch {
     /* the corkboard falls back to its example pins */
