@@ -951,14 +951,14 @@ body.dp-active .nav { top: 38px; }
 .profile-danger summary { cursor: pointer; font-size: 14px; font-weight: 800; color: #b91c1c; }
 .profile-danger p { font-size: 13px; color: var(--t2); line-height: 1.6; margin: 12px 0; }
 .profile-danger-warn { padding: 10px 12px; border-radius: var(--rs); background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b !important; font-weight: 700; }
-.profile-danger-btn { width: 100%; padding: 12px; border: none; border-radius: var(--rp); background: #dc2626; color: #fff; font-size: 14px; font-weight: 800; cursor: pointer; font-family: inherit; }
+.profile-danger-btn { width: 100%; margin-top: 14px; padding: 12px; border: none; border-radius: var(--rp); background: #dc2626; color: #fff; font-size: 14px; font-weight: 800; cursor: pointer; font-family: inherit; }
 .profile-danger-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 .auth-notice { margin-bottom: 14px; padding: 10px 14px; border-radius: var(--rs); background: var(--sb); border: 1.5px solid #86efac; color: #15803d; font-size: 13px; font-weight: 600; }
 
 /* ── admin: delete account ── */
 .admin-danger { border-color: #fca5a5 !important; }
 .admin-danger h3 { color: #b91c1c; }
-.admin-danger-form { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+.admin-danger-form { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
 .admin-danger-btn { padding: 9px 18px; border: none; border-radius: var(--rp); background: #dc2626; color: #fff; font-size: 13px; font-weight: 800; cursor: pointer; font-family: inherit; }
 .admin-danger-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .admin-flash { margin: 10px 0; padding: 8px 12px; border-radius: 8px; background: #ecfdf5; border: 1px solid #86efac; color: #15803d; font-size: 13px; font-weight: 700; display: inline-block; }
