@@ -1,4 +1,6 @@
 import type { LoaderFunctionArgs } from "react-router";
+import { dropState } from "~/lib/drops";
+import { melbNow } from "~/lib/melbDate";
 
 const STATIC_ROUTES = [
   { url: "/", priority: "1.0", changefreq: "daily" },
@@ -45,12 +47,27 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
     const { data: drops } = await supabase
       .from("deal_drops")
-      .select("slug")
+      .select("*")
       .eq("published", true)
       .order("published_at", { ascending: false })
       .limit(500);
     if (drops) {
-      blogRoutes.push(...drops.map((d) => ({ url: `/drops/${d.slug}`, priority: "0.6", changefreq: "weekly" })));
+      // Archived drops (ended over 60 days ago) are off the site.
+      const now = melbNow();
+      const listed = drops.filter(
+        (d) =>
+          dropState(
+            {
+              startsOn: d.starts_on ?? null,
+              endsOn: d.ends_on ?? null,
+              allDay: d.all_day !== false,
+              startTime: typeof d.start_time === "string" ? d.start_time.slice(0, 5) : null,
+              endTime: typeof d.end_time === "string" ? d.end_time.slice(0, 5) : null,
+            },
+            now,
+          ) !== "archived",
+      );
+      blogRoutes.push(...listed.map((d) => ({ url: `/drops/${d.slug}`, priority: "0.6", changefreq: "weekly" })));
     }
   } catch {
     // Supabase not configured yet — skip blog routes

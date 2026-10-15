@@ -90,8 +90,8 @@ export default function ReferralLanding() {
   return (
     <>
       <Nav />
-      <main className="wrap pb-16 pt-8 sm:pt-12">
-        <div className="mx-auto max-w-[760px] space-y-8">
+      <main className="wrap">
+        <div className="mx-auto max-w-[760px] space-y-8 pb-16 pt-8 sm:pt-12">
           {state === "invite" && username && <Invite username={username} />}
           {state === "own" && username && <OwnLink username={username} />}
           {state === "member" && username && <AlreadyMember username={username} />}

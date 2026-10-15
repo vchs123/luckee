@@ -393,6 +393,9 @@ Short posts about free deals and discounts, written by the admin, that members a
 - [x] "Ends 18 Oct" / "Ended" labels; ended drops fade.
 - [x] Members' likes go with a deleted account.
 - [x] SQL run.
+- [x] Timing and categories (`sql/deal_drops_timing.sql`): start and end dates, an All day switch with start/end time pickers, and a category (Free, Min spend, Buy 1 get 1, Discount). Cards say "Sat 17 Oct · from 12pm", "24–25 Oct · 5pm–9pm", "1–31 Oct · All day" or "Until 31 Oct", with "On now" and "Ended" worked out in Melbourne time (an end time counts on the day). `/drops` has category filter chips. Autofill fills category, dates and times; tested against the real model on free, BOGO and min-spend captions. The wording was checked case by case (11 cases); the SQL in PGlite.
+- [x] Ended section: `/drops` shows what's on now and coming up, then an "Ended" section; an ended drop stays there for 60 days after its last day, then is archived: off the public site, out of the sitemap, its link shows "This deal ended on …" (410), still listed in admin as Archived. The home page shows only drops that haven't ended. Admin's Hide works at any time. State rules checked at the 60/61-day boundary.
+- [x] Fixed: `/r/:username` and `/drops/:slug` content sat flush under the header (`.wrap`'s padding overrode Tailwind's).
 - [ ] Live check: publish a drop with a photo using autofill, like and share it from a phone.
 
 ## Later phases (not in scope now)

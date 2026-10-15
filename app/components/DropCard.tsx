@@ -1,19 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useFetcher } from "react-router";
-import { Check, Copy, Heart, Mail, MapPin, Share2 } from "lucide-react";
-import { endsLabel, type DealDrop } from "~/lib/drops";
+import { CalendarClock, Check, Copy, Heart, Mail, MapPin, Share2 } from "lucide-react";
+import { categoryOf, whenLabel, type DealDrop } from "~/lib/drops";
 
 /**
  * One deal drop. `full` is the post's own page (/drops/:slug): the title isn't
- * a link and the photo is larger. `today` is the Melbourne date from the
- * loader, so "Ends …" renders the same on the server and in the browser.
+ * a link and the photo is larger. `now` is the Melbourne date and time from
+ * the loader, so "On now"/"Ended" render the same on the server and in the
+ * browser.
  */
-export function DropCard({ drop, today, full = false }: { drop: DealDrop; today: string; full?: boolean }) {
-  const ends = endsLabel(drop.endsOn, today);
+export function DropCard({ drop, now, full = false }: { drop: DealDrop; now: string; full?: boolean }) {
+  const when = whenLabel(drop, now);
+  const ends = when?.ended ? when : null;
+  const cat = categoryOf(drop.category);
   const href = `/drops/${drop.slug}`;
 
   return (
-    <article className={`flex flex-col border-[3px] border-black bg-white shadow-hard-sm ${ends?.ended ? "opacity-75" : ""}`}>
+    <article className={`flex flex-col border-[3px] border-black bg-white shadow-hard-sm ${ends ? "opacity-75" : ""}`}>
       {drop.imageUrl && (
         <div className={`overflow-hidden border-b-[3px] border-black bg-neutral-100 ${full ? "aspect-[4/3]" : "aspect-[16/10]"}`}>
           <img src={drop.imageUrl} alt="" loading={full ? "eager" : "lazy"} className="h-full w-full object-cover" />
@@ -22,18 +25,22 @@ export function DropCard({ drop, today, full = false }: { drop: DealDrop; today:
       <div className="flex flex-1 flex-col p-4 sm:p-5">
         <div className="mb-2 flex flex-wrap items-center gap-1.5">
           <span className="text-xl" aria-hidden="true">{drop.emoji}</span>
+          <span className={`border border-black px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${cat.badge}`}>
+            {cat.label}
+          </span>
           {drop.saving && (
-            <span className="border border-black bg-[#ffcf00] px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-black">
+            <span className="border border-black bg-white px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-black">
               {drop.saving}
             </span>
           )}
+          {when?.live && (
+            <span className="border border-black bg-black px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white">
+              On now
+            </span>
+          )}
           {ends && (
-            <span
-              className={`border border-black px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${
-                ends.ended ? "bg-neutral-200 text-neutral-600" : "bg-white text-black"
-              }`}
-            >
-              {ends.text}
+            <span className="border border-black bg-neutral-200 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-neutral-600">
+              Ended
             </span>
           )}
         </div>
@@ -51,6 +58,11 @@ export function DropCard({ drop, today, full = false }: { drop: DealDrop; today:
         {drop.place && (
           <p className="mt-1 flex items-center gap-1 text-xs font-bold text-neutral-600">
             <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" /> {drop.place}
+          </p>
+        )}
+        {when && (
+          <p className="mt-1 flex items-center gap-1 text-xs font-bold text-neutral-600">
+            <CalendarClock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" /> {when.text}
           </p>
         )}
 

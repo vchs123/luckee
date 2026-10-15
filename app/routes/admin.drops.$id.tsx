@@ -5,8 +5,8 @@ import { requireAdmin } from "~/lib/auth.server";
 import { getSupabase } from "~/lib/supabase.server";
 import { DROP_BUCKET, publicImageUrl } from "~/lib/drops.server";
 import { draftDropFromCaption, type DropDraft } from "~/lib/dealAutofill.server";
-import { DROP_EMOJIS, DROP_LIMITS } from "~/lib/drops";
-import { melbToday } from "~/lib/melbDate";
+import { DROP_CATEGORIES, DROP_EMOJIS, DROP_LIMITS, isDropCategory, whenLabel, type DropCategory } from "~/lib/drops";
+import { melbNow, melbToday } from "~/lib/melbDate";
 
 /*
  * Write or edit a deal drop (/admin/drops/new or /admin/drops/<id>). Paste the
@@ -17,21 +17,39 @@ import { melbToday } from "~/lib/melbDate";
 const MAX_PHOTO = 5 * 1024 * 1024;
 const PHOTO_TYPES: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
 
-type Fields = { title: string; place: string; saving: string; body: string; emoji: string; endsOn: string; sourceUrl: string };
+type Fields = {
+  title: string;
+  category: DropCategory;
+  place: string;
+  saving: string;
+  body: string;
+  emoji: string;
+  startsOn: string;
+  endsOn: string;
+  allDay: boolean;
+  startTime: string;
+  endTime: string;
+  sourceUrl: string;
+};
 
 export async function loader({ context, params }: LoaderFunctionArgs) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const env = (context as any)?.cloudflare?.env as Env;
   requireAdmin(context);
   const autofillReady = Boolean(env.AI);
-  const empty: Fields = { title: "", place: "", saving: "", body: "", emoji: DROP_EMOJIS[0], endsOn: "", sourceUrl: "" };
-  if (params.id === "new") return { isNew: true, autofillReady, fields: empty, imageUrl: null as string | null, published: true };
+  const empty: Fields = {
+    title: "", category: "free", place: "", saving: "", body: "", emoji: DROP_EMOJIS[0],
+    startsOn: "", endsOn: "", allDay: true, startTime: "", endTime: "", sourceUrl: "",
+  };
+  const now = melbNow();
+  if (params.id === "new") return { isNew: true, autofillReady, fields: empty, imageUrl: null as string | null, published: true, now };
 
   const { data } = await getSupabase(env).from("deal_drops").select("*").eq("id", params.id!).maybeSingle();
   if (!data) throw new Response("Not found", { status: 404 });
   return {
     isNew: false,
     autofillReady,
+    now,
     published: data.published as boolean,
     imageUrl: data.image_path ? publicImageUrl(env.SUPABASE_URL, data.image_path as string) : null,
     fields: {
@@ -40,7 +58,12 @@ export async function loader({ context, params }: LoaderFunctionArgs) {
       saving: data.saving ?? "",
       body: data.body ?? "",
       emoji: data.emoji ?? DROP_EMOJIS[0],
+      category: isDropCategory(data.category) ? data.category : "free",
+      startsOn: data.starts_on ?? "",
       endsOn: data.ends_on ?? "",
+      allDay: data.all_day !== false,
+      startTime: typeof data.start_time === "string" ? data.start_time.slice(0, 5) : "",
+      endTime: typeof data.end_time === "string" ? data.end_time.slice(0, 5) : "",
       sourceUrl: data.source_url ?? "",
     } as Fields,
   };
@@ -83,7 +106,12 @@ export async function action({ request, context, params }: ActionFunctionArgs): 
   const saving = clean("saving") || null;
   const body = ((form.get("body") as string | null) ?? "").trim() || null;
   const emoji = DROP_EMOJIS.find((e) => e === form.get("emoji")) ?? DROP_EMOJIS[0];
+  const category = form.get("category");
+  const startsOn = clean("starts_on") || null;
   const endsOn = clean("ends_on") || null;
+  const allDay = form.get("all_day") === "on";
+  const startTime = allDay ? null : clean("start_time") || null;
+  const endTime = allDay ? null : clean("end_time") || null;
   const sourceUrl = clean("source_url") || null;
   const published = form.get("published") === "on";
 
@@ -91,7 +119,16 @@ export async function action({ request, context, params }: ActionFunctionArgs): 
   if (place && place.length > DROP_LIMITS.place) return { error: `Place can be up to ${DROP_LIMITS.place} characters.` };
   if (saving && saving.length > DROP_LIMITS.saving) return { error: `Saving can be up to ${DROP_LIMITS.saving} characters.` };
   if (body && body.length > DROP_LIMITS.body) return { error: `The text can be up to ${DROP_LIMITS.body} characters.` };
-  if (endsOn && !/^\d{4}-\d{2}-\d{2}$/.test(endsOn)) return { error: "End date must be a date." };
+  const isDate = (v: string | null) => !v || /^\d{4}-\d{2}-\d{2}$/.test(v);
+  const isTime = (v: string | null) => !v || /^\d{2}:\d{2}$/.test(v);
+  if (!isDropCategory(category)) return { error: "Pick a category." };
+  if (!isDate(startsOn) || !isDate(endsOn)) return { error: "Dates must be dates." };
+  if (startsOn && endsOn && endsOn < startsOn) return { error: "The end date is before the start date." };
+  if (!isTime(startTime) || !isTime(endTime)) return { error: "Times must be times." };
+  if (!allDay && !startTime) return { error: "Add a start time, or tick All day." };
+  if (!allDay && startTime && endTime && endTime <= startTime && (!endsOn || endsOn === startsOn)) {
+    return { error: "The end time is before the start time." };
+  }
   if (sourceUrl && (!/^https:\/\/\S+$/.test(sourceUrl) || sourceUrl.length > 500)) return { error: "The link must start with https://" };
 
   // Photo: optional, replaced by a new upload, or removed.
@@ -112,7 +149,7 @@ export async function action({ request, context, params }: ActionFunctionArgs): 
     imagePath = null;
   }
 
-  const row = { title, place, saving, body, emoji, ends_on: endsOn, source_url: sourceUrl, image_path: imagePath, published, updated_at: new Date().toISOString() };
+  const row = { title, category, place, saving, body, emoji, starts_on: startsOn, ends_on: endsOn, all_day: allDay, start_time: startTime, end_time: endTime, source_url: sourceUrl, image_path: imagePath, published, updated_at: new Date().toISOString() };
   const { error } =
     params.id === "new"
       ? await supabase.from("deal_drops").insert({ ...row, slug: slugify(title) })
@@ -126,7 +163,7 @@ export async function action({ request, context, params }: ActionFunctionArgs): 
 }
 
 export default function AdminDropEditor() {
-  const { isNew, autofillReady, fields: initial, imageUrl, published } = useLoaderData<typeof loader>();
+  const { isNew, autofillReady, fields: initial, imageUrl, published, now } = useLoaderData<typeof loader>();
   const saveResult = useActionData<typeof action>() as Result | undefined;
   const autofill = useFetcher<Result>();
   const saving = useNavigation().state === "submitting";
@@ -140,10 +177,28 @@ export default function AdminDropEditor() {
 
   useEffect(() => {
     const d = autofill.data?.draft;
-    if (d) setF((p) => ({ ...p, title: d.title, place: d.place, saving: d.saving, body: d.body, emoji: d.emoji, endsOn: d.endsOn }));
+    if (d)
+      setF((p) => ({
+        ...p,
+        title: d.title,
+        category: d.category,
+        place: d.place,
+        saving: d.saving,
+        body: d.body,
+        emoji: d.emoji,
+        startsOn: d.startsOn,
+        endsOn: d.endsOn,
+        allDay: d.allDay,
+        startTime: d.startTime,
+        endTime: d.endTime,
+      }));
   }, [autofill.data]);
 
   const drafting = autofill.state !== "idle";
+  const whenPreview = whenLabel(
+    { startsOn: f.startsOn || null, endsOn: f.endsOn || null, allDay: f.allDay, startTime: f.startTime || null, endTime: f.endTime || null },
+    now,
+  )?.text;
 
   return (
     <div className="admin-content">
@@ -195,6 +250,25 @@ export default function AdminDropEditor() {
           <input type="hidden" name="emoji" value={f.emoji} />
         </fieldset>
 
+        <fieldset className="fg">
+          <legend className="fl">Category *</legend>
+          <div className="admin-emoji-row">
+            {DROP_CATEGORIES.map((c) => (
+              <label key={c.key} className={`admin-cat${f.category === c.key ? " on" : ""}`}>
+                <input
+                  type="radio"
+                  name="category"
+                  value={c.key}
+                  checked={f.category === c.key}
+                  onChange={() => setF((p) => ({ ...p, category: c.key }))}
+                  className="sr-only"
+                />
+                {c.label}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
         <div className="fg">
           <label className="fl" htmlFor="drop-title">Headline *</label>
           <input id="drop-title" className="fi" name="title" required minLength={3} maxLength={DROP_LIMITS.title} value={f.title} onChange={set("title")} placeholder="Free scoop of gelato at Gelato Messina" />
@@ -214,15 +288,39 @@ export default function AdminDropEditor() {
           <textarea id="drop-body" className="fi" name="body" rows={5} maxLength={DROP_LIMITS.body} value={f.body} onChange={set("body")} />
           <p className="admin-muted" style={{ fontSize: 12 }}>{f.body.length}/{DROP_LIMITS.body}</p>
         </div>
-        <div className="fr">
-          <div className="fg">
-            <label className="fl" htmlFor="drop-ends">Ends on <span className="admin-muted">(optional)</span></label>
-            <input id="drop-ends" className="fi" type="date" name="ends_on" value={f.endsOn} onChange={set("endsOn")} />
+        <fieldset className="fg admin-when">
+          <legend className="fl">When it's on <span className="admin-muted">(optional)</span></legend>
+          <div className="fr">
+            <div className="fg">
+              <label className="fl" htmlFor="drop-starts">Start date</label>
+              <input id="drop-starts" className="fi" type="date" name="starts_on" value={f.startsOn} onChange={set("startsOn")} />
+            </div>
+            <div className="fg">
+              <label className="fl" htmlFor="drop-ends">End date <span className="admin-muted">(blank = one day)</span></label>
+              <input id="drop-ends" className="fi" type="date" name="ends_on" min={f.startsOn || undefined} value={f.endsOn} onChange={set("endsOn")} />
+            </div>
           </div>
-          <div className="fg">
-            <label className="fl" htmlFor="drop-url">Link to the post <span className="admin-muted">(optional)</span></label>
-            <input id="drop-url" className="fi" type="url" name="source_url" maxLength={500} value={f.sourceUrl} onChange={set("sourceUrl")} placeholder="https://www.instagram.com/p/…" />
-          </div>
+          <label style={{ display: "flex", gap: 8, alignItems: "center", margin: "2px 0 10px", fontSize: 14, fontWeight: 700 }}>
+            <input type="checkbox" name="all_day" checked={f.allDay} onChange={(e) => setF((p) => ({ ...p, allDay: e.target.checked }))} /> All day
+          </label>
+          {!f.allDay && (
+            <div className="fr">
+              <div className="fg">
+                <label className="fl" htmlFor="drop-start-time">Start time *</label>
+                <input id="drop-start-time" className="fi" type="time" name="start_time" required value={f.startTime} onChange={set("startTime")} />
+              </div>
+              <div className="fg">
+                <label className="fl" htmlFor="drop-end-time">End time</label>
+                <input id="drop-end-time" className="fi" type="time" name="end_time" value={f.endTime} onChange={set("endTime")} />
+              </div>
+            </div>
+          )}
+          {whenPreview && <p className="admin-muted" style={{ fontSize: 13 }}>Shows as: <strong>{whenPreview}</strong></p>}
+        </fieldset>
+
+        <div className="fg">
+          <label className="fl" htmlFor="drop-url">Link to the post <span className="admin-muted">(optional)</span></label>
+          <input id="drop-url" className="fi" type="url" name="source_url" maxLength={500} value={f.sourceUrl} onChange={set("sourceUrl")} placeholder="https://www.instagram.com/p/…" />
         </div>
 
         <div className="fg">

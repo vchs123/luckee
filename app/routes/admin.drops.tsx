@@ -3,6 +3,8 @@ import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { requireAdmin } from "~/lib/auth.server";
 import { getSupabase } from "~/lib/supabase.server";
 import { DROP_BUCKET } from "~/lib/drops.server";
+import { categoryOf, dropState, endedVisibleUntil } from "~/lib/drops";
+import { melbNow } from "~/lib/melbDate";
 
 /* Admin list of deal drops: write, edit, hide or delete them. */
 
@@ -13,7 +15,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
   const supabase = getSupabase(env);
   const { data, error } = await supabase
     .from("deal_drops")
-    .select("id, slug, title, place, saving, emoji, published, published_at, ends_on, image_path")
+    .select("*")
     .order("published_at", { ascending: false })
     .limit(200);
   if (error) return { setupNeeded: true as const, drops: [] };
@@ -22,6 +24,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
   const { data: likes } = ids.length
     ? await supabase.from("deal_drop_likes").select("drop_id").in("drop_id", ids)
     : { data: [] };
+  const nowMelb = melbNow();
   const counts = new Map<string, number>();
   (likes ?? []).forEach((l) => counts.set(l.drop_id as string, (counts.get(l.drop_id as string) ?? 0) + 1));
 
@@ -37,6 +40,18 @@ export async function loader({ context }: LoaderFunctionArgs) {
       published: d.published as boolean,
       publishedAt: d.published_at as string,
       endsOn: (d.ends_on as string | null) ?? null,
+      category: categoryOf((d.category as string | undefined) ?? "free").label,
+      state: dropState(
+        {
+          startsOn: (d.starts_on as string | null) ?? null,
+          endsOn: (d.ends_on as string | null) ?? null,
+          allDay: d.all_day !== false,
+          startTime: typeof d.start_time === "string" ? d.start_time.slice(0, 5) : null,
+          endTime: typeof d.end_time === "string" ? d.end_time.slice(0, 5) : null,
+        },
+        nowMelb,
+      ),
+      visibleUntil: endedVisibleUntil({ startsOn: (d.starts_on as string | null) ?? null, endsOn: (d.ends_on as string | null) ?? null }),
       hasPhoto: !!d.image_path,
       likes: counts.get(d.id as string) ?? 0,
     })),
@@ -69,6 +84,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
   return { error: "Unknown action." };
 }
 
+const fmtDay = (ymd: string) =>
+  new Date(`${ymd}T00:00:00Z`).toLocaleDateString("en-AU", { day: "numeric", month: "short", timeZone: "UTC" });
+
 const fmt = (iso: string) =>
   new Date(iso).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric", timeZone: "Australia/Melbourne" });
 
@@ -90,7 +108,8 @@ export default function AdminDrops() {
       </div>
       <p className="admin-muted" style={{ maxWidth: 680 }}>
         Short posts about free deals and discounts, shown at <a href="/drops" target="_blank" rel="noreferrer">/drops</a> and the
-        latest three on the home page. Anyone can like and share them.
+        latest three on the home page. Anyone can like and share them. Once a drop's last day passes it moves to the
+        Ended section for 60 days, then it's archived: off the public site but kept here. Hide takes one down any time.
       </p>
       {params.has("saved") && <p className="admin-flash">Saved and live.</p>}
       {params.has("deleted") && <p className="admin-flash">Deleted.</p>}
@@ -125,16 +144,22 @@ export default function AdminDrops() {
                     <span style={{ marginRight: 6 }}>{d.emoji}</span>
                     <Link to={`/admin/drops/${d.id}`}><strong>{d.title}</strong></Link>
                     <div className="admin-muted" style={{ fontSize: 12 }}>
-                      {[d.place, d.saving, d.endsOn && `ends ${d.endsOn}`, d.hasPhoto && "📷"].filter(Boolean).join(" · ")}
+                      {[d.category, d.place, d.saving, d.endsOn && `ends ${d.endsOn}`, d.hasPhoto && "📷"].filter(Boolean).join(" · ")}
                     </div>
                   </td>
                   <td className="admin-muted">{fmt(d.publishedAt)}</td>
                   <td>{d.likes}</td>
                   <td>
-                    {d.published ? (
-                      <a href={`/drops/${d.slug}`} target="_blank" rel="noreferrer">Live ↗</a>
-                    ) : (
+                    {!d.published ? (
                       <span className="admin-muted">Hidden</span>
+                    ) : d.state === "archived" ? (
+                      <span className="admin-muted" title="Ended over 60 days ago: off the public site">Archived</span>
+                    ) : d.state === "ended" ? (
+                      <a href={`/drops/${d.slug}`} target="_blank" rel="noreferrer" title="In the Ended section">
+                        Ended, shown until {fmtDay(d.visibleUntil!)} ↗
+                      </a>
+                    ) : (
+                      <a href={`/drops/${d.slug}`} target="_blank" rel="noreferrer">{d.state === "upcoming" ? "Upcoming" : "Live"} ↗</a>
                     )}
                   </td>
                   <td>

@@ -4,7 +4,7 @@ import { DropCard } from "~/components/DropCard";
 import type { DealDrop } from "~/lib/drops";
 
 /** The newest deal drops on the home page. Renders nothing until there are any. */
-export function DropsTeaser({ drops, today }: { drops: DealDrop[]; today: string }) {
+export function DropsTeaser({ drops, now }: { drops: DealDrop[]; now: string }) {
   if (drops.length === 0) return null;
   return (
     <section className="wrap py-14" aria-labelledby="drops-teaser-h">
@@ -22,7 +22,7 @@ export function DropsTeaser({ drops, today }: { drops: DealDrop[]; today: string
       </div>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {drops.map((d) => (
-          <DropCard key={d.id} drop={d} today={today} />
+          <DropCard key={d.id} drop={d} now={now} />
         ))}
       </div>
     </section>

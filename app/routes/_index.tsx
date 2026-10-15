@@ -5,8 +5,8 @@ import type { CommunityPin } from "~/lib/pins";
 import { userContext } from "~/lib/auth.context";
 import { DropsTeaser } from "~/components/DropsTeaser";
 import { likerKey, loadDrops } from "~/lib/drops.server";
-import { melbToday } from "~/lib/melbDate";
-import type { DealDrop } from "~/lib/drops";
+import { melbNow } from "~/lib/melbDate";
+import { dropState, type DealDrop } from "~/lib/drops";
 import { useEffect, useRef } from "react";
 import { Nav } from "~/components/Nav";
 import { Footer } from "~/components/Footer";
@@ -73,16 +73,19 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   // The newest deal drops (empty until sql/deal_drops.sql has run and one is posted).
   let drops: DealDrop[] = [];
   try {
-    drops = await loadDrops(getSupabase(env), env.SUPABASE_URL, likerKey(request, viewer), { limit: 3 });
+    // Only what's on now or coming up; ended drops live in /drops.
+    const all = await loadDrops(getSupabase(env), env.SUPABASE_URL, likerKey(request, viewer), { limit: 20 });
+    const nowMelb = melbNow();
+    drops = all.filter((d) => ["live", "upcoming"].includes(dropState(d, nowMelb))).slice(0, 3);
   } catch {
     /* section hidden */
   }
 
-  return { pins, drops, today: melbToday() };
+  return { pins, drops, now: melbNow() };
 }
 
 export default function Home() {
-  const { pins, drops, today } = useLoaderData<typeof loader>();
+  const { pins, drops, now } = useLoaderData<typeof loader>();
   const pageRef = useRef<HTMLDivElement>(null);
 
   // Scroll reveals for section headers (the hero animates on mount instead).
@@ -96,7 +99,7 @@ export default function Home() {
       <Nav />
       <div ref={pageRef}>
         <Hero />
-        <DropsTeaser drops={drops} today={today} />
+        <DropsTeaser drops={drops} now={now} />
         <ReferralDeals />
         <TopPicks />
         <FreeMelbourne />
